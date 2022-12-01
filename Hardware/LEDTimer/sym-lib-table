@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "LEDTimer")(type "KiCad")(uri "${KIPRJMOD}/LEDTimer.kicad_sym")(options "")(descr ""))
+)
