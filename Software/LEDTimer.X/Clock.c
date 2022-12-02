@@ -19,21 +19,27 @@
 */
 
 #include "Clock.h"
+
 #include "mcc_generated_files/tmr1.h"
+#include "mcc_generated_files/tmr4.h"
 
 #include <stdlib.h>
 #include <xc.h>
 
 // In the current configuration, every tick means 2 seconds
 volatile static Clock_Ticks _ticks = 0;
+// In the current configuration, every fast tick means 10 milliseconds
+volatile static Clock_Ticks _fastTicks = 0;
 volatile static uint16_t _minutesSinceMidnight = 0;
 volatile static uint8_t _seconds = 0;
 
 static void handleTimerInterrupt();
+static void handleFastTimerInterrupt();
 
 void Clock_init()
 {
-	TMR1_SetInterruptHandler(handleTimerInterrupt);
+    TMR1_SetInterruptHandler(handleTimerInterrupt);
+    TMR4_SetInterruptHandler(handleFastTimerInterrupt);
 }
 
 static void handleTimerInterrupt()
@@ -49,6 +55,11 @@ static void handleTimerInterrupt()
     }
 }
 
+static void handleFastTimerInterrupt()
+{
+    ++_fastTicks;
+}
+
 inline uint8_t Clock_getSeconds()
 {
     return _seconds;
@@ -62,6 +73,11 @@ inline uint16_t Clock_getMinutesSinceMidnight()
 inline Clock_Ticks Clock_getTicks()
 {
     return _ticks;
+}
+
+inline Clock_Ticks Clock_getFastTicks()
+{
+    return _fastTicks;
 }
 
 inline Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)

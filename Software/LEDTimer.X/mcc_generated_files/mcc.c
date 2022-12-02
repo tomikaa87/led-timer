@@ -57,6 +57,7 @@ void SYSTEM_Initialize(void)
     FVR_Initialize();
     EPWM2_Initialize();
     ADC_Initialize();
+    TMR4_Initialize();
     TMR2_Initialize();
     TMR1_Initialize();
     EUSART_Initialize();

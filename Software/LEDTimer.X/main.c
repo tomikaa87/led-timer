@@ -129,6 +129,10 @@ void main(void)
             updateIndicatorIndex = 0;
         }
         
+        printf("fastTicks=%u\r\n", Clock_getFastTicks());
+        __delay_ms(20);
+        printf("fastTicks=%u\r\n", Clock_getFastTicks());
+
         if (
             lastMinutesFromMidnight == 0
             || Clock_getMinutesSinceMidnight() != lastMinutesFromMidnight
