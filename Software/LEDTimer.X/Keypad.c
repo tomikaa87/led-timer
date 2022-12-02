@@ -28,6 +28,7 @@
 #define ScanSampleCount         (3)
 #define ScanSamplingDelayUs     (1)
 #define HoldTimeoutTicks        (50)
+#define DeBounceCoolDownTicks   (5)
 
 static struct KeypadContext
 {
@@ -37,12 +38,14 @@ static struct KeypadContext
         State_KeyHeld
     } state;
 
-    Clock_Ticks pressTicks;
+    Clock_Ticks timerTicks;
     uint8_t lastScanCode;
+    bool coolDown;
 } context = {
     .state = State_Idle,
-    .pressTicks = 0,
-    .lastScanCode = 0
+    .timerTicks = 0,
+    .lastScanCode = 0,
+    .coolDown = false
 };
 
 static void keyPressInterruptHandler()
@@ -76,6 +79,16 @@ uint8_t Keypad_task()
 {
     uint8_t scanCode = scanKeys();
 
+    // Simple de-bouncing logic
+    if (
+        context.coolDown
+        && Clock_getElapsedFastTicks(context.timerTicks) < DeBounceCoolDownTicks
+    ) {
+        return 0;
+    }
+
+    context.coolDown = false;
+
     // Prevent sleeping if the keypad is in use
     if (scanCode != 0) {
         System_wakeUp(System_WakeUpReason_KeyPress);
@@ -85,7 +98,7 @@ uint8_t Keypad_task()
         case State_Idle: {
             if (scanCode != 0) {
                 context.state = State_KeyPressed;
-                context.pressTicks = Clock_getFastTicks();
+                context.timerTicks = Clock_getFastTicks();
                 context.lastScanCode = scanCode;
                 return scanCode;
             }
@@ -96,8 +109,10 @@ uint8_t Keypad_task()
         case State_KeyPressed: {
             if (scanCode != context.lastScanCode) {
                 context.state = State_Idle;
+                context.coolDown = true;
+                context.timerTicks = Clock_getFastTicks();
             } else {
-                if (Clock_getElapsedFastTicks(context.pressTicks) >= HoldTimeoutTicks) {
+                if (Clock_getElapsedFastTicks(context.timerTicks) >= HoldTimeoutTicks) {
                     context.state = State_KeyHeld;
                     return scanCode | (1 << 7);
                 } else {
@@ -111,6 +126,8 @@ uint8_t Keypad_task()
         case State_KeyHeld: {
             if (scanCode != context.lastScanCode) {
                 context.state = State_Idle;
+                context.coolDown = true;
+                context.timerTicks = Clock_getFastTicks();
             } else {
                 return scanCode | (1 << 7);
             }
