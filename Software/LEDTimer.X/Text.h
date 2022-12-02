@@ -20,6 +20,13 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
     
-void Text_draw(const char* s, uint8_t line, uint8_t x, uint8_t yOffset);
+void Text_draw(
+    const char* s,
+    uint8_t line,
+    uint8_t x,
+    uint8_t yOffset,
+    bool invert
+);

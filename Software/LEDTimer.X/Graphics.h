@@ -22,13 +22,15 @@
 
 #include "Types.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 
 void Graphics_drawBitmap(
     const uint8_t* bitmap,
     uint8_t width,
     uint8_t x,
-    uint8_t page
+    uint8_t page,
+    bool invert
 );
 
 void Graphics_drawMultipageBitmap(
@@ -36,8 +38,16 @@ void Graphics_drawMultipageBitmap(
     uint8_t width,
     uint8_t page_count,
     uint8_t x,
-    uint8_t start_page
+    uint8_t start_page,
+    bool invert
 );
 
-void Graphics_drawScheduleBar(ScheduleSegmentData segmentData);
-void Graphics_drawScheduleSegmentIndicator(uint8_t segmentIndex);
+void Graphics_drawScheduleBar(
+    ScheduleSegmentData segmentData,
+     bool invert
+);
+
+void Graphics_drawScheduleSegmentIndicator(
+    uint8_t segmentIndex,
+    bool invert
+);

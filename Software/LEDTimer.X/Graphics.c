@@ -26,7 +26,8 @@ void Graphics_drawBitmap(
     const uint8_t* const bitmap,
     const uint8_t width,
     const uint8_t x,
-    const uint8_t page
+    const uint8_t page,
+    const bool invert
 )
 {
     if (page > SSD1306_PAGE_COUNT || width == 0 || x + width >= SSD1306_LCDWIDTH) {
@@ -36,7 +37,7 @@ void Graphics_drawBitmap(
     SSD1306_enablePageAddressing();
     SSD1306_setPage(page);
     SSD1306_setStartColumn(x);
-    SSD1306_sendData(bitmap, width, 0);
+    SSD1306_sendData(bitmap, width, 0, invert);
 }
 
 void Graphics_drawMultipageBitmap(
@@ -44,7 +45,8 @@ void Graphics_drawMultipageBitmap(
     const uint8_t width,
     const uint8_t pageCount,
     const uint8_t x,
-    const uint8_t startPage
+    const uint8_t startPage,
+    const bool invert
 )
 {
     if (startPage + pageCount > SSD1306_PAGE_COUNT) {
@@ -52,12 +54,15 @@ void Graphics_drawMultipageBitmap(
     }
 
     for (uint8_t page = startPage; page < startPage + pageCount; ++page) {
-        Graphics_drawBitmap(bitmap, width, x, page);
+        Graphics_drawBitmap(bitmap, width, x, page, invert);
         bitmap += width;
     }
 }
 
-void Graphics_drawScheduleBar(ScheduleSegmentData segmentData)
+void Graphics_drawScheduleBar(
+    ScheduleSegmentData segmentData,
+    const bool invert
+)
 {
 	static const uint8_t LongTick = 0b11110000;
 	static const uint8_t ShortTick = 0b01110000;
@@ -92,7 +97,7 @@ void Graphics_drawScheduleBar(ScheduleSegmentData segmentData)
 				bitmap = SegmentInactiveIndicator;
 		}
 
-		SSD1306_sendData(&bitmap, 1, 0);
+		SSD1306_sendData(&bitmap, 1, 0, invert);
 
 		if (++tickCounter == 5) {
 			tickCounter = 0;
@@ -112,14 +117,17 @@ void Graphics_drawScheduleBar(ScheduleSegmentData segmentData)
 		}
 	}
 
-	Text_draw("0", 7, 1, 1);
-	Text_draw("6", 7, 31, 1);
-	Text_draw("12", 7, 58, 1);
-	Text_draw("18", 7, 88, 1);
-	Text_draw("24", 7, 115, 1);
+	Text_draw("0", 7, 1, 1, invert);
+	Text_draw("6", 7, 31, 1, invert);
+	Text_draw("12", 7, 58, 1, invert);
+	Text_draw("18", 7, 88, 1, invert);
+	Text_draw("24", 7, 115, 1, invert);
 }
 
-void Graphics_drawScheduleSegmentIndicator(const uint8_t segmentIndex)
+void Graphics_drawScheduleSegmentIndicator(
+    const uint8_t segmentIndex,
+    const bool invert
+)
 {
 	static const uint8_t SegmentIndicatorBitmap[] = {
 		0b00010000,
@@ -158,6 +166,7 @@ void Graphics_drawScheduleSegmentIndicator(const uint8_t segmentIndex)
         SegmentIndicatorBitmap,
         sizeof(SegmentIndicatorBitmap),
         x,
-        5
+        5,
+        invert
     );
 }

@@ -507,7 +507,8 @@ void Text_draw(
     const char* const s,
     const uint8_t line,
     uint8_t x,
-    const uint8_t yOffset
+    const uint8_t yOffset,
+    const bool invert
 )
 {
     uint8_t length = (uint8_t)strlen(s);
@@ -533,7 +534,7 @@ void Text_draw(
         if (c == ' ') {
             for (uint8_t i = 0; i < ASCII_REDUCED_CHARSET_SPACE_WIDTH; ++i) {
                 const uint8_t data = 0;
-                SSD1306_sendData(&data, 1, yOffset);
+                SSD1306_sendData(&data, 1, yOffset, invert);
             }
             
             continue;
@@ -551,6 +552,6 @@ void Text_draw(
         }
 
         // Send data to the display
-        SSD1306_sendData(charData, ASCII_REDUCED_CHARSET_WIDTH, yOffset);
+        SSD1306_sendData(charData, ASCII_REDUCED_CHARSET_WIDTH, yOffset, invert);
     }
 }

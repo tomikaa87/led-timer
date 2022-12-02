@@ -93,8 +93,8 @@ void main(void)
         0, 0, 0, 0, 0, 0
     };
 
-    Graphics_drawScheduleBar(ssd);
-    Graphics_drawScheduleSegmentIndicator(12);
+    Graphics_drawScheduleBar(ssd, false);
+    Graphics_drawScheduleSegmentIndicator(12, true);
 
     uint16_t lastMinutesFromMidnight = 0;
     
@@ -112,11 +112,11 @@ void main(void)
         char s[20];
         
         snprintf(s, sizeof(s), ":%02u", Clock_getSeconds());
-        Text_draw(s, 0, 30, 0);
+        Text_draw(s, 0, 30, 0, true);
         
         if (System_isVDDReadingUpdated()) {
             snprintf(s, sizeof(s), "VDD=%4umV %c", System_getVDDMilliVolts(), UpdateIndicatorChars[vddUpdateIndicatorIndex]);
-            Text_draw(s, 2, 0, 0);
+            Text_draw(s, 2, 0, 0, false);
 
             if (++vddUpdateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
                 vddUpdateIndicatorIndex = 0;
@@ -124,7 +124,7 @@ void main(void)
         }
         
         snprintf(s, sizeof(s), "Updates: %c", UpdateIndicatorChars[updateIndicatorIndex]);
-        Text_draw(s, 3, 0, 0);
+        Text_draw(s, 3, 0, 0, false);
         if (++updateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
             updateIndicatorIndex = 0;
         }
@@ -139,7 +139,7 @@ void main(void)
             uint8_t minutes = (uint8_t)lastMinutesFromMidnight - hours * 60;
 
             snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
-            Text_draw(s, 0, 0, 0);
+            Text_draw(s, 0, 0, 0, false);
         }
         
         if (systemTaskResult == System_TaskResult_EnterSleepMode) {

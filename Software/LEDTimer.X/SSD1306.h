@@ -117,7 +117,12 @@ void SSD1306_fillArea(uint8_t x, uint8_t startPage, uint8_t width, uint8_t pages
 
 // Low level API
 void SSD1306_sendCommand(SSD1306_Command cmd);
-void SSD1306_sendData(const uint8_t* data, uint8_t length, uint8_t bitShift);
+void SSD1306_sendData(
+    const uint8_t* data,
+    uint8_t length,
+    uint8_t bitShift,
+    bool invert
+);
 
 void SSD1306_enablePageAddressing();
 

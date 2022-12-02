@@ -340,7 +340,8 @@ void SSD1306_setStartColumn(const uint8_t address)
 void SSD1306_sendData(
     const uint8_t* const data,
     const uint8_t length,
-    const uint8_t bitShift
+    const uint8_t bitShift,
+    const bool invert
 )
 {
     if (bitShift > 7)
@@ -356,8 +357,13 @@ void SSD1306_sendData(
         bytesRemaining -= count;
 
         buffer[0] = SSD1306_I2C_DC_FLAG;
+
         for (uint8_t i = 1; i <= count; ++i) {
-            buffer[i] = (uint8_t)(data[dataIndex++] << bitShift);
+            uint8_t byte = (uint8_t)(data[dataIndex++] << bitShift);
+            if (invert) {
+                byte = ~byte;
+            }
+            buffer[i] = byte;
         }
         
         i2cTransmit(buffer, count + 1);
