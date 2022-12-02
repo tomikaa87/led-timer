@@ -528,7 +528,7 @@ void Text_draw(
         // Clear the background
         for (uint8_t j = 0; j < ASCII_REDUCED_CHARSET_CHAR_SPACING; ++j) {
             const uint8_t data = 0;
-            SSD1306_sendData(data, 1, yOffset, invert);
+            SSD1306_sendData(&data, 1, yOffset, invert);
             ++x;
         }
 
