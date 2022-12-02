@@ -48,6 +48,7 @@
 #include "SSD1306.h"
 #include "System.h"
 #include "Text.h"
+#include "UI.h"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -95,12 +96,11 @@ void main(void)
 
     Graphics_drawScheduleBar(ssd, false);
     Graphics_drawScheduleSegmentIndicator(12, true);
-
-    uint16_t lastMinutesFromMidnight = 0;
-
-    static const char UpdateIndicatorChars[] = { '.', ':', '=', ':' };
-    uint8_t vddUpdateIndicatorIndex = 0;
-    uint8_t updateIndicatorIndex = 0;
+//
+//    uint16_t lastMinutesFromMidnight = 0;
+//
+//    static const char UpdateIndicatorChars[] = { '.', ':', '=', ':' };
+//    uint8_t vddUpdateIndicatorIndex = 0;
     uint8_t lastKeyCode = 0;
 
     while (1)
@@ -119,35 +119,37 @@ void main(void)
             );
         }
 
+        UI_task(keyCode);
+
         // This must be the last task to handle sleep mode properly
         System_TaskResult systemTaskResult = System_task();
 
-        char s[20];
-
-        snprintf(s, sizeof(s), ":%02u", Clock_getSeconds());
-        Text_draw(s, 0, 30, 0, true);
-
-        if (System_isVDDReadingUpdated()) {
-            snprintf(s, sizeof(s), "VDD=%4umV %c", System_getVDDMilliVolts(), UpdateIndicatorChars[vddUpdateIndicatorIndex]);
-            Text_draw(s, 2, 0, 0, false);
-
-            if (++vddUpdateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
-                vddUpdateIndicatorIndex = 0;
-            }
-        }
-
-        if (
-            lastMinutesFromMidnight == 0
-            || Clock_getMinutesSinceMidnight() != lastMinutesFromMidnight
-        ) {
-            lastMinutesFromMidnight = Clock_getMinutesSinceMidnight();
-
-            uint8_t hours = (uint8_t)lastMinutesFromMidnight / 60;
-            uint8_t minutes = (uint8_t)lastMinutesFromMidnight - hours * 60;
-
-            snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
-            Text_draw(s, 0, 0, 0, false);
-        }
+//        char s[20];
+//
+//        snprintf(s, sizeof(s), ":%02u", Clock_getSeconds());
+//        Text_draw(s, 0, 30, 0, true);
+//
+//        if (System_isVDDReadingUpdated()) {
+//            snprintf(s, sizeof(s), "VDD=%4umV %c", System_getVDDMilliVolts(), UpdateIndicatorChars[vddUpdateIndicatorIndex]);
+//            Text_draw(s, 2, 0, 0, false);
+//
+//            if (++vddUpdateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
+//                vddUpdateIndicatorIndex = 0;
+//            }
+//        }
+//
+//        if (
+//            lastMinutesFromMidnight == 0
+//            || Clock_getMinutesSinceMidnight() != lastMinutesFromMidnight
+//        ) {
+//            lastMinutesFromMidnight = Clock_getMinutesSinceMidnight();
+//
+//            uint8_t hours = (uint8_t)lastMinutesFromMidnight / 60;
+//            uint8_t minutes = (uint8_t)lastMinutesFromMidnight - hours * 60;
+//
+//            snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
+//            Text_draw(s, 0, 0, 0, false);
+//        }
 
         if (systemTaskResult == System_TaskResult_EnterSleepMode) {
             System_sleep();

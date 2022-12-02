@@ -18,12 +18,15 @@
     Created on 2022-12-01
 */
 
-#include "System.h"
+//#include "System.h"
+#include "Clock.h"
 
 #include "mcc_generated_files/device_config.h"
 #include "mcc_generated_files/pin_manager.h"
 
 #include <xc.h>
+
+#include <stdbool.h>
 
 #define ScanSampleCount         (3)
 #define ScanSamplingDelayUs     (1)
@@ -48,11 +51,6 @@ static struct KeypadContext
     .coolDown = false
 };
 
-static void keyPressInterruptHandler()
-{
-    System_wakeUp(System_WakeUpReason_KeyPress);
-}
-
 static uint8_t scanKeys()
 {
     uint8_t scanCode = 0;
@@ -71,8 +69,6 @@ static uint8_t scanKeys()
 
 void Keypad_init()
 {
-    IOCAF0_SetInterruptHandler(keyPressInterruptHandler);
-    IOCAF1_SetInterruptHandler(keyPressInterruptHandler);
 }
 
 uint8_t Keypad_task()
@@ -88,11 +84,6 @@ uint8_t Keypad_task()
     }
 
     context.coolDown = false;
-
-    // Prevent sleeping if the keypad is in use
-    if (scanCode != 0) {
-        System_wakeUp(System_WakeUpReason_KeyPress);
-    }
 
     switch (context.state) {
         case State_Idle: {

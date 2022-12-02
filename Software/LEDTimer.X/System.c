@@ -25,8 +25,8 @@
 #include <stdio.h>
 #include <xc.h>
 
-#define KeyPressWakeUpLength        (3)
-#define MonitoringUpdateInterval    (2)
+#define KeyPressWakeUpLengthTicks        (6)
+#define MonitoringUpdateIntervalTicks    (2)
 
 #define VDDCalMilliVolts            (3140ul)
 #define VDDCalADCValue              (332ul)
@@ -64,21 +64,21 @@ void System_init()
 
 System_TaskResult System_task()
 {
-    if (Clock_getElapsedTicks(system.monitoring.lastUpdateTime) >= MonitoringUpdateInterval) {
+    if (Clock_getElapsedTicks(system.monitoring.lastUpdateTime) >= MonitoringUpdateIntervalTicks) {
         system.monitoring.lastUpdateTime = Clock_getTicks();
         measureVDD();
     }
-    
+
     if (!system.sleep.enabled) {
         Clock_Ticks elapsedSinceWakeUp
             = Clock_getElapsedTicks(system.sleep.lastWakeUpTime);
- 
+
         switch (system.sleep.wakeUpReason) {
             case System_WakeUpReason_None:
                 break;
-                
+
             case System_WakeUpReason_KeyPress:
-                if (elapsedSinceWakeUp >= KeyPressWakeUpLength) {
+                if (elapsedSinceWakeUp >= KeyPressWakeUpLengthTicks) {
                     system.sleep.enabled = true;
                 }
                 break;
@@ -86,7 +86,7 @@ System_TaskResult System_task()
     } else {
         return System_TaskResult_EnterSleepMode;
     }
-    
+
     return System_TaskResult_NoActionNeeded;
 }
 
@@ -99,7 +99,13 @@ void System_wakeUp(const System_WakeUpReason reason)
 
 void System_sleep()
 {
-    printf("SYS:slp,t=%u\r\n", Clock_getTicks());
+    printf(
+        "SYS:slp,t=%u,ft=%u,msm=%u,s=%u\r\n",
+        Clock_getTicks(),
+        Clock_getFastTicks(),
+        Clock_getMinutesSinceMidnight(),
+        Clock_getSeconds()
+    );
 
     // Send out all the data before going to sleep
     while (TRMT == 0);
