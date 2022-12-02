@@ -20,5 +20,13 @@
 
 #pragma once
 
+enum
+{
+    Keypad_Key1 = (1 << 0),
+    Keypad_Key2 = (1 << 1),
+    Keypad_Key3 = (1 << 2),
+    Keypad_Hold = (1 << 7)
+};
+
 void Keypad_init();
-void Keypad_task();
+uint8_t Keypad_task();

@@ -84,3 +84,8 @@ inline Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)
 {
     return (Clock_Ticks)abs((int16_t)_ticks - (int16_t)since);
 }
+
+inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
+{
+    return (Clock_Ticks)abs((int16_t)_fastTicks - (int16_t)since);
+}
