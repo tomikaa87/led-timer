@@ -25,8 +25,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#define ASCII_REDUCED_CHARSET_CHAR_COUNT 58
-#define ASCII_REDUCED_CHARSET_SPACE_WIDTH 5
+#define ASCII_REDUCED_CHARSET_CHAR_COUNT    58
+#define ASCII_REDUCED_CHARSET_SPACE_WIDTH   5
+#define ASCII_REDUCED_CHARSET_CHAR_SPACING  1
 #define ASCII_REDUCED_CHARSET_WIDTH 5
 static const uint8_t asciiReducedCharset[ASCII_REDUCED_CHARSET_CHAR_COUNT][ASCII_REDUCED_CHARSET_WIDTH] = {
     // !
@@ -522,7 +523,14 @@ void Text_draw(
 
     for (uint8_t i = 0; i < length; ++i) {
         SSD1306_setStartColumn(x);
-        x += ASCII_REDUCED_CHARSET_WIDTH + 1;
+        x += ASCII_REDUCED_CHARSET_WIDTH;
+
+        // Clear the background
+        for (uint8_t j = 0; j < ASCII_REDUCED_CHARSET_CHAR_SPACING; ++j) {
+            const uint8_t data = 0;
+            SSD1306_sendData(data, 1, yOffset, invert);
+            ++x;
+        }
 
         // Stop if the next character won't fit
         if (x > SSD1306_LCDWIDTH - 1) {
@@ -530,16 +538,16 @@ void Text_draw(
         }
 
         char c = (char)toupper(s[i]);
-        
+
         if (c == ' ') {
             for (uint8_t i = 0; i < ASCII_REDUCED_CHARSET_SPACE_WIDTH; ++i) {
                 const uint8_t data = 0;
                 SSD1306_sendData(&data, 1, yOffset, invert);
             }
-            
+
             continue;
         }
-        
+
         const uint8_t* charData;
 
         // If character is not supported, draw placeholder
