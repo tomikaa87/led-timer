@@ -121,15 +121,17 @@ void TMR1_WriteTimer(uint16_t timerVal)
 {
     if (T1CONbits.nT1SYNC == 1)
     {
-        // Stop the Timer by writing to TMRxON bit
-        T1CONbits.TMR1ON = 0;
+        if (timerVal != 0) {
+            // Stop the Timer by writing to TMRxON bit
+            T1CONbits.TMR1ON = 0;
 
-        // Write to the Timer1 register
-        TMR1H = (uint8_t)(timerVal >> 8);
-        TMR1L = (uint8_t)timerVal;
+            // Write to the Timer1 register
+            TMR1H = (uint8_t)(timerVal >> 8);
+            TMR1L = (uint8_t)timerVal;
 
-        // Start the Timer after writing to the register
-        T1CONbits.TMR1ON =1;
+            // Start the Timer after writing to the register
+            T1CONbits.TMR1ON =1;
+        }
     }
     else
     {

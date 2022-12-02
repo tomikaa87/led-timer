@@ -55,7 +55,7 @@
   Section: Macro Declarations
 */
 
-#define PWM2_INITIALIZE_DUTY_VALUE    511
+#define PWM2_INITIALIZE_DUTY_VALUE    255
 
 /**
   Section: EPWM Module APIs
@@ -80,8 +80,8 @@ void EPWM2_Initialize(void)
 	// CCPR2H 0; 
 	CCPR2H = 0x00;    
 	
-	// CCPR2L 127; 
-	CCPR2L = 0x7F;    
+	// CCPR2L 63; 
+	CCPR2L = 0x3F;    
 
 	// Selecting CCPTMRS
 	CCPTMRSbits.C2TSEL = 0x0;
@@ -93,7 +93,7 @@ void EPWM2_LoadDutyValue(uint16_t dutyValue)
     CCPR2L = ((dutyValue & 0x03FC)>>2);
     
    // Writing to 2 LSBs of pwm duty cycle in CCPCON register
-    CCP2CON = (uint8_t)((uint8_t)(CCP2CON & 0xCF) | ((dutyValue & 0x0003)<<4));
+    CCP2CON = ((uint8_t)(CCP2CON & 0xCF) | ((dutyValue & 0x0003)<<4));
 }
 /**
  End of File

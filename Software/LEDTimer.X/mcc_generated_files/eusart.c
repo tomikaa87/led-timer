@@ -76,8 +76,8 @@ void EUSART_Initialize(void)
     // TX9 8-bit; TX9D 0; SENDB sync_break_complete; TXEN enabled; SYNC asynchronous; BRGH hi_speed; CSRC slave; 
     TXSTA = 0x24;
 
-    // SPBRGL 68; 
-    SPBRGL = 0x44;
+    // SPBRGL 34; 
+    SPBRGL = 0x22;
 
     // SPBRGH 0; 
     SPBRGH = 0x00;
@@ -131,7 +131,7 @@ uint8_t EUSART_Read(void)
 
 void EUSART_Write(uint8_t txData)
 {
-    while(0 == PIR1bits.TXIF)
+    while(0 == PIR1bits.TXIF || TRMT == 0)
     {
     }
 

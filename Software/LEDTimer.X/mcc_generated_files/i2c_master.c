@@ -169,7 +169,7 @@ void I2C_Initialize()
     SSP1STAT = 0x00;
     SSP1CON1 = 0x08;
     SSP1CON2 = 0x00;
-    SSP1ADD  = 0x09;
+    SSP1ADD  = 0x04;
     SSP1CON1bits.SSPEN = 0;
 }
 
@@ -547,7 +547,7 @@ static inline bool I2C_MasterOpen(void)
         SSP1STAT = 0x00;
         SSP1CON1 = 0x08;
         SSP1CON2 = 0x00;
-        SSP1ADD = 0x09;
+        SSP1ADD = 0x04;
         SSP1CON1bits.SSPEN = 1;
         return true;
     }
