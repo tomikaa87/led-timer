@@ -33,7 +33,7 @@ void Graphics_drawBitmap(
         return;
     }
 
-    SSD1306_setPageAddressing();
+    SSD1306_enablePageAddressing();
     SSD1306_setPage(page);
     SSD1306_setStartColumn(x);
     SSD1306_sendData(bitmap, width, 0);
@@ -64,7 +64,7 @@ void Graphics_drawScheduleBar(ScheduleSegmentData segmentData)
 	static const uint8_t SegmentActiveIndicator = 0b00010111;
 	static const uint8_t SegmentInactiveIndicator = 0b00010000;
 
-	SSD1306_setPageAddressing();
+	SSD1306_enablePageAddressing();
 	SSD1306_setPage(6);
 	SSD1306_setStartColumn(3);
 

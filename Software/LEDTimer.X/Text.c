@@ -516,7 +516,7 @@ void Text_draw(
         return;
     }
 
-    SSD1306_setPageAddressing();
+    SSD1306_enablePageAddressing();
     SSD1306_setPage(line);
 
     for (uint8_t i = 0; i < length; ++i) {

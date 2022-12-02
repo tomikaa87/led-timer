@@ -22,6 +22,10 @@
 
 #include <stdint.h>
 
+typedef uint16_t Clock_Ticks;
+
 void Clock_init();
 inline uint8_t Clock_getSeconds();
 inline uint16_t Clock_getMinutesSinceMidnight();
+inline Clock_Ticks Clock_getTicks();
+inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);

@@ -364,7 +364,7 @@ void SSD1306_sendData(
     }
 }
 
-void SSD1306_setPageAddressing()
+void SSD1306_enablePageAddressing()
 {
     SSD1306_sendCommand(SSD1306_CMD_MEMORYMODE);
     SSD1306_sendCommand(SSD1306_MEM_MODE_PAGE_ADDRESSING);
@@ -382,7 +382,7 @@ void SSD1306_fillArea(
         return;
     }
     
-    SSD1306_setPageAddressing();
+    SSD1306_enablePageAddressing();
     
     uint8_t data[2];
     data[0] = SSD1306_I2C_DC_FLAG;

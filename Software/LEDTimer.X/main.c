@@ -42,40 +42,18 @@
 */
 
 #include "mcc_generated_files/mcc.h"
-#include "SSD1306.h"
-#include "Text.h"
-#include "Graphics.h"
 #include "Clock.h"
+#include "Graphics.h"
+#include "Keypad.h"
+#include "SSD1306.h"
+#include "System.h"
+#include "Text.h"
 
 #include <stdio.h>
 #include <stdbool.h>
 
-bool sleepEnabled = false;
-volatile bool switch1Pressed = false;
-volatile bool switch2Pressed = false;
-volatile uint16_t vddADCValue = 0;
-
-void switch1ISR()
-{
-    switch1Pressed = true;
-}
-
-void switch2ISR()
-{
-    switch2Pressed = true;
-}
-
-void adcISR()
-{
-    vddADCValue = ADC_GetConversionResult();
-}
-
 inline void setupI2C()
 {
-    SSP1STAT = 0x00;
-    SSP1CON1 = 0x08;
-    SSP1CON2 = 0x00;
-    SSP1ADD  = 0x09;
     SSP1CON1bits.SSPEN = 1;
 }
 
@@ -104,13 +82,9 @@ void main(void)
     
     setupI2C();
     
-    IOCAF0_SetInterruptHandler(switch1ISR);
-    IOCAF1_SetInterruptHandler(switch2ISR);
-    
-    ADC_SetInterruptHandler(adcISR);
-    ADC_SelectChannel(channel_FVR);
-    
+    System_init();
     Clock_init();
+    Keypad_init();
 
     SSD1306_init();
     SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
@@ -123,39 +97,37 @@ void main(void)
     Graphics_drawScheduleSegmentIndicator(12);
 
     uint16_t lastMinutesFromMidnight = 0;
-    uint8_t lastSeconds = 0;
     
     static const char UpdateIndicatorChars[] = { '.', ':', '=', ':' };
     uint8_t vddUpdateIndicatorIndex = 0;
     uint8_t updateIndicatorIndex = 0;
     
-    sleepEnabled = true;
-    
     while (1)
     {
+        Keypad_task();
+        
+        // This must be the last task to handle sleep mode properly
+        System_TaskResult systemTaskResult = System_task();
+
         char s[20];
         
         snprintf(s, sizeof(s), ":%02u", Clock_getSeconds());
         Text_draw(s, 0, 30, 0);
         
-        const uint32_t VDDCalMilliVolts = 3140;
-        const uint32_t VDDCalADCValue = 332;
-        uint32_t vddMilliVolts = VDDCalMilliVolts * VDDCalADCValue / vddADCValue;
-        
-        snprintf(s, sizeof(s), "VDD=%4lumV %c", vddMilliVolts, UpdateIndicatorChars[vddUpdateIndicatorIndex]);
-        Text_draw(s, 2, 0, 0);
+        if (System_isVDDReadingUpdated()) {
+            snprintf(s, sizeof(s), "VDD=%4umV %c", System_getVDDMilliVolts(), UpdateIndicatorChars[vddUpdateIndicatorIndex]);
+            Text_draw(s, 2, 0, 0);
+
+            if (++vddUpdateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
+                vddUpdateIndicatorIndex = 0;
+            }
+        }
         
         snprintf(s, sizeof(s), "Updates: %c", UpdateIndicatorChars[updateIndicatorIndex]);
         Text_draw(s, 3, 0, 0);
         if (++updateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
             updateIndicatorIndex = 0;
         }
-        
-        snprintf(s, sizeof(s), "SW1=%d,SW2=%d", switch1Pressed, switch2Pressed);
-        Text_draw(s, 4, 0, 0);
-        
-        switch1Pressed = false;
-        switch2Pressed = false;
         
         if (
             lastMinutesFromMidnight == 0
@@ -170,19 +142,8 @@ void main(void)
             Text_draw(s, 0, 0, 0);
         }
         
-        if (abs(Clock_getSeconds() - lastSeconds) >= 6) {
-            lastSeconds = Clock_getSeconds();
-            
-            if (++vddUpdateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
-                vddUpdateIndicatorIndex = 0;
-            }
-
-            ADC_SelectChannel(channel_FVR);
-            ADC_StartConversion();
-        }
-        
-        if (sleepEnabled) {
-            SLEEP();
+        if (systemTaskResult == System_TaskResult_EnterSleepMode) {
+            System_sleep();
         }
     }
 }

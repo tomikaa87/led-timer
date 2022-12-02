@@ -21,8 +21,11 @@
 #include "Clock.h"
 #include "mcc_generated_files/tmr1.h"
 
+#include <stdlib.h>
 #include <xc.h>
 
+// In the current configuration, every tick means 2 seconds
+volatile static Clock_Ticks _ticks = 0;
 volatile static uint16_t _minutesSinceMidnight = 0;
 volatile static uint8_t _seconds = 0;
 
@@ -35,6 +38,7 @@ void Clock_init()
 
 static void handleTimerInterrupt()
 {
+    _ticks += 1;
     _seconds += 2;
 	if (_seconds >= 60) {
         _seconds = 0;
@@ -53,4 +57,14 @@ inline uint8_t Clock_getSeconds()
 inline uint16_t Clock_getMinutesSinceMidnight()
 {
     return _minutesSinceMidnight;
+}
+
+inline Clock_Ticks Clock_getTicks()
+{
+    return _ticks;
+}
+
+inline Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)
+{
+    return (Clock_Ticks)abs((int16_t)_ticks - (int16_t)since);
 }

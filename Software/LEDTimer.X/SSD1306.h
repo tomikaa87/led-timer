@@ -119,7 +119,7 @@ void SSD1306_fillArea(uint8_t x, uint8_t startPage, uint8_t width, uint8_t pages
 void SSD1306_sendCommand(SSD1306_Command cmd);
 void SSD1306_sendData(const uint8_t* data, uint8_t length, uint8_t bitShift);
 
-void SSD1306_setPageAddressing();
+void SSD1306_enablePageAddressing();
 
 void SSD1306_setColumnAddress(uint8_t start, uint8_t end);
 void SSD1306_setPageAddress(uint8_t start, uint8_t end);
