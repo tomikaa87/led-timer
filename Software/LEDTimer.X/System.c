@@ -21,15 +21,16 @@
 #include "System.h"
 
 #include "mcc_generated_files/adc.h"
+#include "mcc_generated_files/pin_manager.h"
 
 #include <stdio.h>
 #include <xc.h>
 
-#define KeyPressWakeUpLengthTicks        (6)
-#define MonitoringUpdateIntervalTicks    (2)
+#define KeyPressWakeUpLengthTicks           (6)
+#define MonitoringUpdateIntervalTicks       (2)
 
-#define VDDCalMilliVolts            (3140ul)
-#define VDDCalADCValue              (332ul)
+#define VDDCalMilliVolts                    (3140ul)
+#define VDDCalADCValue                      (332ul)
 
 System system = {
     .sleep = {
@@ -40,14 +41,21 @@ System system = {
     .monitoring = {
         .vddReadingUpdated = false,
         .vddADCValue = 0,
-        .lastUpdateTime = 0
+        .lastUpdateTime = 0,
+        .onBatteryPower = true,
+        .batteryLevel = 5
     }
 };
 
-void adcISR()
+static void handleADCInterrupt()
 {
     system.monitoring.vddADCValue = ADC_GetConversionResult();
     system.monitoring.vddReadingUpdated = true;
+}
+
+static void handleLDOSenseInterrupt()
+{
+    system.monitoring.onBatteryPower = !IO_LDO_SENSE_GetValue();
 }
 
 static void measureVDD()
@@ -58,8 +66,11 @@ static void measureVDD()
 
 void System_init()
 {
-    ADC_SetInterruptHandler(adcISR);
+    ADC_SetInterruptHandler(handleADCInterrupt);
     ADC_SelectChannel(channel_FVR);
+
+    IOCAF2_SetInterruptHandler(handleLDOSenseInterrupt);
+    handleLDOSenseInterrupt();
 }
 
 System_TaskResult System_task()

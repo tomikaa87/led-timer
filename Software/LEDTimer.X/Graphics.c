@@ -76,6 +76,43 @@ const uint8_t Graphics_BulbIcon[Graphics_BulbIconPages][Graphics_BulbIconWidth] 
     }
 };
 
+const uint8_t Graphics_BatteryIndicatorCap[Graphics_BatteryIndicatorCapWidth] = {
+    0b00111100,
+    0b01111110,
+    0b10000001
+};
+
+const uint8_t Graphics_BatteryIndicatorBodyFull[Graphics_BatteryIndicatorBodyFullWidth] = {
+    0b10111101
+};
+
+const uint8_t Graphics_BatteryIndicatorBodyEmpty[Graphics_BatteryIndicatorBodyEmptyWidth] = {
+    0b10000001
+};
+
+const uint8_t Graphics_BatteryIndicatorEndCap[Graphics_BatteryIndicatorEndCapWidth] = {
+    0b10000001,
+    0b01111110
+};
+
+const uint8_t Graphics_ExternalPowerIndicator[Graphics_ExternalPowerIndicatorWidth] = {
+    0b00100100,
+    0b00100100,
+    0b11111111,
+    0b10000001,
+    0b10000001,
+    0b10000001,
+    0b01000010,
+    0b00111100,
+    0b00100100,
+    0b00011000,
+    0b00001000,
+    0b00001000,
+    0b00110000,
+    0b01000000,
+    0b01000000
+};
+
 void Graphics_drawBitmap(
     const uint8_t* const bitmap,
     const uint8_t width,

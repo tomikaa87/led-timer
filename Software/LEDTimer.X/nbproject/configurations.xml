@@ -32,6 +32,7 @@
       <itemPath>Keypad.h</itemPath>
       <itemPath>System.h</itemPath>
       <itemPath>UI.h</itemPath>
+      <itemPath>MainScreen.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -68,6 +69,7 @@
       <itemPath>Keypad.c</itemPath>
       <itemPath>System.c</itemPath>
       <itemPath>UI.c</itemPath>
+      <itemPath>MainScreen.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -75,8 +77,6 @@
       <itemPath>Makefile</itemPath>
       <itemPath>LEDTimer.mc3</itemPath>
     </logicalFolder>
-    <itemPath>MainScreen.c</itemPath>
-    <itemPath>MainScreen.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
@@ -214,6 +214,7 @@
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

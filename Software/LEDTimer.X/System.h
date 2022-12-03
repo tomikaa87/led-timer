@@ -31,7 +31,7 @@ typedef enum
     System_WakeUpReason_KeyPress
 } System_WakeUpReason;
 
-typedef struct 
+typedef struct
 {
     struct _Sleep
     {
@@ -39,12 +39,14 @@ typedef struct
         Clock_Ticks lastWakeUpTime;
         System_WakeUpReason wakeUpReason;
     } sleep;
-    
+
     struct _Monitoring
     {
         volatile bool vddReadingUpdated;
         volatile uint16_t vddADCValue;
         Clock_Ticks lastUpdateTime;
+        volatile bool onBatteryPower;       // True if the system is running from battery power
+        uint8_t batteryLevel;               // Estimated batter level: 0..10
     } monitoring;
 } System;
 

@@ -25,9 +25,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define Graphics_BulbIconWidth      15
-#define Graphics_BulbIconPages      3
+#define Graphics_BulbIconWidth                      15
+#define Graphics_BulbIconPages                      3
 extern const uint8_t Graphics_BulbIcon[Graphics_BulbIconPages][Graphics_BulbIconWidth];
+
+#define Graphics_BatteryIndicatorCapWidth           3
+extern const uint8_t Graphics_BatteryIndicatorCap[Graphics_BatteryIndicatorCapWidth];
+
+#define Graphics_BatteryIndicatorBodyFullWidth      1
+extern const uint8_t Graphics_BatteryIndicatorBodyFull[Graphics_BatteryIndicatorBodyFullWidth];
+
+#define Graphics_BatteryIndicatorBodyEmptyWidth     1
+extern const uint8_t Graphics_BatteryIndicatorBodyEmpty[Graphics_BatteryIndicatorBodyEmptyWidth];
+
+#define Graphics_BatteryIndicatorEndCapWidth        2
+extern const uint8_t Graphics_BatteryIndicatorEndCap[Graphics_BatteryIndicatorEndCapWidth];
+
+#define Graphics_ExternalPowerIndicatorWidth        15
+extern const uint8_t Graphics_ExternalPowerIndicator[Graphics_ExternalPowerIndicatorWidth];
 
 void Graphics_drawBitmap(
     const uint8_t* bitmap,

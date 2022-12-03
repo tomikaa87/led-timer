@@ -22,14 +22,17 @@
 #include "Graphics.h"
 #include "MainScreen.h"
 #include "SSD1306.h"
+#include "System.h"
 #include "Text.h"
 
 #include <stdio.h>
 
 static struct MainScreenContext {
     uint8_t scheduleSegmentIndex;
+    bool onBatteryPower;
 } context = {
-    .scheduleSegmentIndex = 0
+    .scheduleSegmentIndex = 0,
+    .onBatteryPower = false
 };
 
 static void drawClock()
@@ -89,6 +92,74 @@ static void drawBulbIcon(const bool visible)
     }
 }
 
+static void drawPowerIndicator()
+{
+    if (context.onBatteryPower) {
+        static const uint8_t Width =
+            Graphics_BatteryIndicatorCapWidth
+            + Graphics_BatteryIndicatorBodyFullWidth * 10
+            + Graphics_BatteryIndicatorEndCapWidth;
+
+        uint8_t x = 127 - Width;
+
+        SSD1306_fillArea(x, 0, Width, 1, SSD1306_COLOR_BLACK);
+
+        Graphics_drawBitmap(
+            (uint8_t*)Graphics_BatteryIndicatorCap,
+            Graphics_BatteryIndicatorCapWidth,
+            x,
+            0,
+            false
+        );
+
+        x += Graphics_BatteryIndicatorCapWidth;
+
+        for (uint8_t i = 10 - system.monitoring.batteryLevel; i > 0; --i) {
+            Graphics_drawBitmap(
+                (uint8_t*)Graphics_BatteryIndicatorBodyEmpty,
+                Graphics_BatteryIndicatorBodyEmptyWidth,
+                x,
+                0,
+                false
+            );
+
+            ++x;
+        }
+
+        for (uint8_t i = system.monitoring.batteryLevel; i > 0; --i) {
+            Graphics_drawBitmap(
+                (uint8_t*)Graphics_BatteryIndicatorBodyFull,
+                Graphics_BatteryIndicatorBodyFullWidth,
+                x,
+                0,
+                false
+            );
+
+            ++x;
+        }
+
+        Graphics_drawBitmap(
+            (uint8_t*)Graphics_BatteryIndicatorEndCap,
+            Graphics_BatteryIndicatorEndCapWidth,
+            x,
+            0,
+            false
+        );
+    } else {
+        static const uint8_t X = 127 - Graphics_ExternalPowerIndicatorWidth;
+
+        SSD1306_fillArea(X, 0, Graphics_ExternalPowerIndicatorWidth, 1, SSD1306_COLOR_BLACK);
+
+        Graphics_drawBitmap(
+            (uint8_t*)Graphics_ExternalPowerIndicator,
+            Graphics_ExternalPowerIndicatorWidth,
+            X,
+            0,
+            false
+        );
+    }
+}
+
 void MainScreen_update(const bool redraw)
 {
     drawClock();
@@ -97,6 +168,14 @@ void MainScreen_update(const bool redraw)
     if (redraw) {
         drawBulbIcon(true);
         drawScheduleBar();
+    }
+
+    if (
+        redraw
+        || (context.onBatteryPower != system.monitoring.onBatteryPower)
+    ) {
+        context.onBatteryPower = system.monitoring.onBatteryPower;
+        drawPowerIndicator();
     }
 }
 
