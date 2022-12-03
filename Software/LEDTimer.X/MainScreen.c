@@ -40,7 +40,7 @@ static void drawClock()
     char s[6];
     snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
 
-    Text_draw7Seg(s, 2, 10, false);
+    Text_draw7Seg(s, 2, 15, false);
 }
 
 static void drawScheduleBar()
@@ -56,8 +56,36 @@ static void drawScheduleSegmentIndicator(const bool redraw)
 {
     uint8_t segmentIndex = (uint8_t)(Clock_getMinutesSinceMidnight() / 15);
 
+    printf("clock=%u\r\n", Clock_getMinutesSinceMidnight());
+    printf("segment=%u\r\n", segmentIndex);
+
     if (context.scheduleSegmentIndex != segmentIndex || redraw) {
+        context.scheduleSegmentIndex = segmentIndex;
         Graphics_drawScheduleSegmentIndicator(segmentIndex, false);
+    }
+}
+
+static void drawBulbIcon(const bool visible)
+{
+    static const uint8_t X = 127 - Graphics_BulbIconWidth - 15;
+
+    if (visible) {
+        Graphics_drawMultipageBitmap(
+            (const uint8_t*)Graphics_BulbIcon,
+            Graphics_BulbIconWidth,
+            Graphics_BulbIconPages,
+            X,
+            2,
+            false
+        );
+    } else {
+        SSD1306_fillArea(
+            X,
+            2,
+            Graphics_BulbIconWidth,
+            Graphics_BulbIconPages,
+            SSD1306_COLOR_BLACK
+        );
     }
 }
 
@@ -67,6 +95,7 @@ void MainScreen_update(const bool redraw)
     drawScheduleSegmentIndicator(redraw);
 
     if (redraw) {
+        drawBulbIcon(true);
         drawScheduleBar();
     }
 }

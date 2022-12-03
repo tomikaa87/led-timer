@@ -25,6 +25,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define Graphics_BulbIconWidth      15
+#define Graphics_BulbIconPages      3
+extern const uint8_t Graphics_BulbIcon[Graphics_BulbIconPages][Graphics_BulbIconWidth];
+
 void Graphics_drawBitmap(
     const uint8_t* bitmap,
     uint8_t width,
@@ -34,11 +38,11 @@ void Graphics_drawBitmap(
 );
 
 void Graphics_drawMultipageBitmap(
-    const uint8_t* mp_bitmap,
+    const uint8_t* bitmap,
     uint8_t width,
-    uint8_t page_count,
+    uint8_t pageCount,
     uint8_t x,
-    uint8_t start_page,
+    uint8_t startPage,
     bool invert
 );
 
