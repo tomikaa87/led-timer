@@ -75,6 +75,8 @@
       <itemPath>Makefile</itemPath>
       <itemPath>LEDTimer.mc3</itemPath>
     </logicalFolder>
+    <itemPath>MainScreen.c</itemPath>
+    <itemPath>MainScreen.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>

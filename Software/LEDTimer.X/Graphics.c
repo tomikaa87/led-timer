@@ -60,7 +60,7 @@ void Graphics_drawMultipageBitmap(
 }
 
 void Graphics_drawScheduleBar(
-    ScheduleSegmentData segmentData,
+    const ScheduleSegmentData segmentData,
     const bool invert
 )
 {

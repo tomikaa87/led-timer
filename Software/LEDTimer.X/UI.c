@@ -24,22 +24,49 @@
 #include "System.h"
 #include "UI.h"
 
+#include "MainScreen.h"
+
 #include "stdbool.h"
 #include "stdio.h"
 
 #define KeyRepeatIntervalTicks      (10)
 #define DisplayTimeoutTicks         (1000)
+#define UpdateIntervalTicks         (100)
+
+typedef enum {
+    UI_Screen_Main
+} UI_Screen;
 
 static struct UIContext {
+    UI_Screen screen;
+    bool redrawScreen;
     uint8_t lastKeyCode;
     Clock_Ticks keyRepeatTimer;
     bool displayOn;
     Clock_Ticks displayTimer;
+    Clock_Ticks updateTimer;
 } context = {
+    .screen = UI_Screen_Main,
+    .redrawScreen = true,
     .lastKeyCode = 0,
     .keyRepeatTimer = 0,
-    .displayOn = true
+    .displayOn = true,
+    .updateTimer = 0
 };
+
+static void updateScreen()
+{
+    switch (context.screen) {
+        case UI_Screen_Main:
+            MainScreen_update(context.redrawScreen);
+            break;
+
+        default:
+            break;
+    }
+
+    context.redrawScreen = false;
+}
 
 static void handleKeyPress(const uint8_t keyCode)
 {
@@ -52,6 +79,8 @@ static void handleKeyPress(const uint8_t keyCode)
             context.displayOn = true;
 
             SSD1306_setDisplayEnabled(true);
+
+            updateScreen();
 
             return;
         }
@@ -98,5 +127,13 @@ void UI_task(const uint8_t keyCode)
     ) {
         context.displayOn = false;
         SSD1306_setDisplayEnabled(false);
+    }
+
+    if (
+        context.displayOn
+        && Clock_getElapsedFastTicks(context.updateTimer) >= UpdateIntervalTicks
+    ) {
+        context.updateTimer = Clock_getFastTicks();
+        updateScreen();
     }
 }

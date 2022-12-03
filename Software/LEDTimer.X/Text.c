@@ -25,11 +25,11 @@
 #include <ctype.h>
 #include <string.h>
 
-#define ASCII_REDUCED_CHARSET_CHAR_COUNT    58
-#define ASCII_REDUCED_CHARSET_SPACE_WIDTH   5
-#define ASCII_REDUCED_CHARSET_CHAR_SPACING  1
-#define ASCII_REDUCED_CHARSET_WIDTH 5
-static const uint8_t asciiReducedCharset[ASCII_REDUCED_CHARSET_CHAR_COUNT][ASCII_REDUCED_CHARSET_WIDTH] = {
+#define ASCIIReduced_CharCount              58
+#define ASCIIReduced_SpaceWidth             5
+#define ASCIIReduced_CharSpacing            1
+#define ASCIIReduced_CharWidth              5
+static const uint8_t ASCIIReduced[ASCIIReduced_CharCount][ASCIIReduced_CharWidth] = {
     // !
     {
         0b00000000,
@@ -496,12 +496,511 @@ static const uint8_t asciiReducedCharset[ASCII_REDUCED_CHARSET_CHAR_COUNT][ASCII
     },
 };
 
-static const uint8_t asciiReducedPlaceholder[ASCII_REDUCED_CHARSET_WIDTH] = {
+static const uint8_t ASCIIReducedPlaceholder[ASCIIReduced_CharWidth] = {
     0b01111111,
     0b01010101,
     0b01001001,
     0b01010101,
     0b01111111
+};
+
+#define Numbers7Seg_CharCount               10
+#define Numbers7Seg_CharWidth               12
+#define Numbers7Seg_Pages                   3
+static const uint8_t Numbers7Seg[Numbers7Seg_CharCount][Numbers7Seg_Pages][Numbers7Seg_CharWidth] = {
+    {
+        // 0, Page 0
+        {
+            0b11111110,
+            0b11111101,
+            0b11111011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b11111011,
+            0b11111101,
+            0b11111110
+        },
+        // 0, Page 1
+        {
+            0b11111111,
+            0b11110111,
+            0b11100011,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b11100011,
+            0b11110111,
+            0b11111111
+        },
+        // 0, Page 2
+        {
+            0b00111111,
+            0b01011111,
+            0b01101111,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01101111,
+            0b01011111,
+            0b00111111
+        }
+    },
+    {
+        // 1, Page 0
+        {
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b11111000,
+            0b11111100,
+            0b11111110
+        },
+        // 1, Page 1
+        {
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b11100011,
+            0b11110111,
+            0b11111111
+        },
+        // 1, Page 2
+        {
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00001111,
+            0b00011111,
+            0b00111111
+        }
+    },
+    {
+        // 2, Page 0
+        {
+            0b00000000,
+            0b00000001,
+            0b00000011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b11111011,
+            0b11111101,
+            0b11111110
+        },
+        // 2, Page 1
+        {
+            0b11111000,
+            0b11110100,
+            0b11101100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011011,
+            0b00010111,
+            0b00001111
+        },
+        // 2, Page 2
+        {
+            0b00111111,
+            0b01011111,
+            0b01101111,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01100000,
+            0b01000000,
+            0b00000000
+        }
+    },
+    {
+        // 3, Page 0
+        {
+            0b00000000,
+            0b00000001,
+            0b00000011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b11111011,
+            0b11111101,
+            0b11111110
+        },
+        // 3, Page 1
+        {
+            0b00000000,
+            0b00000000,
+            0b00001000,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b11101011,
+            0b11110111,
+            0b11111111
+        },
+        // 3, Page 2
+        {
+            0b00000000,
+            0b01000000,
+            0b01100000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01101111,
+            0b01011111,
+            0b00111111
+        }
+    },
+    {
+        // 4, Page 0
+        {
+            0b11111110,
+            0b11111100,
+            0b11111000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b11111000,
+            0b11111100,
+            0b11111110
+        },
+        // 4, Page 1
+        {
+            0b00001111,
+            0b00010111,
+            0b00011011,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b11101011,
+            0b11110111,
+            0b11111111
+        },
+        // 4, Page 2
+        {
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00001111,
+            0b00011111,
+            0b00111111
+        }
+    },
+    {
+        // 5, Page 0
+        {
+            0b11111110,
+            0b11111101,
+            0b11111011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000011,
+            0b00000001,
+            0b00000000
+        },
+        // 5, Page 1
+        {
+            0b00001111,
+            0b00010111,
+            0b00011011,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b11101100,
+            0b11110100,
+            0b11111000
+        },
+        // 5, Page 2
+        {
+            0b00000000,
+            0b01000000,
+            0b01100000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01101111,
+            0b01011111,
+            0b00111111
+        }
+    },
+    {
+        // 6, Page 0
+        {
+            0b11111110,
+            0b11111101,
+            0b11111011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000011,
+            0b00000001,
+            0b00000000
+        },
+        // 6, Page 1
+        {
+            0b11111111,
+            0b11110111,
+            0b11101011,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b11101100,
+            0b11110100,
+            0b11111000
+        },
+        // 6, Page 2
+        {
+            0b00111111,
+            0b01011111,
+            0b01101111,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01101111,
+            0b01011111,
+            0b00111111
+        }
+    },
+    {
+        // 7, Page 0
+        {
+            0b00000000,
+            0b00000001,
+            0b00000011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b11111011,
+            0b11111101,
+            0b11111110
+        },
+        // 7, Page 1
+        {
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b11100011,
+            0b11110111,
+            0b11111111
+        },
+        // 7, Page 2
+        {
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00000000,
+            0b00001111,
+            0b00011111,
+            0b00111111
+        }
+    },
+    {
+        // 8, Page 0
+        {
+            0b11111110,
+            0b11111101,
+            0b11111011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b11111011,
+            0b11111101,
+            0b11111110
+        },
+        // 8, Page 1
+        {
+            0b11111111,
+            0b11110111,
+            0b11101011,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b11101011,
+            0b11110111,
+            0b11111111
+        },
+        // 8, Page 2
+        {
+            0b00111111,
+            0b01011111,
+            0b01101111,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01101111,
+            0b01011111,
+            0b00111111
+        }
+    },
+    {
+        // 9, Page 0
+        {
+            0b11111110,
+            0b11111101,
+            0b11111011,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b00000111,
+            0b11111011,
+            0b11111101,
+            0b11111110
+        },
+        // 9, Page 1
+        {
+            0b00001111,
+            0b00010111,
+            0b00011011,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b00011100,
+            0b11101011,
+            0b11110111,
+            0b11111111
+        },
+        // 9, Page 2
+        {
+            0b00000000,
+            0b01000000,
+            0b01100000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01110000,
+            0b01101111,
+            0b01011111,
+            0b00111111
+        }
+    }
+};
+
+#define Colon7Seg_CharWidth                 4
+#define Colon7Seg_Pages                     3
+static const uint8_t Colon7Seg[Colon7Seg_Pages][Colon7Seg_CharWidth] = {
+    {
+        0b10000000,
+        0b11000000,
+        0b11000000,
+        0b11000000
+    },
+    {
+        0b10000011,
+        0b11000011,
+        0b11000011,
+        0b11000001
+    },
+    {
+        0b00000011,
+        0b00000011,
+        0b00000011,
+        0b00000001
+    }
 };
 
 void Text_draw(
@@ -523,10 +1022,10 @@ void Text_draw(
 
     for (uint8_t i = 0; i < length; ++i) {
         SSD1306_setStartColumn(x);
-        x += ASCII_REDUCED_CHARSET_WIDTH;
+        x += ASCIIReduced_CharWidth;
 
         // Clear the background
-        for (uint8_t j = 0; j < ASCII_REDUCED_CHARSET_CHAR_SPACING; ++j) {
+        for (uint8_t j = 0; j < ASCIIReduced_CharSpacing; ++j) {
             const uint8_t data = 0;
             SSD1306_sendData(&data, 1, yOffset, invert);
             ++x;
@@ -540,7 +1039,7 @@ void Text_draw(
         char c = (char)toupper(s[i]);
 
         if (c == ' ') {
-            for (uint8_t i = 0; i < ASCII_REDUCED_CHARSET_SPACE_WIDTH; ++i) {
+            for (uint8_t i = 0; i < ASCIIReduced_SpaceWidth; ++i) {
                 const uint8_t data = 0;
                 SSD1306_sendData(&data, 1, yOffset, invert);
             }
@@ -552,14 +1051,82 @@ void Text_draw(
 
         // If character is not supported, draw placeholder
         // Since space is dynamically generated, the first character is '!'
-        if ((c - '!') >= ASCII_REDUCED_CHARSET_CHAR_COUNT) {
-            charData = asciiReducedPlaceholder;
+        if ((c - '!') >= ASCIIReduced_CharCount) {
+            charData = ASCIIReducedPlaceholder;
         } else {
             // Get data for the next character
-            charData = asciiReducedCharset[c - '!'];
+            charData = ASCIIReduced[c - '!'];
         }
 
         // Send data to the display
-        SSD1306_sendData(charData, ASCII_REDUCED_CHARSET_WIDTH, yOffset, invert);
+        SSD1306_sendData(charData, ASCIIReduced_CharWidth, yOffset, invert);
+    }
+}
+
+void Text_draw7Seg(
+    const char* const number,
+    const uint8_t line,
+    uint8_t x,
+    const bool invert
+) {
+    uint8_t length = (uint8_t)strlen(number);
+
+    if (length == 0 || line > (7 - Numbers7Seg_Pages) || x > 127) {
+        return;
+    }
+
+    SSD1306_enablePageAddressing();
+
+    for (uint8_t i = 0; i < length; ++i) {
+        // Stop if the next character won't fit
+        if (x + Numbers7Seg_CharWidth + 1 > SSD1306_LCDWIDTH - 1) {
+            return;
+        }
+
+        char c = number[i];
+
+        if (c != ' ') {
+            if (c == '-') {
+                SSD1306_setStartColumn(x);
+                SSD1306_setPage(line + 1);
+
+                // Cost-efficient dash symbol
+                uint8_t charData = 0b00011100;
+                for (uint8_t j = 2; j < Numbers7Seg_CharWidth - 2; ++j) {
+                    SSD1306_sendData(&charData, 1, 0, invert);
+                }
+            } else {
+                uint8_t width = Numbers7Seg_CharWidth;
+
+                // Draw the pages of the character
+                for (uint8_t page = 0; page < Numbers7Seg_Pages; ++page) {
+                    SSD1306_setPage(line + page);
+                    SSD1306_setStartColumn(x);
+
+                    const uint8_t* charData = 0;
+
+                    if (c >= '0' && c <= '9') {
+                        charData = Numbers7Seg[c - '0'][page];
+                    } else if (c == ':') {
+                        width = Colon7Seg_CharWidth;
+                        charData = Colon7Seg[page];
+                    }
+
+                    SSD1306_sendData(charData, width, 0, invert);
+                }
+
+                x += width + 2;
+            }
+        } else {
+            for (uint8_t page = 0; page < Numbers7Seg_Pages; ++page) {
+                SSD1306_setPage(line + page);
+                SSD1306_setStartColumn(x);
+
+                uint8_t charData[Numbers7Seg_CharWidth] = { 0 };
+                SSD1306_sendData(charData, sizeof(charData), 0, invert);
+            }
+
+            x += Numbers7Seg_CharWidth + 2;
+        }
     }
 }

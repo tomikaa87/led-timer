@@ -30,3 +30,10 @@ void Text_draw(
     uint8_t yOffset,
     bool invert
 );
+
+void Text_draw7Seg(
+    const char* number,
+    uint8_t line,
+    uint8_t x,
+    bool invert
+);

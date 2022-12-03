@@ -90,12 +90,6 @@ void main(void)
     SSD1306_init();
     SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
 
-    ScheduleSegmentData ssd = {
-        0, 0, 0, 0, 0, 0
-    };
-
-    Graphics_drawScheduleBar(ssd, false);
-    Graphics_drawScheduleSegmentIndicator(12, true);
 //
 //    uint16_t lastMinutesFromMidnight = 0;
 //
@@ -138,18 +132,6 @@ void main(void)
 //            }
 //        }
 //
-//        if (
-//            lastMinutesFromMidnight == 0
-//            || Clock_getMinutesSinceMidnight() != lastMinutesFromMidnight
-//        ) {
-//            lastMinutesFromMidnight = Clock_getMinutesSinceMidnight();
-//
-//            uint8_t hours = (uint8_t)lastMinutesFromMidnight / 60;
-//            uint8_t minutes = (uint8_t)lastMinutesFromMidnight - hours * 60;
-//
-//            snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
-//            Text_draw(s, 0, 0, 0, false);
-//        }
 
         if (systemTaskResult == System_TaskResult_EnterSleepMode) {
             System_sleep();

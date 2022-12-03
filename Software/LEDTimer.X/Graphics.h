@@ -43,8 +43,8 @@ void Graphics_drawMultipageBitmap(
 );
 
 void Graphics_drawScheduleBar(
-    ScheduleSegmentData segmentData,
-     bool invert
+    const ScheduleSegmentData segmentData,
+    bool invert
 );
 
 void Graphics_drawScheduleSegmentIndicator(
