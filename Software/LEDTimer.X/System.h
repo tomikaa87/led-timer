@@ -37,6 +37,12 @@ typedef enum
 {
     System_TaskResult_NoActionNeeded,
     System_TaskResult_EnterSleepMode
+} System_TaskResult_Action;
+
+typedef struct
+{
+    System_TaskResult_Action action;
+    bool powerInputChanged;
 } System_TaskResult;
 
 void System_init(void);
@@ -45,9 +51,15 @@ System_TaskResult System_task(void);
 /**
  * This function must be called after a wake up event when it's caused by
  * an external event, letting the system know when to go to sleep mode again.
- * @param reason Reason why the system woke up from sleep
+ * @param reason Reason why the system woke up from sleep.
  */
 void System_onWakeUp(System_WakeUpReason reason);
+
+/**
+ * Returns the last reason why the system was woken up from sleep mode.
+ * @return Reason why the system woke up from sleep.
+ */
+inline System_WakeUpReason System_getLastWakeUpReason();
 
 /**
  * Puts the MCU into sleep mode. The system wakes up if there is an external

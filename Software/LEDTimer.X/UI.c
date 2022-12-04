@@ -45,13 +45,15 @@ static struct UIContext {
     bool displayOn;
     Clock_Ticks displayTimer;
     Clock_Ticks updateTimer;
+    bool forceUpdate;
 } context = {
     .screen = UI_Screen_Main,
     .redrawScreen = true,
     .lastKeyCode = 0,
     .keyRepeatTimer = 0,
     .displayOn = true,
-    .updateTimer = 0
+    .updateTimer = 0,
+    .forceUpdate = true
 };
 
 static void updateScreen()
@@ -68,21 +70,32 @@ static void updateScreen()
     context.redrawScreen = false;
 }
 
+static bool wakeUpDisplay()
+{
+    context.displayTimer = Clock_getFastTicks();
+
+    if (!context.displayOn) {
+        puts("UI:wakeUpDisplay\r\n");
+
+        context.displayOn = true;
+        context.redrawScreen = true;
+
+        SSD1306_setDisplayEnabled(true);
+
+        updateScreen();
+
+        return true;
+    }
+
+    return false;
+}
+
 static void handleKeyPress(const uint8_t keyCode)
 {
     if (keyCode != 0) {
         System_onWakeUp(System_WakeUpReason_KeyPress);
 
-        context.displayTimer = Clock_getFastTicks();
-
-        if (!context.displayOn) {
-            context.displayOn = true;
-            context.redrawScreen = true;
-
-            SSD1306_setDisplayEnabled(true);
-
-            updateScreen();
-
+        if (wakeUpDisplay()) {
             return;
         }
     }
@@ -139,10 +152,30 @@ void UI_task(const uint8_t keyCode)
     }
 
     if (
-        context.displayOn
-        && Clock_getElapsedFastTicks(context.updateTimer) >= UpdateIntervalTicks
+        (
+            context.displayOn
+            && Clock_getElapsedFastTicks(context.updateTimer) >= UpdateIntervalTicks
+        ) || context.forceUpdate
     ) {
+        context.forceUpdate = false;
         context.updateTimer = Clock_getFastTicks();
         updateScreen();
     }
+}
+
+void UI_onSystemWakeUp()
+{
+    puts("UI:wakeUp\r\n");
+
+    if (System_getLastWakeUpReason() == System_WakeUpReason_PowerInputChanged) {
+        UI_onPowerInputChanged();
+    }
+}
+
+void UI_onPowerInputChanged()
+{
+    puts("UI:pwrChanged\r\n");
+
+    wakeUpDisplay();
+    context.forceUpdate = true;
 }

@@ -95,11 +95,6 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
-//
-//    uint16_t lastMinutesFromMidnight = 0;
-//
-//    static const char UpdateIndicatorChars[] = { '.', ':', '=', ':' };
-//    uint8_t vddUpdateIndicatorIndex = 0;
     uint8_t lastKeyCode = 0;
 
     while (1)
@@ -123,8 +118,13 @@ void main(void)
         // This must be the last task to handle sleep mode properly
         System_TaskResult systemTaskResult = System_task();
 
-        if (systemTaskResult == System_TaskResult_EnterSleepMode) {
+        if (systemTaskResult.powerInputChanged) {
+            UI_onPowerInputChanged();
+        }
+
+        if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
             System_sleep();
+            UI_onSystemWakeUp();
         }
     }
 }

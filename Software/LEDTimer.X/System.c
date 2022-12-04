@@ -43,9 +43,9 @@ static struct SystemContext
 {
     struct _Sleep
     {
-        bool enabled;
-        Clock_Ticks lastWakeUpTime;
-        System_WakeUpReason wakeUpReason;
+        volatile bool enabled;
+        volatile Clock_Ticks lastWakeUpTime;
+        volatile System_WakeUpReason wakeUpReason;
     } sleep;
 
     struct _Monitoring
@@ -55,6 +55,7 @@ static struct SystemContext
         Clock_Ticks lastUpdateTime;
         volatile bool onBatteryPower;       // True if the system is running from battery power
         uint8_t batteryLevel;               // Estimated batter level: 0..10
+        volatile bool powerInputChanged;
     } monitoring;
 } context = {
     .sleep = {
@@ -67,7 +68,8 @@ static struct SystemContext
         .vddADCValue = 0,
         .lastUpdateTime = 0,
         .onBatteryPower = true,
-        .batteryLevel = 5
+        .batteryLevel = 0,
+        .powerInputChanged = false
     }
 };
 
@@ -86,6 +88,11 @@ static void measureVDD()
 {
     ADC_SelectChannel(channel_FVR);
     ADC_StartConversion();
+}
+
+static void checkLDOSense()
+{
+    context.monitoring.onBatteryPower = !IO_LDO_SENSE_GetValue();
 }
 
 void updateBatteryLevel()
@@ -120,13 +127,26 @@ void System_init()
     ADC_SelectChannel(channel_FVR);
 
     IOCAF2_SetInterruptHandler(handleLDOSenseInterrupt);
+
+    checkLDOSense();
+    measureVDD();
+    updateBatteryLevel();
 }
 
 System_TaskResult System_task()
 {
-    if (Clock_getElapsedTicks(context.monitoring.lastUpdateTime) >= MonitoringUpdateIntervalTicks) {
+    System_TaskResult result = {
+        .action = System_TaskResult_NoActionNeeded,
+        .powerInputChanged = context.monitoring.powerInputChanged
+    };
+
+    if (
+        context.monitoring.powerInputChanged
+        || Clock_getElapsedTicks(context.monitoring.lastUpdateTime) >= MonitoringUpdateIntervalTicks
+    ) {
+        context.monitoring.powerInputChanged = false;
         context.monitoring.lastUpdateTime = Clock_getTicks();
-        context.monitoring.onBatteryPower = !IO_LDO_SENSE_GetValue();
+        checkLDOSense();
         measureVDD();
         updateBatteryLevel();
     }
@@ -141,27 +161,27 @@ System_TaskResult System_task()
 
             case System_WakeUpReason_Startup:
                 if (elapsedSinceWakeUp >= StartupAwakeLengthTicks) {
-                    context.sleep.enabled = true;
+                    context.sleep.enabled = context.monitoring.onBatteryPower;
                 }
                 break;
 
             case System_WakeUpReason_KeyPress:
                 if (elapsedSinceWakeUp >= KeyPressWakeUpLengthTicks) {
-                    context.sleep.enabled = true;
+                    context.sleep.enabled = context.monitoring.onBatteryPower;
                 }
                 break;
 
             case System_WakeUpReason_PowerInputChanged:
                 if (elapsedSinceWakeUp >= PowerInputChangeWakeUpLengthTicks) {
-                    context.sleep.enabled = true;
+                    context.sleep.enabled = context.monitoring.onBatteryPower;
                 }
                 break;
         }
     } else {
-        return System_TaskResult_EnterSleepMode;
+        result.action = System_TaskResult_EnterSleepMode;
     }
 
-    return System_TaskResult_NoActionNeeded;
+    return result;
 }
 
 void System_onWakeUp(const System_WakeUpReason reason)
@@ -171,9 +191,13 @@ void System_onWakeUp(const System_WakeUpReason reason)
     context.sleep.wakeUpReason = reason;
 
     if (reason == System_WakeUpReason_PowerInputChanged) {
-        // Trigger a VDD measurement on power input change
-        context.monitoring.lastUpdateTime = context.sleep.lastWakeUpTime;
+        context.monitoring.powerInputChanged = true;
     }
+}
+
+inline System_WakeUpReason System_getLastWakeUpReason()
+{
+    return context.sleep.wakeUpReason;
 }
 
 void System_sleep()
@@ -189,10 +213,18 @@ void System_sleep()
     // Send out all the data before going to sleep
     while (TRMT == 0);
 
+    context.sleep.wakeUpReason = System_WakeUpReason_None;
+
     SLEEP();
 
     // Wait for the oscillator to stabilize
     while (OSCSTATbits.HFIOFS == 0);
+
+    if (context.sleep.wakeUpReason == System_WakeUpReason_PowerInputChanged) {
+        checkLDOSense();
+        measureVDD();
+        updateBatteryLevel();
+    }
 }
 
 inline bool System_isRunningFromBackupBattery()

@@ -24,3 +24,5 @@
 
 void UI_init(void);
 void UI_task(uint8_t keyCode);
+void UI_onSystemWakeUp(void);
+void UI_onPowerInputChanged(void);
