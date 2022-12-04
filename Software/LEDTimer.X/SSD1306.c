@@ -41,15 +41,11 @@ static inline void i2cWait()
 {
     while (
         SSP1STATbits.R_nW
-        || SSP1CON2bits.SEN
-        || SSP1CON2bits.RSEN
-        || SSP1CON2bits.PEN
-        || SSP1CON2bits.RCEN
-        || SSP1CON2bits.ACKEN
+        || (SSP1CON2 & 0b11111) // ACKEN | RCEN | PEN | RSEN | SEN
     );
 }
 
-void i2cTransmit(const uint8_t* data, uint8_t length)
+static void i2cTransmit(const uint8_t* data, uint8_t length)
 {
 	// Start
 	i2cWait();

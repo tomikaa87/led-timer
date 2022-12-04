@@ -96,10 +96,12 @@ void main(void)
     //INTERRUPT_PeripheralInterruptDisable();
 
     uint8_t lastKeyCode = 0;
+    (void)lastKeyCode;
 
     while (1)
     {
         uint8_t keyCode = Keypad_task();
+#if 0
         if (keyCode != lastKeyCode) {
             lastKeyCode = keyCode;
 
@@ -112,6 +114,7 @@ void main(void)
                 keyCode & Keypad_Hold ? "Hold" : ""
             );
         }
+#endif
 
         UI_task(keyCode);
 

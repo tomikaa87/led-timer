@@ -210,7 +210,7 @@ inline System_WakeUpReason System_getLastWakeUpReason()
 void System_sleep()
 {
     printf(
-        "SYS:slp,t=%u,ft=%u,msm=%u,s=%u\r\n",
+        "SYS:SLP,T=%u,FT=%u,MSM=%u,SEC=%u\r\n",
         Clock_getTicks(),
         Clock_getFastTicks(),
         Clock_getMinutesSinceMidnight(),
