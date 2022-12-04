@@ -71,6 +71,15 @@ void main(void)
     __delay_ms(100);
     SSD1306_init();
 
+    System_init();
+    Clock_init();
+    Keypad_init();
+    UI_init();
+
+    SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
+
+    System_wakeUp(System_WakeUpReason_Startup);
+
     // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
     // Use the following macros to:
 
@@ -85,16 +94,6 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-
-
-    System_init();
-    Clock_init();
-    Keypad_init();
-    UI_init();
-
-    SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
-
-    System_wakeUp(System_WakeUpReason_Startup);
 
 //
 //    uint16_t lastMinutesFromMidnight = 0;
