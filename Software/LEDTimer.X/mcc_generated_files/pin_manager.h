@@ -162,23 +162,6 @@
 #define RC1_SetAnalogMode()         do { ANSELCbits.ANSC1 = 1; } while(0)
 #define RC1_SetDigitalMode()        do { ANSELCbits.ANSC1 = 0; } while(0)
 
-// get/set IO_VBAT_SENSE aliases
-#define IO_VBAT_SENSE_TRIS                 TRISCbits.TRISC2
-#define IO_VBAT_SENSE_LAT                  LATCbits.LATC2
-#define IO_VBAT_SENSE_PORT                 PORTCbits.RC2
-#define IO_VBAT_SENSE_WPU                  WPUCbits.WPUC2
-#define IO_VBAT_SENSE_ANS                  ANSELCbits.ANSC2
-#define IO_VBAT_SENSE_SetHigh()            do { LATCbits.LATC2 = 1; } while(0)
-#define IO_VBAT_SENSE_SetLow()             do { LATCbits.LATC2 = 0; } while(0)
-#define IO_VBAT_SENSE_Toggle()             do { LATCbits.LATC2 = ~LATCbits.LATC2; } while(0)
-#define IO_VBAT_SENSE_GetValue()           PORTCbits.RC2
-#define IO_VBAT_SENSE_SetDigitalInput()    do { TRISCbits.TRISC2 = 1; } while(0)
-#define IO_VBAT_SENSE_SetDigitalOutput()   do { TRISCbits.TRISC2 = 0; } while(0)
-#define IO_VBAT_SENSE_SetPullup()          do { WPUCbits.WPUC2 = 1; } while(0)
-#define IO_VBAT_SENSE_ResetPullup()        do { WPUCbits.WPUC2 = 0; } while(0)
-#define IO_VBAT_SENSE_SetAnalogMode()      do { ANSELCbits.ANSC2 = 1; } while(0)
-#define IO_VBAT_SENSE_SetDigitalMode()     do { ANSELCbits.ANSC2 = 0; } while(0)
-
 // get/set RC3 procedures
 #define RC3_SetHigh()            do { LATCbits.LATC3 = 1; } while(0)
 #define RC3_SetLow()             do { LATCbits.LATC3 = 0; } while(0)

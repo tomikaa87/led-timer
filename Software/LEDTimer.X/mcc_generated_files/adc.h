@@ -94,7 +94,6 @@ typedef struct
 
 typedef enum
 {
-    IO_VBAT_SENSE =  0x6,
     channel_Temp =  0x1D,
     channel_DAC =  0x1E,
     channel_FVR =  0x1F

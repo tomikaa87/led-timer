@@ -96,7 +96,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC" name="AN6"/>
-         <value>enabled</value>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ADC" name="AN7"/>
@@ -2219,7 +2219,7 @@
          <value>dontupdate</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2SEL%aux1"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2SEL%aux2"/>
          <value>RC3</value>
       </entry>
       <entry>
@@ -2256,7 +2256,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC2"/>
-         <value>IO_VBAT_SENSE</value>
+         <value/>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RC3"/>
@@ -2271,7 +2271,7 @@
          <value>IO_SW3</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="P2BSEL%aux2"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="P2BSEL%aux3"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
@@ -2327,15 +2327,15 @@
          <value>input</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RXDTSEL%aux4"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RXDTSEL%aux1"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1GSEL%aux0"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1GSEL%aux4"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="TXCKSEL%aux3"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="TXCKSEL%aux0"/>
          <value>RC4</value>
       </entry>
       <entry>
@@ -2404,7 +2404,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RC2"/>
-         <value>enabled</value>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RC3"/>
@@ -4479,46 +4479,74 @@
          <value>OFF</value>
       </entry>
    </tokenMap>
-   <generatedFileHashHistoryMap class="java.util.HashMap">
+   <generatedFileHashHistoryMap class="java.util.TreeMap">
       <entry>
-         <file>mcc_generated_files\interrupt_manager.h</file>
-         <hash>a35e1aa19bc68c3c451a9303860225980b9150546715f36cc21ff53b857f4479</hash>
+         <file>main.c</file>
+         <hash>ea4c8fe93ff4d4a0f49024e3ccbfc9c3295d9f72ad28b57f0175238ee0f02aad</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\i2c_master.c</file>
-         <hash>d4057f92b0eaff5da5a09860856bf50dd5144f00f32f8ef3bddf412afd8a13d1</hash>
+         <file>mcc_generated_files\adc.c</file>
+         <hash>deabc1bc46b7350f913bf1681a2f676f76033d8ea5eda14c72553ef41143fa95</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\memory.c</file>
-         <hash>d9f8a34cbf8990e798c8ec6f82f282d595900fa821f1e1054a4dce9160386092</hash>
+         <file>mcc_generated_files\adc.h</file>
+         <hash>c78ce50fc974fccf777e8c0715f8b6a1f60acfdc9899a1075f1e50998d94d5b4</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\i2c_master.h</file>
-         <hash>e1aa9ce1a5c7677fbe7ddf2d6e9286326842c4b730c690fa8b6123fa3e6d2410</hash>
+         <file>mcc_generated_files\device_config.c</file>
+         <hash>db8bb35bfc411e04faac875dafcca31d593abfeb05b36a09208929b3c04be43e</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\eusart.h</file>
-         <hash>3076504f3eef542e06f691222895f1a1e24bced70430df67d23d85bc3d66c09e</hash>
+         <file>mcc_generated_files\device_config.h</file>
+         <hash>d99550a7f86bd41f65cfeedd5246992824e711a3416d37d4879f6547a501eb9e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\epwm2.c</file>
          <hash>220253a7102deb73b3679e869146eefa37208204e6e74d3fdd7a73b9a8a4b37e</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\examples\i2c_master_example.h</file>
-         <hash>44dc378ed670d467759c06bad58e202290a8551d776ff30a8efd58173b2444dd</hash>
+         <file>mcc_generated_files\epwm2.h</file>
+         <hash>9c889144b9b12107cdc936e33b3df4d9b59809d6a2a78cd3eab82aa38c534e7e</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\fvr.h</file>
-         <hash>25574f7b25856ee406b24b870b818d0116b339bdc481902799ccb88debbabe1a</hash>
+         <file>mcc_generated_files\eusart.c</file>
+         <hash>dc3e16e3acbbdd52b3357e1060c40e08fc6346017960270aedf063e154641921</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\eusart.h</file>
+         <hash>3076504f3eef542e06f691222895f1a1e24bced70430df67d23d85bc3d66c09e</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\examples\i2c_master_example.c</file>
+         <hash>5343ff3d87f70430843d9ab4aa4d10e6532121b0fae119c320c2e607fb5a47df</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\examples\i2c_master_example.h</file>
+         <hash>44dc378ed670d467759c06bad58e202290a8551d776ff30a8efd58173b2444dd</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\fvr.c</file>
          <hash>ac3fa2e0a7ea5e15ac83e7fdd8ebb60afa513ee915163d363dadf6c2ccecc0c2</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\examples\i2c_master_example.c</file>
-         <hash>5343ff3d87f70430843d9ab4aa4d10e6532121b0fae119c320c2e607fb5a47df</hash>
+         <file>mcc_generated_files\fvr.h</file>
+         <hash>25574f7b25856ee406b24b870b818d0116b339bdc481902799ccb88debbabe1a</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\i2c_master.c</file>
+         <hash>d4057f92b0eaff5da5a09860856bf50dd5144f00f32f8ef3bddf412afd8a13d1</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\i2c_master.h</file>
+         <hash>e1aa9ce1a5c7677fbe7ddf2d6e9286326842c4b730c690fa8b6123fa3e6d2410</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\interrupt_manager.c</file>
+         <hash>eb6d72fd63e597dfb94f91055345bcac44510011b3ac0be5b87e720bd42bacc2</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\interrupt_manager.h</file>
+         <hash>a35e1aa19bc68c3c451a9303860225980b9150546715f36cc21ff53b857f4479</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>
@@ -4526,75 +4554,47 @@
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.h</file>
-         <hash>59b27f46ac9fd4399ad259ad6b2d6ad6bb44037af7ce8a9a34b5aa700994e452</hash>
+         <hash>9f12955ab949e340c5096b0fde2f5379ec79d02f2b8a5226018e0433bbc72e93</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\device_config.h</file>
-         <hash>d99550a7f86bd41f65cfeedd5246992824e711a3416d37d4879f6547a501eb9e</hash>
+         <file>mcc_generated_files\memory.c</file>
+         <hash>d9f8a34cbf8990e798c8ec6f82f282d595900fa821f1e1054a4dce9160386092</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\tmr4.h</file>
-         <hash>4145777a559f1e8eebcaf48f85459c2237fece4d5ae4a1e691ce945fdea67500</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr1.h</file>
-         <hash>609e32d3299cb6675da3bb5e9dddda60417ba45606dcca28bd74ec984f142169</hash>
-      </entry>
-      <entry>
-         <file>main.c</file>
-         <hash>ea4c8fe93ff4d4a0f49024e3ccbfc9c3295d9f72ad28b57f0175238ee0f02aad</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr2.h</file>
-         <hash>a68aeb29d624e53363e2eedd546aa8b2f525cccb9561185298c9d89f490d7a18</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\device_config.c</file>
-         <hash>db8bb35bfc411e04faac875dafcca31d593abfeb05b36a09208929b3c04be43e</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\pin_manager.h</file>
-         <hash>865c31f9e55a82a8561ee5a07a975c916cc96281fff30fa18f06bc2cd1e27f05</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr2.c</file>
-         <hash>7b3233cc9489e3ff979e3abdb13f5a080d727017b5c7fd55d57f616af7032d83</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr1.c</file>
-         <hash>1e3c78b5335d31f70322dcdf24c35918f504cfb2f530184ecff95b990b591d63</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\epwm2.h</file>
-         <hash>9c889144b9b12107cdc936e33b3df4d9b59809d6a2a78cd3eab82aa38c534e7e</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\tmr4.c</file>
-         <hash>8529418ece70e7617c782c6290a1775f02405de0b0b6a9f366292d0316632728</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\adc.h</file>
-         <hash>b0b03103fe0c5674a390491e9982ea6fe656d22ea86a05333536f2933692a853</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\eusart.c</file>
-         <hash>dc3e16e3acbbdd52b3357e1060c40e08fc6346017960270aedf063e154641921</hash>
+         <file>mcc_generated_files\memory.h</file>
+         <hash>79f5787ade15515abb335f26fb803168a8d2b0f0483efe99535f805b8222fc84</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.c</file>
          <hash>0e6e4aa28e3ddaf84b4d02e135a45b2b7ec0ff5835d8f4991f1fc7da83e50b97</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\adc.c</file>
-         <hash>deabc1bc46b7350f913bf1681a2f676f76033d8ea5eda14c72553ef41143fa95</hash>
+         <file>mcc_generated_files\pin_manager.h</file>
+         <hash>6cc69eae5716a3be3bbf08f04dcaf7e53a7cb0e37c85f63999ae71b4282c9130</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\interrupt_manager.c</file>
-         <hash>eb6d72fd63e597dfb94f91055345bcac44510011b3ac0be5b87e720bd42bacc2</hash>
+         <file>mcc_generated_files\tmr1.c</file>
+         <hash>1e3c78b5335d31f70322dcdf24c35918f504cfb2f530184ecff95b990b591d63</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\memory.h</file>
-         <hash>79f5787ade15515abb335f26fb803168a8d2b0f0483efe99535f805b8222fc84</hash>
+         <file>mcc_generated_files\tmr1.h</file>
+         <hash>609e32d3299cb6675da3bb5e9dddda60417ba45606dcca28bd74ec984f142169</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr2.c</file>
+         <hash>7b3233cc9489e3ff979e3abdb13f5a080d727017b5c7fd55d57f616af7032d83</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr2.h</file>
+         <hash>a68aeb29d624e53363e2eedd546aa8b2f525cccb9561185298c9d89f490d7a18</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr4.c</file>
+         <hash>8529418ece70e7617c782c6290a1775f02405de0b0b6a9f366292d0316632728</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr4.h</file>
+         <hash>4145777a559f1e8eebcaf48f85459c2237fece4d5ae4a1e691ce945fdea67500</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>
