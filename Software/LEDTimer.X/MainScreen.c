@@ -37,8 +37,8 @@ static struct MainScreenContext {
 
 static void drawClock()
 {
-    uint8_t hours = (uint8_t)Clock_getMinutesSinceMidnight() / 60;
-    uint8_t minutes = (uint8_t)Clock_getMinutesSinceMidnight() - hours * 60;
+    uint8_t hours = (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
+    uint8_t minutes = (uint8_t)(Clock_getMinutesSinceMidnight() - hours * 60);
 
     char s[6];
     snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
@@ -57,10 +57,7 @@ static void drawScheduleBar()
 
 static void drawScheduleSegmentIndicator(const bool redraw)
 {
-    uint8_t segmentIndex = (uint8_t)(Clock_getMinutesSinceMidnight() / 15);
-
-    printf("clock=%u\r\n", Clock_getMinutesSinceMidnight());
-    printf("segment=%u\r\n", segmentIndex);
+    uint8_t segmentIndex = (uint8_t)(Clock_getMinutesSinceMidnight() / 30);
 
     if (context.scheduleSegmentIndex != segmentIndex || redraw) {
         context.scheduleSegmentIndex = segmentIndex;
