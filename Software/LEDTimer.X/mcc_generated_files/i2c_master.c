@@ -166,7 +166,7 @@ i2c_status_t I2C_Status = {0};
 
 void I2C_Initialize()
 {
-    SSP1STAT = 0x00;
+    SSP1STAT = 0x80;
     SSP1CON1 = 0x08;
     SSP1CON2 = 0x00;
     SSP1ADD  = 0x04;
@@ -544,7 +544,7 @@ static inline bool I2C_MasterOpen(void)
 {
     if(!SSP1CON1bits.SSPEN)
     {
-        SSP1STAT = 0x00;
+        SSP1STAT = 0x80;
         SSP1CON1 = 0x08;
         SSP1CON2 = 0x00;
         SSP1ADD = 0x04;
