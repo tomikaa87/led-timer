@@ -59,11 +59,12 @@ typedef enum
     System_TaskResult_EnterSleepMode
 } System_TaskResult;
 
-void System_init();
-System_TaskResult System_task();
+void System_init(void);
+System_TaskResult System_task(void);
 
 void System_wakeUp(System_WakeUpReason reason);
-void System_sleep();
+void System_sleep(void);
 
-inline bool System_isVDDReadingUpdated();
-uint16_t System_getVDDMilliVolts();
+inline bool System_isVDDReadingUpdated(void);
+uint16_t System_getVDDMilliVolts(void);
+uint16_t System_getVBatMilliVolts(void);

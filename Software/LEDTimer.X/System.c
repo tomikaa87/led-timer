@@ -145,3 +145,8 @@ uint16_t System_getVDDMilliVolts()
         VDDCalMilliVolts * VDDCalADCValue / system.monitoring.vddADCValue
     );
 }
+
+uint16_t System_getVBatMilliVolts()
+{
+    return System_getVDDMilliVolts() + VBatDiodeDropMilliVolts;
+}

@@ -106,12 +106,12 @@ typedef enum {
 } SSD1306_Color;
 
 // High level API
-void SSD1306_init();
+void SSD1306_init(void);
 void SSD1306_setInvertEnabled(bool enabled);
 void SSD1306_scroll(SSD1306_ScrollMode scroll, uint8_t start, uint8_t stop);
 void SSD1306_setContrast(uint8_t contrast);
 void SSD1306_setContrastLevel(SSD1306_ContrastLevel level);
-void SSD1306_clear();
+void SSD1306_clear(void);
 
 void SSD1306_fillArea(uint8_t x, uint8_t startPage, uint8_t width, uint8_t pages, uint8_t color);
 
@@ -124,7 +124,7 @@ void SSD1306_sendData(
     bool invert
 );
 
-void SSD1306_enablePageAddressing();
+void SSD1306_enablePageAddressing(void);
 
 void SSD1306_setColumnAddress(uint8_t start, uint8_t end);
 void SSD1306_setPageAddress(uint8_t start, uint8_t end);
@@ -133,4 +133,4 @@ void SSD1306_setPage(uint8_t page);
 void SSD1306_setStartColumn(uint8_t address);
 
 void SSD1306_setDisplayEnabled(bool enabled);
-bool SSD1306_isDisplayEnabled();
+bool SSD1306_isDisplayEnabled(void);

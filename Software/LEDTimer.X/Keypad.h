@@ -28,5 +28,5 @@ enum
     Keypad_Hold = (1 << 7)
 };
 
-void Keypad_init();
-uint8_t Keypad_task();
+void Keypad_init(void);
+uint8_t Keypad_task(void);
