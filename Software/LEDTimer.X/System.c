@@ -86,6 +86,13 @@ static void handleLDOSenseInterrupt()
 
 static void measureVDD()
 {
+    if (!FVRCONbits.FVREN) {
+        return;
+    }
+
+    // Wait for the FVR to stabilize
+    while (!FVRCONbits.FVRRDY);
+
     ADC_SelectChannel(channel_FVR);
     ADC_StartConversion();
 }
@@ -213,9 +220,15 @@ void System_sleep()
     // Send out all the data before going to sleep
     while (TRMT == 0);
 
+    // Disable the FVR to conserve power
+    uint8_t fvren = FVRCONbits.FVREN;
+    FVRCONbits.FVREN = 0;
+
     context.sleep.wakeUpReason = System_WakeUpReason_None;
 
     SLEEP();
+
+    FVRCONbits.FVREN = fvren;
 
     // Wait for the oscillator to stabilize
     while (OSCSTATbits.HFIOFS == 0);
