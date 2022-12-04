@@ -28,6 +28,7 @@
 typedef enum
 {
     System_WakeUpReason_None,
+    System_WakeUpReason_Startup,
     System_WakeUpReason_KeyPress
 } System_WakeUpReason;
 

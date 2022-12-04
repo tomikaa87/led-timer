@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <xc.h>
 
+#define StartupAwakeLengthTicks             (6)
 #define KeyPressWakeUpLengthTicks           (6)
 #define MonitoringUpdateIntervalTicks       (2)
 
@@ -87,6 +88,11 @@ System_TaskResult System_task()
         switch (system.sleep.wakeUpReason) {
             case System_WakeUpReason_None:
                 break;
+
+            case System_WakeUpReason_Startup:
+                if (elapsedSinceWakeUp >= StartupAwakeLengthTicks) {
+                    system.sleep.enabled = true;
+                }
 
             case System_WakeUpReason_KeyPress:
                 if (elapsedSinceWakeUp >= KeyPressWakeUpLengthTicks) {

@@ -66,6 +66,11 @@ void main(void)
     // initialize the device
     SYSTEM_Initialize();
 
+    setupI2C();
+
+    __delay_ms(100);
+    SSD1306_init();
+
     // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
     // Use the following macros to:
 
@@ -81,14 +86,15 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
-    setupI2C();
 
     System_init();
     Clock_init();
     Keypad_init();
+    UI_init();
 
-    SSD1306_init();
     SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
+
+    System_wakeUp(System_WakeUpReason_Startup);
 
 //
 //    uint16_t lastMinutesFromMidnight = 0;

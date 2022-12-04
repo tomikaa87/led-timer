@@ -77,6 +77,9 @@ static void handleKeyPress(const uint8_t keyCode)
 
         if (!context.displayOn) {
             context.displayOn = true;
+            context.redrawScreen = true;
+
+            printf("UI:Don\r\n");
 
             SSD1306_setDisplayEnabled(true);
 
@@ -104,6 +107,14 @@ static void handleKeyPress(const uint8_t keyCode)
     }
 }
 
+void UI_init()
+{
+    context.redrawScreen = true;
+    context.displayOn = true;
+    context.displayTimer = Clock_getFastTicks();
+    updateScreen();
+}
+
 void UI_task(const uint8_t keyCode)
 {
     if (keyCode != context.lastKeyCode) {
@@ -127,6 +138,7 @@ void UI_task(const uint8_t keyCode)
     ) {
         context.displayOn = false;
         SSD1306_setDisplayEnabled(false);
+        printf("UI:Doff\r\n");
     }
 
     if (

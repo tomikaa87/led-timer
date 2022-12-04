@@ -22,4 +22,5 @@
 
 #include <stdint.h>
 
+void UI_init();
 void UI_task(uint8_t keyCode);
