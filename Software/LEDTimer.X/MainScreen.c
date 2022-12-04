@@ -111,7 +111,7 @@ static void drawPowerIndicator()
 
         x += Graphics_BatteryIndicatorCapWidth;
 
-        for (uint8_t i = 10 - system.monitoring.batteryLevel; i > 0; --i) {
+        for (uint8_t i = 10 - System_getBatteryLevel(); i > 0; --i) {
             Graphics_drawBitmap(
                 (uint8_t*)Graphics_BatteryIndicatorBodyEmpty,
                 Graphics_BatteryIndicatorBodyEmptyWidth,
@@ -123,7 +123,7 @@ static void drawPowerIndicator()
             ++x;
         }
 
-        for (uint8_t i = system.monitoring.batteryLevel; i > 0; --i) {
+        for (uint8_t i = System_getBatteryLevel(); i > 0; --i) {
             Graphics_drawBitmap(
                 (uint8_t*)Graphics_BatteryIndicatorBodyFull,
                 Graphics_BatteryIndicatorBodyFullWidth,
@@ -169,9 +169,9 @@ void MainScreen_update(const bool redraw)
 
     if (
         redraw
-        || (context.onBatteryPower != system.monitoring.onBatteryPower)
+        || (context.onBatteryPower != System_isRunningFromBackupBattery())
     ) {
-        context.onBatteryPower = system.monitoring.onBatteryPower;
+        context.onBatteryPower = System_isRunningFromBackupBattery();
         drawPowerIndicator();
     }
 }

@@ -78,7 +78,7 @@ void main(void)
 
     SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
 
-    System_wakeUp(System_WakeUpReason_Startup);
+    System_onWakeUp(System_WakeUpReason_Startup);
 
     // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
     // Use the following macros to:
@@ -122,21 +122,6 @@ void main(void)
 
         // This must be the last task to handle sleep mode properly
         System_TaskResult systemTaskResult = System_task();
-
-//        char s[20];
-//
-//        snprintf(s, sizeof(s), ":%02u", Clock_getSeconds());
-//        Text_draw(s, 0, 30, 0, true);
-//
-//        if (System_isVDDReadingUpdated()) {
-//            snprintf(s, sizeof(s), "VDD=%4umV %c", System_getVDDMilliVolts(), UpdateIndicatorChars[vddUpdateIndicatorIndex]);
-//            Text_draw(s, 2, 0, 0, false);
-//
-//            if (++vddUpdateIndicatorIndex >= sizeof(UpdateIndicatorChars)) {
-//                vddUpdateIndicatorIndex = 0;
-//            }
-//        }
-//
 
         if (systemTaskResult == System_TaskResult_EnterSleepMode) {
             System_sleep();

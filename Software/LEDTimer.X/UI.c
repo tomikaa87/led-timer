@@ -71,7 +71,7 @@ static void updateScreen()
 static void handleKeyPress(const uint8_t keyCode)
 {
     if (keyCode != 0) {
-        System_wakeUp(System_WakeUpReason_KeyPress);
+        System_onWakeUp(System_WakeUpReason_KeyPress);
 
         context.displayTimer = Clock_getFastTicks();
 

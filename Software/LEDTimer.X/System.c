@@ -39,7 +39,24 @@
 #define VBatMinMilliVolts                   (2500u)
 #define VBatMaxMilliVolts                   (3000u)
 
-System system = {
+static struct SystemContext
+{
+    struct _Sleep
+    {
+        bool enabled;
+        Clock_Ticks lastWakeUpTime;
+        System_WakeUpReason wakeUpReason;
+    } sleep;
+
+    struct _Monitoring
+    {
+        volatile bool vddReadingUpdated;
+        volatile uint16_t vddADCValue;
+        Clock_Ticks lastUpdateTime;
+        volatile bool onBatteryPower;       // True if the system is running from battery power
+        uint8_t batteryLevel;               // Estimated batter level: 0..10
+    } monitoring;
+} context = {
     .sleep = {
         .enabled = true,
         .lastWakeUpTime = 0,
@@ -56,13 +73,13 @@ System system = {
 
 static void handleADCInterrupt()
 {
-    system.monitoring.vddADCValue = ADC_GetConversionResult();
-    system.monitoring.vddReadingUpdated = true;
+    context.monitoring.vddADCValue = ADC_GetConversionResult();
+    context.monitoring.vddReadingUpdated = true;
 }
 
 static void handleLDOSenseInterrupt()
 {
-    System_wakeUp(System_WakeUpReason_PowerInputChanged);
+    System_onWakeUp(System_WakeUpReason_PowerInputChanged);
 }
 
 static void measureVDD()
@@ -83,7 +100,7 @@ void updateBatteryLevel()
                 : vbat
             );
 
-    system.monitoring.batteryLevel = (uint8_t)(
+    context.monitoring.batteryLevel = (uint8_t)(
         (uint32_t)(vbat - VBatMinMilliVolts) * 10u
         / (VBatMaxMilliVolts - VBatMinMilliVolts)
     );
@@ -91,9 +108,9 @@ void updateBatteryLevel()
     printf(
         "SYS:VDD=%u(ADC=%u),VBat=%u,L=%u\r\n",
         System_getVDDMilliVolts(),
-        system.monitoring.vddADCValue,
+        context.monitoring.vddADCValue,
         System_getVBatMilliVolts(),
-        system.monitoring.batteryLevel
+        context.monitoring.batteryLevel
     );
 }
 
@@ -107,36 +124,36 @@ void System_init()
 
 System_TaskResult System_task()
 {
-    if (Clock_getElapsedTicks(system.monitoring.lastUpdateTime) >= MonitoringUpdateIntervalTicks) {
-        system.monitoring.lastUpdateTime = Clock_getTicks();
-        system.monitoring.onBatteryPower = !IO_LDO_SENSE_GetValue();
+    if (Clock_getElapsedTicks(context.monitoring.lastUpdateTime) >= MonitoringUpdateIntervalTicks) {
+        context.monitoring.lastUpdateTime = Clock_getTicks();
+        context.monitoring.onBatteryPower = !IO_LDO_SENSE_GetValue();
         measureVDD();
         updateBatteryLevel();
     }
 
-    if (!system.sleep.enabled) {
+    if (!context.sleep.enabled) {
         Clock_Ticks elapsedSinceWakeUp
-            = Clock_getElapsedTicks(system.sleep.lastWakeUpTime);
+            = Clock_getElapsedTicks(context.sleep.lastWakeUpTime);
 
-        switch (system.sleep.wakeUpReason) {
+        switch (context.sleep.wakeUpReason) {
             case System_WakeUpReason_None:
                 break;
 
             case System_WakeUpReason_Startup:
                 if (elapsedSinceWakeUp >= StartupAwakeLengthTicks) {
-                    system.sleep.enabled = true;
+                    context.sleep.enabled = true;
                 }
                 break;
 
             case System_WakeUpReason_KeyPress:
                 if (elapsedSinceWakeUp >= KeyPressWakeUpLengthTicks) {
-                    system.sleep.enabled = true;
+                    context.sleep.enabled = true;
                 }
                 break;
 
             case System_WakeUpReason_PowerInputChanged:
                 if (elapsedSinceWakeUp >= PowerInputChangeWakeUpLengthTicks) {
-                    system.sleep.enabled = true;
+                    context.sleep.enabled = true;
                 }
                 break;
         }
@@ -147,15 +164,15 @@ System_TaskResult System_task()
     return System_TaskResult_NoActionNeeded;
 }
 
-void System_wakeUp(const System_WakeUpReason reason)
+void System_onWakeUp(const System_WakeUpReason reason)
 {
-    system.sleep.enabled = false;
-    system.sleep.lastWakeUpTime = Clock_getTicks();
-    system.sleep.wakeUpReason = reason;
+    context.sleep.enabled = false;
+    context.sleep.lastWakeUpTime = Clock_getTicks();
+    context.sleep.wakeUpReason = reason;
 
     if (reason == System_WakeUpReason_PowerInputChanged) {
         // Trigger a VDD measurement on power input change
-        system.monitoring.lastUpdateTime = system.sleep.lastWakeUpTime;
+        context.monitoring.lastUpdateTime = context.sleep.lastWakeUpTime;
     }
 }
 
@@ -178,20 +195,25 @@ void System_sleep()
     while (OSCSTATbits.HFIOFS == 0);
 }
 
-inline bool System_isVDDReadingUpdated()
+inline bool System_isRunningFromBackupBattery()
 {
-    return system.monitoring.vddReadingUpdated;
+    return context.monitoring.onBatteryPower;
 }
 
 uint16_t System_getVDDMilliVolts()
 {
-    system.monitoring.vddReadingUpdated = false;
+    context.monitoring.vddReadingUpdated = false;
     return (uint16_t)(
-        VDDCalMilliVolts * VDDCalADCValue / system.monitoring.vddADCValue
+        VDDCalMilliVolts * VDDCalADCValue / context.monitoring.vddADCValue
     );
 }
 
 uint16_t System_getVBatMilliVolts()
 {
     return System_getVDDMilliVolts() + VBatDiodeDropMilliVolts;
+}
+
+inline uint8_t System_getBatteryLevel()
+{
+    return context.monitoring.batteryLevel;
 }

@@ -33,27 +33,6 @@ typedef enum
     System_WakeUpReason_PowerInputChanged
 } System_WakeUpReason;
 
-typedef struct
-{
-    struct _Sleep
-    {
-        bool enabled;
-        Clock_Ticks lastWakeUpTime;
-        System_WakeUpReason wakeUpReason;
-    } sleep;
-
-    struct _Monitoring
-    {
-        volatile bool vddReadingUpdated;
-        volatile uint16_t vddADCValue;
-        Clock_Ticks lastUpdateTime;
-        volatile bool onBatteryPower;       // True if the system is running from battery power
-        uint8_t batteryLevel;               // Estimated batter level: 0..10
-    } monitoring;
-} System;
-
-extern System system;
-
 typedef enum
 {
     System_TaskResult_NoActionNeeded,
@@ -63,9 +42,46 @@ typedef enum
 void System_init(void);
 System_TaskResult System_task(void);
 
-void System_wakeUp(System_WakeUpReason reason);
+/**
+ * This function must be called after a wake up event when it's caused by
+ * an external event, letting the system know when to go to sleep mode again.
+ * @param reason Reason why the system woke up from sleep
+ */
+void System_onWakeUp(System_WakeUpReason reason);
+
+/**
+ * Puts the MCU into sleep mode. The system wakes up if there is an external
+ * interrupt or the main clock timer (Timer1) overflows.
+ */
 void System_sleep(void);
 
-inline bool System_isVDDReadingUpdated(void);
+/**
+ * Indicates that the system is running on the backup battery by reading the
+ * logic level of the LDO_SENSE input.
+ * @return True: running from backup battery, false; running from main power
+ */
+inline bool System_isRunningFromBackupBattery();
+
+/**
+ * Returns the estimated VDD voltage of the MCU. It;s measured via the ADC
+ * using the internal fixed voltage reference (FVR).
+ * @return Voltage in millivolts.
+ */
 uint16_t System_getVDDMilliVolts(void);
+
+/**
+ * Returns the estimated voltage of the backup battery. It's calculated from
+ * the measured VDD value by adding the forward voltage drop of the backup
+ * battery diode. If the system is running from the main power supply, the
+ * returned value is the estimated voltage of the LDO's output.
+ * @return Voltage in millivolts.
+ */
 uint16_t System_getVBatMilliVolts(void);
+
+/**
+ * Returns the estimated charge level of the backup battery. The value is
+ * calculated from VBat and because the discharge curve of a lithium cell
+ * is far from linear, the value is only a rough indication of its state.
+ * @return A value from 0 to 10.
+ */
+inline uint8_t System_getBatteryLevel(void);
