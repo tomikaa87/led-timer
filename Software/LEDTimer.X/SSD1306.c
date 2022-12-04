@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Author: Tamas Karpati
     Created on 2022-11-29
 */
@@ -54,17 +54,17 @@ void i2cTransmit(const uint8_t* data, uint8_t length)
 	// Start
 	i2cWait();
 	SSP1CON2bits.SEN = 1;
-	
+
 	// Send address
 	i2cWait();
 	SSP1BUF = SSD1306_I2C_ADDRESS << 1;
-	
+
 	// Send data
 	while (length-- > 0) {
 		i2cWait();
 		SSP1BUF = *data++;
 	}
-	
+
 	// Stop
 	i2cWait();
 	SSP1CON2bits.PEN = 1;
@@ -114,7 +114,7 @@ void SSD1306_init()
     for (uint16_t i = 0; i < sizeof(SSD1306_screen_buffer); ++i)
         SSD1306_screen_buffer[i] = 0xAA;
 #endif
-    
+
     SSD1306_displayOn = true;
 }
 
@@ -224,7 +224,7 @@ void SSD1306_clear()
 {
     SSD1306_sendCommand(SSD1306_CMD_MEMORYMODE);
     SSD1306_sendCommand(SSD1306_MEM_MODE_HORIZONTAL_ADDRESSING);
-    
+
     SSD1306_sendCommand(SSD1306_CMD_COLUMNADDR);
     SSD1306_sendCommand(0); // Column start address (0 = reset)
     SSD1306_sendCommand(SSD1306_LCDWIDTH - 1); // Column end address (127 = reset)
@@ -251,7 +251,7 @@ void SSD1306_clear()
 
         for (uint8_t j = 1; j < 17; ++j)
             data[j] = 0;
-        
+
         i2cTransmit(data, sizeof(data));
 
 #ifdef SSD1306_DEBUG
@@ -346,7 +346,7 @@ void SSD1306_sendData(
 {
     if (bitShift > 7)
         return;
-    
+
     uint8_t buffer[17];
     uint8_t bytesRemaining = length;
     uint8_t dataIndex = 0;
@@ -365,7 +365,7 @@ void SSD1306_sendData(
             }
             buffer[i] = byte;
         }
-        
+
         i2cTransmit(buffer, count + 1);
     }
 }
@@ -387,22 +387,22 @@ void SSD1306_fillArea(
     if (width == 0 || x >= SSD1306_LCDWIDTH) {
         return;
     }
-    
+
     SSD1306_enablePageAddressing();
-    
+
     uint8_t data[2];
     data[0] = SSD1306_I2C_DC_FLAG;
     data[1] = color > 0 ? 0xFF : 0;
-    
+
     for (uint8_t i = 0; i < pages; ++i) {
         uint8_t page = startPage + i;
         if (page >= 8) {
             return;
         }
-        
+
         SSD1306_setPage(page);
         SSD1306_setStartColumn(x);
-        
+
         for (uint8_t j = 0; j < width && x + j < SSD1306_LCDWIDTH; ++j) {
             i2cTransmit(data, sizeof(data));
         }

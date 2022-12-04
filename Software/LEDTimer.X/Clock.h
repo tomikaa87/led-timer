@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Author: Tamas Karpati
     Created on 2022-11-29
 */

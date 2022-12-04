@@ -22,25 +22,25 @@
 */
 
 /*
-    (c) 2018 Microchip Technology Inc. and its subsidiaries. 
-    
-    Subject to your compliance with these terms, you may use Microchip software and any 
-    derivatives exclusively with Microchip products. It is your responsibility to comply with third party 
-    license terms applicable to your use of third party software (including open source software) that 
+    (c) 2018 Microchip Technology Inc. and its subsidiaries.
+
+    Subject to your compliance with these terms, you may use Microchip software and any
+    derivatives exclusively with Microchip products. It is your responsibility to comply with third party
+    license terms applicable to your use of third party software (including open source software) that
     may accompany Microchip software.
-    
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
-    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS
     FOR A PARTICULAR PURPOSE.
-    
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
-    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO 
-    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
-    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
-    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS
     SOFTWARE.
 */
 
@@ -58,7 +58,7 @@
 uint16_t FLASH_ReadWord(uint16_t flashAddr)
 {
     uint8_t GIEBitValue = INTCONbits.GIE;   // Save interrupt enable
-	
+
     INTCONbits.GIE = 0;     // Disable interrupts
     EEADRL = (flashAddr & 0x00FF);
     EEADRH = ((flashAddr & 0xFF00) >> 8);
@@ -118,31 +118,31 @@ int8_t FLASH_WriteBlock(uint16_t writeAddr, uint16_t *flashWordArray)
 		EECON1bits.CFGS = 0;    // Deselect Configuration space
 		EECON1bits.WREN = 1;    // Enable writes
 		EECON1bits.LWLO = 1;    // Only load write latches
-		
+
 		for (i=0; i<WRITE_FLASH_BLOCKSIZE; i++)
 		{
 			// Load lower 8 bits of write address
 			EEADRL = (writeAddr & 0xFF);
 			// Load upper 6 bits of write address
 			EEADRH = ((writeAddr & 0xFF00) >> 8);
-		
+
 			// Load data in current address
-			EEDATL = flashWordArray[dataCounter];
+			EEDATL = (uint8_t)(flashWordArray[dataCounter]);
 			EEDATH = ((flashWordArray[dataCounter] & 0xFF00) >> 8);
 			dataCounter++;
-		
+
 			if(i == (WRITE_FLASH_BLOCKSIZE-1))
 			{
 				// Start Flash program memory write
 				EECON1bits.LWLO = 0;
 			}
-		
+
 			EECON2 = 0x55;
 			EECON2 = 0xAA;
 			EECON1bits.WR = 1;
 			NOP();
 			NOP();
-		
+
 			writeAddr++;
 		}
 	}

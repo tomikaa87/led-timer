@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Author: Tamas Karpati
     Created on 2022-11-29
 */
@@ -48,7 +48,7 @@ static void handleTimerInterrupt()
     _seconds += 2;
 	if (_seconds >= 60) {
         _seconds = 0;
-        
+
         if (++_minutesSinceMidnight >= 1440) {
             _minutesSinceMidnight = 0;
         }
