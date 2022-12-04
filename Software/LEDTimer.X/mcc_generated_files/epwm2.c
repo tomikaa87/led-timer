@@ -91,9 +91,9 @@ void EPWM2_LoadDutyValue(uint16_t dutyValue)
 {
    // Writing to 8 MSBs of pwm duty cycle in CCPRL register
     CCPR2L = ((dutyValue & 0x03FC)>>2);
-    
+
    // Writing to 2 LSBs of pwm duty cycle in CCPCON register
-    CCP2CON = ((uint8_t)(CCP2CON & 0xCF) | ((dutyValue & 0x0003)<<4));
+    CCP2CON = (uint8_t)((uint8_t)(CCP2CON & 0xCF) | ((dutyValue & 0x0003)<<4));
 }
 /**
  End of File

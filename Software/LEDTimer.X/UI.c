@@ -79,8 +79,6 @@ static void handleKeyPress(const uint8_t keyCode)
             context.displayOn = true;
             context.redrawScreen = true;
 
-            printf("UI:Don\r\n");
-
             SSD1306_setDisplayEnabled(true);
 
             updateScreen();
@@ -138,7 +136,6 @@ void UI_task(const uint8_t keyCode)
     ) {
         context.displayOn = false;
         SSD1306_setDisplayEnabled(false);
-        printf("UI:Doff\r\n");
     }
 
     if (

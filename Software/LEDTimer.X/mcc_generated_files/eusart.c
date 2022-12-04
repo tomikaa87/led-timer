@@ -55,9 +55,12 @@ volatile eusart_status_t eusartRxLastError;
   Section: EUSART APIs
 */
 
+#pragma warning push
+#pragma warning disable 1090
 void (*EUSART_FramingErrorHandler)(void);
 void (*EUSART_OverrunErrorHandler)(void);
 void (*EUSART_ErrorHandler)(void);
+#pragma warning pop
 
 void EUSART_DefaultFramingErrorHandler(void);
 void EUSART_DefaultOverrunErrorHandler(void);
@@ -163,6 +166,8 @@ void EUSART_DefaultOverrunErrorHandler(void){
 void EUSART_DefaultErrorHandler(void){
 }
 
+#pragma warning push
+#pragma warning disable 759
 void EUSART_SetFramingErrorHandler(void (* interruptHandler)(void)){
     EUSART_FramingErrorHandler = interruptHandler;
 }
@@ -174,7 +179,7 @@ void EUSART_SetOverrunErrorHandler(void (* interruptHandler)(void)){
 void EUSART_SetErrorHandler(void (* interruptHandler)(void)){
     EUSART_ErrorHandler = interruptHandler;
 }
-
+#pragma warning pop
 
 /**
   End of File
