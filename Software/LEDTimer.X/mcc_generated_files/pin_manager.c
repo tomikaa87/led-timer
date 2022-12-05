@@ -24,25 +24,25 @@
 */
 
 /*
-    (c) 2018 Microchip Technology Inc. and its subsidiaries. 
-    
-    Subject to your compliance with these terms, you may use Microchip software and any 
-    derivatives exclusively with Microchip products. It is your responsibility to comply with third party 
-    license terms applicable to your use of third party software (including open source software) that 
+    (c) 2018 Microchip Technology Inc. and its subsidiaries.
+
+    Subject to your compliance with these terms, you may use Microchip software and any
+    derivatives exclusively with Microchip products. It is your responsibility to comply with third party
+    license terms applicable to your use of third party software (including open source software) that
     may accompany Microchip software.
-    
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
-    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS
     FOR A PARTICULAR PURPOSE.
-    
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
-    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO 
-    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
-    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
-    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS
     SOFTWARE.
 */
 
@@ -91,7 +91,7 @@ void PIN_MANAGER_Initialize(void)
     APFCON1 = 0x00;
 
     /**
-    IOCx registers 
+    IOCx registers
     */
     //interrupt on change for group IOCAF - flag
     IOCAFbits.IOCAF0 = 0;
@@ -113,34 +113,35 @@ void PIN_MANAGER_Initialize(void)
     IOCAPbits.IOCAP2 = 1;
 
 
-
+#if 0
     // register default IOC callback functions at runtime; use these methods to register a custom function
     IOCAF0_SetInterruptHandler(IOCAF0_DefaultInterruptHandler);
     IOCAF1_SetInterruptHandler(IOCAF1_DefaultInterruptHandler);
     IOCAF2_SetInterruptHandler(IOCAF2_DefaultInterruptHandler);
-   
-    // Enable IOCI interrupt 
-    INTCONbits.IOCIE = 1; 
-    
+#endif
+
+    // Enable IOCI interrupt
+    INTCONbits.IOCIE = 1;
+
 }
-  
+
 void PIN_MANAGER_IOC(void)
-{   
+{
 	// interrupt on change for pin IOCAF0
     if(IOCAFbits.IOCAF0 == 1)
     {
-        IOCAF0_ISR();  
-    }	
+        IOCAF0_ISR();
+    }
 	// interrupt on change for pin IOCAF1
     if(IOCAFbits.IOCAF1 == 1)
     {
-        IOCAF1_ISR();  
-    }	
+        IOCAF1_ISR();
+    }
 	// interrupt on change for pin IOCAF2
     if(IOCAFbits.IOCAF2 == 1)
     {
-        IOCAF2_ISR();  
-    }	
+        IOCAF2_ISR();
+    }
 }
 
 /**

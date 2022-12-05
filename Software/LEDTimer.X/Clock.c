@@ -26,66 +26,39 @@
 #include <stdlib.h>
 #include <xc.h>
 
-// In the current configuration, every tick means 2 seconds
-volatile static Clock_Ticks _ticks = 0;
-// In the current configuration, every fast tick means 10 milliseconds
-volatile static Clock_Ticks _fastTicks = 0;
-volatile static uint16_t _minutesSinceMidnight = 0;
-volatile static uint8_t _seconds = 0;
-
-static void handleTimerInterrupt();
-static void handleFastTimerInterrupt();
-
-void Clock_init()
-{
-    TMR1_SetInterruptHandler(handleTimerInterrupt);
-    TMR4_SetInterruptHandler(handleFastTimerInterrupt);
-}
-
-static void handleTimerInterrupt()
-{
-    _ticks += 1;
-    _seconds += 2;
-	if (_seconds >= 60) {
-        _seconds = 0;
-
-        if (++_minutesSinceMidnight >= 1440) {
-            _minutesSinceMidnight = 0;
-        }
-    }
-}
-
-static void handleFastTimerInterrupt()
-{
-    ++_fastTicks;
-}
+Clock_InterruptContext Clock_interruptContext = {
+    .ticks = 0,
+    .fastTicks = 0,
+    .minutesSinceMidnight = 0,
+    .seconds = 0
+};
 
 inline uint8_t Clock_getSeconds()
 {
-    return _seconds;
+    return Clock_interruptContext.seconds;
 }
 
 inline uint16_t Clock_getMinutesSinceMidnight()
 {
-    return _minutesSinceMidnight;
+    return Clock_interruptContext.minutesSinceMidnight;
 }
 
 inline Clock_Ticks Clock_getTicks()
 {
-    return _ticks;
+    return Clock_interruptContext.ticks;
 }
 
 inline Clock_Ticks Clock_getFastTicks()
 {
-    return _fastTicks;
+    return Clock_interruptContext.fastTicks;
 }
 
 Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)
 {
-    return (Clock_Ticks)abs((int16_t)_ticks - (int16_t)since);
+    return (Clock_Ticks)abs((int16_t)Clock_interruptContext.ticks - (int16_t)since);
 }
 
 Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
 {
-    return (Clock_Ticks)abs((int16_t)_fastTicks - (int16_t)since);
+    return (Clock_Ticks)abs((int16_t)Clock_interruptContext.fastTicks - (int16_t)since);
 }

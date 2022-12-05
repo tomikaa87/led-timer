@@ -18,6 +18,8 @@
     Created on 2022-12-01
 */
 
+#include "Clock.h"
+#include "Config.h"
 #include "System.h"
 
 #include "mcc_generated_files/adc.h"
@@ -26,18 +28,17 @@
 #include <stdio.h>
 #include <xc.h>
 
-#define StartupAwakeLengthTicks             (6)
-#define KeyPressWakeUpLengthTicks           (6)
-#define PowerInputChangeWakeUpLengthTicks   (6)
-#define MonitoringUpdateIntervalTicks       (2)
+volatile uint16_t _System_adcResult = 0;
 
-#define VDDCalMilliVolts                    (3140ul)
-#define VDDCalADCValue                      (332ul)
-
-#define VBatDiodeDropMilliVolts             (221)
-
-#define VBatMinMilliVolts                   (2500u)
-#define VBatMaxMilliVolts                   (3000u)
+System_InterruptContext System_interruptContext = {
+    .adc = {
+        .result = 0,
+        .updated = false
+    },
+    .ldoSense = {
+        .updated = false
+    }
+};
 
 static struct SystemContext
 {
@@ -50,8 +51,6 @@ static struct SystemContext
 
     struct _Monitoring
     {
-        volatile bool vddReadingUpdated;
-        volatile uint16_t vddADCValue;
         Clock_Ticks lastUpdateTime;
         volatile bool onBatteryPower;       // True if the system is running from battery power
         uint8_t batteryLevel;               // Estimated batter level: 0..10
@@ -64,25 +63,12 @@ static struct SystemContext
         .wakeUpReason = System_WakeUpReason_None
     },
     .monitoring = {
-        .vddReadingUpdated = false,
-        .vddADCValue = 0,
         .lastUpdateTime = 0,
         .onBatteryPower = true,
         .batteryLevel = 0,
         .powerInputChanged = false
     }
 };
-
-static void handleADCInterrupt()
-{
-    context.monitoring.vddADCValue = ADC_GetConversionResult();
-    context.monitoring.vddReadingUpdated = true;
-}
-
-static void handleLDOSenseInterrupt()
-{
-    System_onWakeUp(System_WakeUpReason_PowerInputChanged);
-}
 
 static void measureVDD()
 {
@@ -106,23 +92,23 @@ void updateBatteryLevel()
 {
     uint16_t vbat = System_getVBatMilliVolts();
     vbat =
-        vbat > VBatMaxMilliVolts
-            ? VBatMaxMilliVolts
+        vbat > Config_System_VBatMaxMilliVolts
+            ? Config_System_VBatMaxMilliVolts
             : (
-                vbat < VBatMinMilliVolts
-                ? VBatMinMilliVolts
+                vbat < Config_System_VBatMinMilliVolts
+                ? Config_System_VBatMinMilliVolts
                 : vbat
             );
 
     context.monitoring.batteryLevel = (uint8_t)(
-        (uint32_t)(vbat - VBatMinMilliVolts) * 10u
-        / (VBatMaxMilliVolts - VBatMinMilliVolts)
+        (uint32_t)(vbat - Config_System_VBatMinMilliVolts) * 10u
+        / (Config_System_VBatMaxMilliVolts - Config_System_VBatMinMilliVolts)
     );
 
     printf(
         "SYS:VDD=%u(ADC=%u),VBat=%u,L=%u\r\n",
         System_getVDDMilliVolts(),
-        context.monitoring.vddADCValue,
+        System_interruptContext.adc.result,
         System_getVBatMilliVolts(),
         context.monitoring.batteryLevel
     );
@@ -130,10 +116,7 @@ void updateBatteryLevel()
 
 void System_init()
 {
-    ADC_SetInterruptHandler(handleADCInterrupt);
     ADC_SelectChannel(channel_FVR);
-
-    IOCAF2_SetInterruptHandler(handleLDOSenseInterrupt);
 
     checkLDOSense();
     measureVDD();
@@ -149,7 +132,8 @@ System_TaskResult System_task()
 
     if (
         context.monitoring.powerInputChanged
-        || Clock_getElapsedTicks(context.monitoring.lastUpdateTime) >= MonitoringUpdateIntervalTicks
+        || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+            >= Config_System_MonitoringUpdateIntervalTicks
     ) {
         context.monitoring.powerInputChanged = false;
         context.monitoring.lastUpdateTime = Clock_getTicks();
@@ -167,19 +151,19 @@ System_TaskResult System_task()
                 break;
 
             case System_WakeUpReason_Startup:
-                if (elapsedSinceWakeUp >= StartupAwakeLengthTicks) {
+                if (elapsedSinceWakeUp >= Config_System_StartupAwakeLengthTicks) {
                     context.sleep.enabled = context.monitoring.onBatteryPower;
                 }
                 break;
 
             case System_WakeUpReason_KeyPress:
-                if (elapsedSinceWakeUp >= KeyPressWakeUpLengthTicks) {
+                if (elapsedSinceWakeUp >= Config_System_KeyPressWakeUpLengthTicks) {
                     context.sleep.enabled = context.monitoring.onBatteryPower;
                 }
                 break;
 
             case System_WakeUpReason_PowerInputChanged:
-                if (elapsedSinceWakeUp >= PowerInputChangeWakeUpLengthTicks) {
+                if (elapsedSinceWakeUp >= Config_System_PowerInputChangeWakeUpLengthTicks) {
                     context.sleep.enabled = context.monitoring.onBatteryPower;
                 }
                 break;
@@ -228,6 +212,8 @@ void System_sleep()
 
     SLEEP();
 
+    // The next instruction will always be executed before the ISR
+
     FVRCONbits.FVREN = fvren;
 
     // Wait for the oscillator to stabilize
@@ -247,15 +233,16 @@ inline bool System_isRunningFromBackupBattery()
 
 uint16_t System_getVDDMilliVolts()
 {
-    context.monitoring.vddReadingUpdated = false;
     return (uint16_t)(
-        VDDCalMilliVolts * VDDCalADCValue / context.monitoring.vddADCValue
+        Config_System_VDDCalMilliVolts
+        * Config_System_VDDCalADCValue
+        / System_interruptContext.adc.result
     );
 }
 
 uint16_t System_getVBatMilliVolts()
 {
-    return System_getVDDMilliVolts() + VBatDiodeDropMilliVolts;
+    return System_getVDDMilliVolts() + Config_System_VBatDiodeDropMilliVolts;
 }
 
 inline uint8_t System_getBatteryLevel()

@@ -25,6 +25,37 @@
 /**
  * Settings
  */
-#define Config_Settings_ScheduleDataBaseAddress     (0)
-#define Config_Settings_ScheduleDataSize            (sizeof(ScheduleSegmentData))
-#define Config_Settings_ScheduleDataCheksumAddress  (Config_Settings_ScheduleDataBaseAddress + Config_Settings_ScheduleDataSize)
+#define Config_Settings_ScheduleDataBaseAddress             (0)
+#define Config_Settings_ScheduleDataSize                    (sizeof(ScheduleSegmentData))
+#define Config_Settings_ScheduleDataCheksumAddress          (Config_Settings_ScheduleDataBaseAddress + Config_Settings_ScheduleDataSize)
+
+/**
+ * System
+ */
+#define Config_System_StartupAwakeLengthTicks               (6)
+#define Config_System_KeyPressWakeUpLengthTicks             (6)
+#define Config_System_PowerInputChangeWakeUpLengthTicks     (6)
+#define Config_System_MonitoringUpdateIntervalTicks         (2)
+
+#define Config_System_VDDCalMilliVolts                      (3140ul)
+#define Config_System_VDDCalADCValue                        (332ul)
+
+#define Config_System_VBatDiodeDropMilliVolts               (221)
+
+#define Config_System_VBatMinMilliVolts                     (2500u)
+#define Config_System_VBatMaxMilliVolts                     (3000u)
+
+/**
+ * UI
+ */
+#define Config_UI_KeyRepeatIntervalTicks                    (10)
+#define Config_UI_DisplayTimeoutTicks                       (1000)
+#define Config_UI_UpdateIntervalTicks                       (100)
+
+/**
+ * Keypad
+ */
+#define Config_Keypad_ScanSampleCount                       (3)
+#define Config_Keypad_ScanSamplingDelayUs                   (1)
+#define Config_Keypad_HoldTimeoutTicks                      (50)
+#define Config_Keypad_DeBounceCoolDownTicks                 (5)

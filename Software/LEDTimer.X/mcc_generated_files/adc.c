@@ -22,25 +22,25 @@
 */
 
 /*
-    (c) 2018 Microchip Technology Inc. and its subsidiaries. 
-    
-    Subject to your compliance with these terms, you may use Microchip software and any 
-    derivatives exclusively with Microchip products. It is your responsibility to comply with third party 
-    license terms applicable to your use of third party software (including open source software) that 
+    (c) 2018 Microchip Technology Inc. and its subsidiaries.
+
+    Subject to your compliance with these terms, you may use Microchip software and any
+    derivatives exclusively with Microchip products. It is your responsibility to comply with third party
+    license terms applicable to your use of third party software (including open source software) that
     may accompany Microchip software.
-    
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
-    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS
     FOR A PARTICULAR PURPOSE.
-    
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
-    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO 
-    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
-    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
-    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS
     SOFTWARE.
 */
 
@@ -67,32 +67,34 @@ void (*ADC_InterruptHandler)(void);
 void ADC_Initialize(void)
 {
     // set the ADC to the options selected in the User Interface
-    
-    // ADFM right; ADNREF VSS; ADPREF VDD; ADCS Frc; 
+
+    // ADFM right; ADNREF VSS; ADPREF VDD; ADCS Frc;
     ADCON1 = 0xF0;
-    
-    // ADRESL 0; 
+
+    // ADRESL 0;
     ADRESL = 0x00;
-    
-    // ADRESH 0; 
+
+    // ADRESH 0;
     ADRESH = 0x00;
-    
-    // GO_nDONE stop; ADON enabled; CHS AN0; 
+
+    // GO_nDONE stop; ADON enabled; CHS AN0;
     ADCON0 = 0x01;
-    
+
     // Enabling ADC interrupt.
     PIE1bits.ADIE = 1;
-	
+
 	// Set Default Interrupt Handler
+#if 0
     ADC_SetInterruptHandler(ADC_DefaultInterruptHandler);
+#endif
 }
 
 void ADC_SelectChannel(adc_channel_t channel)
 {
     // select the A/D channel
-    ADCON0bits.CHS = channel;    
+    ADCON0bits.CHS = channel;
     // Turn on the ADC module
-    ADCON0bits.ADON = 1;  
+    ADCON0bits.ADON = 1;
 }
 
 void ADC_StartConversion(void)
@@ -117,8 +119,8 @@ adc_result_t ADC_GetConversionResult(void)
 adc_result_t ADC_GetConversion(adc_channel_t channel)
 {
     // select the A/D channel
-    ADCON0bits.CHS = channel;    
-    
+    ADCON0bits.CHS = channel;
+
     // Turn on the ADC module
     ADCON0bits.ADON = 1;
 
@@ -146,7 +148,7 @@ void ADC_ISR(void)
 {
     // Clear the ADC interrupt flag
     PIR1bits.ADIF = 0;
-	
+
 	if(ADC_InterruptHandler)
     {
         ADC_InterruptHandler();

@@ -53,6 +53,44 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+void __interrupt() isr(void)
+{
+    if (IOCIE && IOCIF) {
+        // RA0 IOC - SW1
+        if (IOCAF0) {
+            IOCAF0 = 0;
+        }
+
+        // RA1 IOC - SW2
+        if (IOCAF1) {
+            IOCAF1 = 0;
+        }
+
+        // RA2 IOC - LDO_SENSE
+        if (IOCAF2) {
+            IOCAF2 = 0;
+            System_handleLDOSenseInterrupt();
+        }
+    }
+
+    if (PEIE) {
+        if (ADIE && ADIF) {
+            ADIF = 0;
+            System_handleADCInterrupt(((uint16_t)ADRESH) << 8 | ADRESL);
+        }
+
+        if (TMR4IE & TMR4IF) {
+            TMR4IF = 0;
+            Clock_handleFastTimerInterrupt();
+        }
+
+        if (TMR1IE & TMR1IF) {
+            TMR1IF = 0;
+            Clock_handleRTCTimerInterrupt();
+        }
+    }
+}
+
 inline void setupI2C()
 {
     SSP1CON1bits.SSPEN = 1;
@@ -72,7 +110,6 @@ void main(void)
     SSD1306_init();
 
     System_init();
-    Clock_init();
     Keypad_init();
     UI_init();
 

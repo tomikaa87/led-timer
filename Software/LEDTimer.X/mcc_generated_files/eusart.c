@@ -85,10 +85,11 @@ void EUSART_Initialize(void)
     // SPBRGH 0;
     SPBRGH = 0x00;
 
-
+#if 0
     EUSART_SetFramingErrorHandler(EUSART_DefaultFramingErrorHandler);
     EUSART_SetOverrunErrorHandler(EUSART_DefaultOverrunErrorHandler);
     EUSART_SetErrorHandler(EUSART_DefaultErrorHandler);
+#endif
 
     eusartRxLastError.status = 0;
 

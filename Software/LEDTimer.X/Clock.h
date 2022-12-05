@@ -24,7 +24,31 @@
 
 typedef uint16_t Clock_Ticks;
 
-void Clock_init(void);
+typedef volatile struct
+{
+    volatile Clock_Ticks ticks;
+    volatile Clock_Ticks fastTicks;
+    volatile uint16_t minutesSinceMidnight;
+    volatile uint8_t seconds;
+} Clock_InterruptContext;
+
+#define Clock_handleRTCTimerInterrupt() {\
+    extern Clock_InterruptContext Clock_interruptContext; \
+    Clock_interruptContext.ticks += 1; \
+    Clock_interruptContext.seconds += 2; \
+	if (Clock_interruptContext.seconds >= 60) { \
+        Clock_interruptContext.seconds = 0; \
+        if (++Clock_interruptContext.minutesSinceMidnight >= 1440) { \
+            Clock_interruptContext.minutesSinceMidnight = 0; \
+        } \
+    } \
+}
+
+#define Clock_handleFastTimerInterrupt() { \
+    extern Clock_InterruptContext Clock_interruptContext; \
+    ++Clock_interruptContext.fastTicks; \
+}
+
 inline uint8_t Clock_getSeconds(void);
 inline uint16_t Clock_getMinutesSinceMidnight(void);
 inline Clock_Ticks Clock_getTicks(void);

@@ -18,8 +18,8 @@
     Created on 2022-12-01
 */
 
-//#include "System.h"
 #include "Clock.h"
+#include "Config.h"
 
 #include "mcc_generated_files/device_config.h"
 #include "mcc_generated_files/pin_manager.h"
@@ -27,11 +27,6 @@
 #include <xc.h>
 
 #include <stdbool.h>
-
-#define ScanSampleCount         (3)
-#define ScanSamplingDelayUs     (1)
-#define HoldTimeoutTicks        (50)
-#define DeBounceCoolDownTicks   (5)
 
 static struct KeypadContext
 {
@@ -55,13 +50,13 @@ static uint8_t scanKeys()
 {
     uint8_t scanCode = 0;
 
-    for (uint8_t i = 0; i < ScanSampleCount; ++i) {
+    for (uint8_t i = 0; i < Config_Keypad_ScanSampleCount; ++i) {
         scanCode |=
             (IO_SW1_GetValue() ? 0 : (1 << 0))
             | (IO_SW2_GetValue() ? 0 : (1 << 1))
             | (IO_SW3_GetValue() ? 0 : (1 << 2));
 
-        __delay_us(ScanSamplingDelayUs);
+        __delay_us(Config_Keypad_ScanSamplingDelayUs);
     }
 
     return scanCode;
@@ -78,7 +73,7 @@ uint8_t Keypad_task()
     // Simple de-bouncing logic
     if (
         context.coolDown
-        && Clock_getElapsedFastTicks(context.timerTicks) < DeBounceCoolDownTicks
+        && Clock_getElapsedFastTicks(context.timerTicks) < Config_Keypad_DeBounceCoolDownTicks
     ) {
         return 0;
     }
@@ -103,7 +98,7 @@ uint8_t Keypad_task()
                 context.coolDown = true;
                 context.timerTicks = Clock_getFastTicks();
             } else {
-                if (Clock_getElapsedFastTicks(context.timerTicks) >= HoldTimeoutTicks) {
+                if (Clock_getElapsedFastTicks(context.timerTicks) >= Config_Keypad_HoldTimeoutTicks) {
                     context.state = State_KeyHeld;
                     return scanCode | (1 << 7);
                 } else {

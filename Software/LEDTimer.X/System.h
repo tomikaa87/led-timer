@@ -45,6 +45,31 @@ typedef struct
     bool powerInputChanged;
 } System_TaskResult;
 
+typedef volatile struct
+{
+    struct
+    {
+        uint16_t result;
+        bool updated;
+    } adc;
+
+    struct
+    {
+        bool updated;
+    } ldoSense;
+} System_InterruptContext;
+
+#define System_handleADCInterrupt(RESULT) { \
+    extern volatile System_InterruptContext System_interruptContext; \
+    System_interruptContext.adc.result = (RESULT); \
+    System_interruptContext.adc.updated = true; \
+}
+
+#define System_handleLDOSenseInterrupt() { \
+    extern volatile System_InterruptContext System_interruptContext; \
+    System_interruptContext.ldoSense.updated = true; \
+}
+
 void System_init(void);
 System_TaskResult System_task(void);
 

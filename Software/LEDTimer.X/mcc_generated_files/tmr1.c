@@ -22,25 +22,25 @@
 */
 
 /*
-    (c) 2018 Microchip Technology Inc. and its subsidiaries. 
-    
-    Subject to your compliance with these terms, you may use Microchip software and any 
-    derivatives exclusively with Microchip products. It is your responsibility to comply with third party 
-    license terms applicable to your use of third party software (including open source software) that 
+    (c) 2018 Microchip Technology Inc. and its subsidiaries.
+
+    Subject to your compliance with these terms, you may use Microchip software and any
+    derivatives exclusively with Microchip products. It is your responsibility to comply with third party
+    license terms applicable to your use of third party software (including open source software) that
     may accompany Microchip software.
-    
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
-    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS
     FOR A PARTICULAR PURPOSE.
-    
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
-    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO 
-    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
-    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
-    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS
     SOFTWARE.
 */
 
@@ -65,13 +65,13 @@ void TMR1_Initialize(void)
 {
     //Set the Timer to the options selected in the GUI
 
-    //T1GSS T1G_pin; TMR1GE disabled; T1GTM disabled; T1GPOL low; T1GGO done; T1GSPM disabled; 
+    //T1GSS T1G_pin; TMR1GE disabled; T1GTM disabled; T1GPOL low; T1GGO done; T1GSPM disabled;
     T1GCON = 0x00;
 
-    //TMR1H 0; 
+    //TMR1H 0;
     TMR1H = 0x00;
 
-    //TMR1L 0; 
+    //TMR1L 0;
     TMR1L = 0x00;
 
     // Clearing IF flag before enabling the interrupt.
@@ -84,9 +84,11 @@ void TMR1_Initialize(void)
     PIE1bits.TMR1IE = 1;
 
     // Set Default Interrupt Handler
+#if 0
     TMR1_SetInterruptHandler(TMR1_DefaultInterruptHandler);
+#endif
 
-    // T1CKPS 1:1; T1OSCEN enabled; nT1SYNC do_not_synchronize; TMR1CS External; TMR1ON enabled; 
+    // T1CKPS 1:1; T1OSCEN enabled; nT1SYNC do_not_synchronize; TMR1CS External; TMR1ON enabled;
     T1CON = 0x8D;
 }
 
@@ -107,11 +109,11 @@ uint16_t TMR1_ReadTimer(void)
     uint16_t readVal;
     uint8_t readValHigh;
     uint8_t readValLow;
-    
-	
+
+
     readValLow = TMR1L;
     readValHigh = TMR1H;
-    
+
     readVal = ((uint16_t)readValHigh << 8) | readValLow;
 
     return readVal;
@@ -161,7 +163,7 @@ void TMR1_ISR(void)
 
     // Clear the TMR1 interrupt flag
     PIR1bits.TMR1IF = 0;
-    
+
     // Avoid stopping the timer to reload a 0 value in async mode
     if (timer1ReloadVal != 0) {
         TMR1_WriteTimer(timer1ReloadVal);

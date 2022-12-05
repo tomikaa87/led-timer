@@ -19,6 +19,7 @@
 */
 
 #include "Clock.h"
+#include "Config.h"
 #include "Keypad.h"
 #include "SSD1306.h"
 #include "System.h"
@@ -28,10 +29,6 @@
 
 #include "stdbool.h"
 #include "stdio.h"
-
-#define KeyRepeatIntervalTicks      (10)
-#define DisplayTimeoutTicks         (1000)
-#define UpdateIntervalTicks         (100)
 
 typedef enum {
     UI_Screen_Main
@@ -137,7 +134,7 @@ void UI_task(const uint8_t keyCode)
 
     if (
         (keyCode & Keypad_Hold)
-        && Clock_getElapsedFastTicks(context.keyRepeatTimer) >= KeyRepeatIntervalTicks
+        && Clock_getElapsedFastTicks(context.keyRepeatTimer) >= Config_UI_KeyRepeatIntervalTicks
     ) {
         context.keyRepeatTimer = Clock_getFastTicks();
         handleKeyPress(keyCode & 0b111);
@@ -145,7 +142,7 @@ void UI_task(const uint8_t keyCode)
 
     if (
         context.displayOn
-        && Clock_getElapsedFastTicks(context.displayTimer) >= DisplayTimeoutTicks
+        && Clock_getElapsedFastTicks(context.displayTimer) >= Config_UI_DisplayTimeoutTicks
     ) {
         context.displayOn = false;
         SSD1306_setDisplayEnabled(false);
@@ -154,7 +151,7 @@ void UI_task(const uint8_t keyCode)
     if (
         (
             context.displayOn
-            && Clock_getElapsedFastTicks(context.updateTimer) >= UpdateIntervalTicks
+            && Clock_getElapsedFastTicks(context.updateTimer) >= Config_UI_UpdateIntervalTicks
         ) || context.forceUpdate
     ) {
         context.forceUpdate = false;
