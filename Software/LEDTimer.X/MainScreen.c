@@ -24,6 +24,7 @@
 #include "SSD1306.h"
 #include "System.h"
 #include "Text.h"
+#include "Keypad.h"
 
 #include <stdio.h>
 
@@ -34,6 +35,11 @@ static struct MainScreenContext {
     .scheduleSegmentIndex = 0,
     .onBatteryPower = false
 };
+
+static void drawKeypadHelpBar()
+{
+    Text_draw("STNGS :  OFF  :      ", 0, 0, 0, false);
+}
 
 static void drawClock()
 {
@@ -163,6 +169,7 @@ void MainScreen_update(const bool redraw)
     drawScheduleSegmentIndicator(redraw);
 
     if (redraw) {
+        drawKeypadHelpBar();
         drawBulbIcon(true);
         drawScheduleBar();
     }
@@ -176,7 +183,19 @@ void MainScreen_update(const bool redraw)
     }
 }
 
-void MainScreen_handleKeyPress(const uint8_t keyCode)
+bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
 {
+    switch (keyCode) {
+        // Propagate to the UI to show the Settings
+        case Keypad_Key1:
+        // Propagate to the UI to propagate forward to main() to toggle the output
+        case Keypad_Key2:
+            break;
 
+        // Key3 does nothing
+        case Keypad_Key3:
+            return true;
+    }
+
+    return false;
 }

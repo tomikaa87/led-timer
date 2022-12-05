@@ -26,45 +26,91 @@
 #include "UI.h"
 
 #include "MainScreen.h"
+#include "SettingsScreen.h"
 
 #include "stdbool.h"
 #include "stdio.h"
 
+/*
+ *  Screen width = 21 chars (128 / (5 + 1))
+ *
+ *      Main screen
+ *
+ *      [K 1]   [K 2]   [K 3]
+ *     [123456789012345678901]
+ *
+ *      STNGS |  OFF  |  ---
+ *      brightness      power
+ *        CLOCK    BULB
+ *        CLOCK    BULB
+ *        CLOCK    BULB
+ *      ...Segment indicator..
+ *      ...Segment bar........
+ *      ...Hour numbers.......
+ *
+ *  Main screen key mapping:
+ *      Key1: show Settings screen
+ *      Key2: turn the output ON/OFF
+ *      Key3: does nothing
+ *
+ *
+ *      Settings screen (default state)
+ *
+ *      [K 1]   [K 2]   [K 3]
+ *     [123456789012345678901]
+ *
+ *      EXIT  |  SEL  |  NEXT
+ *      SETTING NAME      n/m
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *
+ *  Settings screen (default) mapping:
+ *      Key1: exit to main scren
+ *
+ */
+
 typedef enum {
-    UI_Screen_Main
+    UI_Screen_Main,
+    UI_Screen_Settings
 } UI_Screen;
 
 static struct UIContext {
     UI_Screen screen;
-    bool redrawScreen;
     uint8_t lastKeyCode;
     Clock_Ticks keyRepeatTimer;
     bool displayOn;
     Clock_Ticks displayTimer;
     Clock_Ticks updateTimer;
     bool forceUpdate;
+    bool lastKeyHandled;
 } context = {
     .screen = UI_Screen_Main,
-    .redrawScreen = true,
     .lastKeyCode = 0,
     .keyRepeatTimer = 0,
     .displayOn = true,
     .updateTimer = 0,
-    .forceUpdate = true
+    .forceUpdate = true,
+    .lastKeyHandled = false
 };
 
-static void updateScreen()
+static void updateScreen(const bool redraw)
 {
     switch (context.screen) {
         case UI_Screen_Main:
-            MainScreen_update(context.redrawScreen);
+            MainScreen_update(redraw);
+            break;
+
+        case UI_Screen_Settings:
+            SettingsScreen_update(redraw);
             break;
 
         default:
             break;
     }
-
-    context.redrawScreen = false;
 }
 
 static bool wakeUpDisplay()
@@ -75,11 +121,10 @@ static bool wakeUpDisplay()
         puts("UI:wakeUpDisplay\r\n");
 
         context.displayOn = true;
-        context.redrawScreen = true;
 
         SSD1306_setDisplayEnabled(true);
 
-        updateScreen();
+        updateScreen(true);
 
         return true;
     }
@@ -87,57 +132,80 @@ static bool wakeUpDisplay()
     return false;
 }
 
-static void handleKeyPress(const uint8_t keyCode)
+static void switchToScreen(const UI_Screen screen)
 {
-    if (keyCode != 0) {
-        System_onWakeUp(System_WakeUpReason_KeyPress);
+    context.screen = screen;
+    SSD1306_clear();
+    updateScreen(true);
+}
 
-        if (wakeUpDisplay()) {
-            return;
-        }
+static bool handleKeyPress(const uint8_t keyCode, const bool hold)
+{
+    printf("UI:handleKey:%u %u\r\n", keyCode, hold);
+
+    System_onWakeUp(System_WakeUpReason_KeyPress);
+
+    if (wakeUpDisplay()) {
+        return true;
     }
 
-    switch (keyCode) {
-        case Keypad_Key1:
-            printf("UI:KP:1\r\n");
+    bool handled = false;
+
+    switch (context.screen) {
+        case UI_Screen_Main:
+            if (!MainScreen_handleKeyPress(keyCode, hold)) {
+                // Key1 -> Show Settings
+                if (keyCode == Keypad_Key1) {
+                    puts("UI:ShowSettings\r\n");
+                    handled = true;
+                    switchToScreen(UI_Screen_Settings);
+                }
+            }
             break;
 
-        case Keypad_Key2:
-            printf("UI:KP:2\r\n");
-            break;
-
-        case Keypad_Key3:
-            printf("UI:KP:3\r\n");
+        case UI_Screen_Settings:
+            if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
+                // Key1 -> Back to Main
+                if (keyCode == Keypad_Key1) {
+                    puts("UI:BackToMain\r\n");
+                    handled = true;
+                    switchToScreen(UI_Screen_Main);
+                }
+            }
             break;
 
         default:
             break;
     }
+
+    return handled;
 }
 
 void UI_init()
 {
-    context.redrawScreen = true;
     context.displayOn = true;
     context.displayTimer = Clock_getFastTicks();
-    updateScreen();
+    updateScreen(true);
 }
 
-void UI_task(const uint8_t keyCode)
+bool UI_task(const uint8_t keyCode)
 {
-    if (keyCode != context.lastKeyCode) {
-        context.lastKeyCode = keyCode;
-        context.keyRepeatTimer = Clock_getFastTicks();
+    if (keyCode != 0) {
+        if (keyCode != context.lastKeyCode) {
+            context.lastKeyCode = keyCode;
+            context.keyRepeatTimer = Clock_getFastTicks();
+            context.lastKeyHandled = handleKeyPress(keyCode & 0b111, false);
+        }
 
-        handleKeyPress(keyCode & 0b111);
-    }
-
-    if (
-        (keyCode & Keypad_Hold)
-        && Clock_getElapsedFastTicks(context.keyRepeatTimer) >= Config_UI_KeyRepeatIntervalTicks
-    ) {
-        context.keyRepeatTimer = Clock_getFastTicks();
-        handleKeyPress(keyCode & 0b111);
+        if (
+            (keyCode & Keypad_Hold)
+            && Clock_getElapsedFastTicks(context.keyRepeatTimer) >= Config_UI_KeyRepeatIntervalTicks
+        ) {
+            context.keyRepeatTimer = Clock_getFastTicks();
+            context.lastKeyHandled = handleKeyPress(keyCode & 0b111, true);
+        }
+    } else {
+        context.lastKeyHandled = false;
     }
 
     if (
@@ -156,8 +224,11 @@ void UI_task(const uint8_t keyCode)
     ) {
         context.forceUpdate = false;
         context.updateTimer = Clock_getFastTicks();
-        updateScreen();
+        updateScreen(false);
     }
+
+    // Key events only propagate from the Main screen
+    return context.lastKeyHandled || context.screen != UI_Screen_Main;
 }
 
 void UI_onSystemWakeUp()

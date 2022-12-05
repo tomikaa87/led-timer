@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 enum
 {
     Keypad_Key1 = (1 << 0),

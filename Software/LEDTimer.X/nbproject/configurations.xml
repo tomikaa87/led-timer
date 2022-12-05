@@ -35,6 +35,7 @@
       <itemPath>MainScreen.h</itemPath>
       <itemPath>Settings.h</itemPath>
       <itemPath>Config.h</itemPath>
+      <itemPath>SettingsScreen.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -73,6 +74,7 @@
       <itemPath>UI.c</itemPath>
       <itemPath>MainScreen.c</itemPath>
       <itemPath>Settings.c</itemPath>
+      <itemPath>SettingsScreen.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -92,7 +94,7 @@
         <targetDevice>PIC16F1825</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.40</languageToolchainVersion>
         <platform>3</platform>

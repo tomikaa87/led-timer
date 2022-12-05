@@ -15,13 +15,41 @@
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
 
     Author: Tamas Karpati
-    Created on 2022-12-03
+    Created on 2022-12-05
 */
 
-#pragma once
+#include "Keypad.h"
+#include "SettingsScreen.h"
+#include "Text.h"
 
-#include <stdbool.h>
-#include <stdint.h>
+static struct SettingsScreenContext {
 
-void MainScreen_update(bool redraw);
-bool MainScreen_handleKeyPress(uint8_t keyCode, bool hold);
+} context = {
+
+};
+
+static void drawKeypadHelpBar()
+{
+    Text_draw("EXIT", 0, 0, 0, false);
+}
+
+void SettingsScreen_update(const bool redraw)
+{
+    if (redraw) {
+        drawKeypadHelpBar();
+    }
+}
+
+bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
+{
+    switch (keyCode) {
+        case Keypad_Key1:
+            break;
+
+        case Keypad_Key2:
+        case Keypad_Key3:
+            return true;
+    }
+
+    return false;
+}

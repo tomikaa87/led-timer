@@ -15,7 +15,7 @@
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
 
     Author: Tamas Karpati
-    Created on 2022-12-03
+    Created on 2022-12-05
 */
 
 #pragma once
@@ -23,5 +23,5 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void MainScreen_update(bool redraw);
-bool MainScreen_handleKeyPress(uint8_t keyCode, bool hold);
+void SettingsScreen_update(bool redraw);
+bool SettingsScreen_handleKeyPress(uint8_t keyCode, const bool hold);

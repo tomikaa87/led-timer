@@ -20,9 +20,28 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
+/**
+ * Initializes the display and the internal logic.
+ */
 void UI_init(void);
-void UI_task(uint8_t keyCode);
+
+/**
+ * Runs the essential tasks of the UI, including handling key events.
+ * @param keyCode Current key code read from the keypad.
+ * @return False if the key event was not handled and should be done by the caller
+ */
+bool UI_task(uint8_t keyCode);
+
+/**
+ * Runs the tasks that should be done when the system wakes up from sleep.
+ */
 void UI_onSystemWakeUp(void);
+
+/**
+ * Runs the tasks that should be done when the power input changes from
+ * main input to the backup battery or vica-versa.
+ */
 void UI_onPowerInputChanged(void);

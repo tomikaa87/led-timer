@@ -62,6 +62,10 @@ static uint8_t scanKeys()
     return scanCode;
 }
 
+// TODO implement the keypad handling logic used in pic-thermostat
+// The current implementation makes hard to handle repeated presses
+// of the same key
+
 void Keypad_init()
 {
 }
