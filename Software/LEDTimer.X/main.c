@@ -45,6 +45,7 @@
 #include "Clock.h"
 #include "Graphics.h"
 #include "Keypad.h"
+#include "OutputController.h"
 #include "SSD1306.h"
 #include "System.h"
 #include "Text.h"
@@ -152,10 +153,13 @@ void main(void)
             // Key2 -> Turn the output ON/OFF
             if (keyCode == Keypad_Key2) {
                 puts("M:OutToggle");
+
+                OutputController_toggle();
             }
         }
 
         UI_task();
+        OutputController_task();
 
         // This must be the last task to handle sleep mode properly
         System_TaskResult systemTaskResult = System_task();

@@ -187,6 +187,8 @@ bool UI_keyEvent(uint8_t keyCode)
         return true;
     }
 
+    context.forceUpdate = true;
+
     bool handled = false;
 
     switch (context.screen) {

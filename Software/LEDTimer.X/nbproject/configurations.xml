@@ -36,6 +36,7 @@
       <itemPath>Settings.h</itemPath>
       <itemPath>Config.h</itemPath>
       <itemPath>SettingsScreen.h</itemPath>
+      <itemPath>OutputController.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -75,6 +76,8 @@
       <itemPath>MainScreen.c</itemPath>
       <itemPath>Settings.c</itemPath>
       <itemPath>SettingsScreen.c</itemPath>
+      <itemPath>OutputController.c</itemPath>
+      <itemPath>Types.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -220,6 +223,7 @@
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

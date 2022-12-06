@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Author: Tamas Karpati
     Created on 2022-11-29
 */
@@ -23,3 +23,13 @@
 #include <stdint.h>
 
 typedef uint8_t ScheduleSegmentData[6];
+
+/**
+ * Calculates the segment index by the elapsed minutes from midnight.
+ * The index can be used to address the corresponding bit in the
+ * schedule segment data or drawing the schedule segment indicator to the
+ * right position.
+ * @param minutes Elapsed minutes from midnight.
+ * @return Segment index from 0 to 47.
+ */
+inline uint8_t Types_calculateScheduleSegmentIndex(uint16_t minutes);

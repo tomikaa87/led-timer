@@ -25,6 +25,7 @@
 #include "System.h"
 #include "Text.h"
 #include "Keypad.h"
+#include "OutputController.h"
 
 #include <stdio.h>
 
@@ -36,9 +37,20 @@ static struct MainScreenContext {
     .onBatteryPower = false
 };
 
+inline static void drawOutputToggleKeyHelp()
+{
+    Text_draw(
+        OutputController_isOutputEnabled()
+            ? "OFF"
+            : "ON ",
+        0, 54, 0, false
+    );
+}
+
 static void drawKeypadHelpBar()
 {
-    Text_draw("STNGS :  OFF  :      ", 0, 0, 0, false);
+    Text_draw("STNGS :       :      ", 0, 0, 0, false);
+    drawOutputToggleKeyHelp();
 }
 
 static void drawClock()
@@ -165,14 +177,15 @@ static void drawPowerIndicator()
 
 void MainScreen_update(const bool redraw)
 {
-    drawClock();
-    drawScheduleSegmentIndicator(redraw);
-
     if (redraw) {
         drawKeypadHelpBar();
-        drawBulbIcon(true);
         drawScheduleBar();
     }
+
+    drawBulbIcon(OutputController_isOutputEnabled());
+    drawClock();
+    drawScheduleSegmentIndicator(redraw);
+    drawOutputToggleKeyHelp();
 
     if (
         redraw

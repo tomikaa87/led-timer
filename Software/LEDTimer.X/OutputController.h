@@ -15,39 +15,31 @@
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
 
     Author: Tamas Karpati
-    Created on 2022-12-02
+    Created on 2022-12-06
 */
 
 #pragma once
 
 #include <stdbool.h>
-#include <stdint.h>
 
 /**
- * Initializes the display and the internal logic.
+ * Loads the the current settings from the persistent storage
  */
-void UI_init(void);
+void OutputController_loadSettings(void);
 
 /**
- * Runs the essential tasks of the UI, including handling timers and periodic
- * screen updates.
+ * Toggles the output temporarily without altering the schedule.
  */
-void UI_task(void);
+void OutputController_toggle(void);
 
 /**
- * Handles keypad key presses
- * @param keyCode Current key code read from the keypad.
- * @return False if the key event was not handled and should be done by the caller
+ * Runs the essential tasks, like switching the output based on
+ * the saved schedule.
  */
-bool UI_keyEvent(uint8_t keyCode);
+void OutputController_task(void);
 
 /**
- * Runs the tasks that should be done when the system wakes up from sleep.
+ * Returns the current state of the output.
+ * @return True if the output is enabled
  */
-void UI_onSystemWakeUp(void);
-
-/**
- * Runs the tasks that should be done when the power input changes from
- * main input to the backup battery or vica-versa.
- */
-void UI_onPowerInputChanged(void);
+inline bool OutputController_isOutputEnabled(void);
