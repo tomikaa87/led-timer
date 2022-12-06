@@ -29,11 +29,17 @@
 void UI_init(void);
 
 /**
- * Runs the essential tasks of the UI, including handling key events.
+ * Runs the essential tasks of the UI, including handling timers and periodic
+ * screen updates.
+ */
+void UI_task();
+
+/**
+ * Handles keypad key presses
  * @param keyCode Current key code read from the keypad.
  * @return False if the key event was not handled and should be done by the caller
  */
-bool UI_task(uint8_t keyCode);
+bool UI_keyEvent(uint8_t keyCode);
 
 /**
  * Runs the tasks that should be done when the system wakes up from sleep.

@@ -80,21 +80,15 @@ typedef enum {
 
 static struct UIContext {
     UI_Screen screen;
-    uint8_t lastKeyCode;
-    Clock_Ticks keyRepeatTimer;
     bool displayOn;
     Clock_Ticks displayTimer;
     Clock_Ticks updateTimer;
     bool forceUpdate;
-    bool lastKeyHandled;
 } context = {
     .screen = UI_Screen_Main,
-    .lastKeyCode = 0,
-    .keyRepeatTimer = 0,
     .displayOn = true,
     .updateTimer = 0,
-    .forceUpdate = true,
-    .lastKeyHandled = false
+    .forceUpdate = true
 };
 
 static void updateScreen(const bool redraw)
@@ -139,9 +133,54 @@ static void switchToScreen(const UI_Screen screen)
     updateScreen(true);
 }
 
-static bool handleKeyPress(const uint8_t keyCode, const bool hold)
+void UI_init()
 {
-    printf("UI:handleKey:%u %u\r\n", keyCode, hold);
+    context.displayOn = true;
+    context.displayTimer = Clock_getFastTicks();
+    updateScreen(true);
+}
+
+void UI_task()
+{
+    if (context.displayOn) {
+        // Update the contents of the current screen periodically
+        if (
+            context.forceUpdate
+            || Clock_getElapsedFastTicks(context.updateTimer)
+                >= Config_UI_UpdateIntervalTicks
+        ) {
+            puts("UI:update");
+            puts(context.forceUpdate ? ",forced\r\n" : "\r\n");
+
+            context.forceUpdate = false;
+            context.updateTimer = Clock_getFastTicks();
+            updateScreen(false);
+        }
+
+        // Turn off the display after the specified time
+        if (
+            Clock_getElapsedFastTicks(context.displayTimer)
+                >= Config_UI_DisplayTimeoutTicks
+        ) {
+            puts("UI:displayOff\r\n");
+
+            context.displayOn = false;
+            SSD1306_setDisplayEnabled(false);
+        }
+    }
+}
+
+bool UI_keyEvent(uint8_t keyCode)
+{
+    // Stop propagating to avoid executing more code in main()
+    if (keyCode == 0) {
+        return true;
+    }
+
+    bool hold = !!(keyCode & Keypad_Hold);
+    keyCode = keyCode & (Keypad_Key1 | Keypad_Key2 | Keypad_Key3);
+
+    printf("UI:keyEvent:%u %u\r\n", keyCode, hold);
 
     System_onWakeUp(System_WakeUpReason_KeyPress);
 
@@ -179,56 +218,6 @@ static bool handleKeyPress(const uint8_t keyCode, const bool hold)
     }
 
     return handled;
-}
-
-void UI_init()
-{
-    context.displayOn = true;
-    context.displayTimer = Clock_getFastTicks();
-    updateScreen(true);
-}
-
-bool UI_task(const uint8_t keyCode)
-{
-    if (keyCode != 0) {
-        if (keyCode != context.lastKeyCode) {
-            context.lastKeyCode = keyCode;
-            context.keyRepeatTimer = Clock_getFastTicks();
-            context.lastKeyHandled = handleKeyPress(keyCode & 0b111, false);
-        }
-
-        if (
-            (keyCode & Keypad_Hold)
-            && Clock_getElapsedFastTicks(context.keyRepeatTimer) >= Config_UI_KeyRepeatIntervalTicks
-        ) {
-            context.keyRepeatTimer = Clock_getFastTicks();
-            context.lastKeyHandled = handleKeyPress(keyCode & 0b111, true);
-        }
-    } else {
-        context.lastKeyHandled = false;
-    }
-
-    if (
-        context.displayOn
-        && Clock_getElapsedFastTicks(context.displayTimer) >= Config_UI_DisplayTimeoutTicks
-    ) {
-        context.displayOn = false;
-        SSD1306_setDisplayEnabled(false);
-    }
-
-    if (
-        (
-            context.displayOn
-            && Clock_getElapsedFastTicks(context.updateTimer) >= Config_UI_UpdateIntervalTicks
-        ) || context.forceUpdate
-    ) {
-        context.forceUpdate = false;
-        context.updateTimer = Clock_getFastTicks();
-        updateScreen(false);
-    }
-
-    // Key events only propagate from the Main screen
-    return context.lastKeyHandled || context.screen != UI_Screen_Main;
 }
 
 void UI_onSystemWakeUp()

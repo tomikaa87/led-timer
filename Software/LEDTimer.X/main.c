@@ -132,13 +132,11 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
-    uint8_t lastKeyCode = 0;
-
     while (1)
     {
         uint8_t keyCode = Keypad_task();
-#if 0
-        if (keyCode != lastKeyCode) {
+#if 1
+        if (keyCode != 0) {
             printf(
                 "Keys(%02X): %1s %1s %1s %s\r\n",
                 keyCode,
@@ -150,16 +148,14 @@ void main(void)
         }
 #endif
 
-        if (!UI_task(keyCode)) {
-            if (lastKeyCode != keyCode) {
-                // Key2 -> Turn the output ON/OFF
-                if (keyCode == Keypad_Key2) {
-                    puts("M:OutToggle\r\n");
-                }
+        if (!UI_keyEvent(keyCode)) {
+            // Key2 -> Turn the output ON/OFF
+            if (keyCode == Keypad_Key2) {
+                puts("M:OutToggle\r\n");
             }
         }
 
-        lastKeyCode = keyCode;
+        UI_task();
 
         // This must be the last task to handle sleep mode properly
         System_TaskResult systemTaskResult = System_task();
