@@ -57,5 +57,7 @@
  */
 #define Config_Keypad_ScanSampleCount                       (3)
 #define Config_Keypad_ScanSamplingDelayUs                   (1)
-#define Config_Keypad_HoldTimeoutTicks                      (50)
+#define Config_Keypad_DelayAfterKeysChangedTicks            (10)
+#define Config_Keypad_RepeatTimeoutTicks                    (50)
+#define Config_Keypad_RepeatIntervalTicks                   (10)
 #define Config_Keypad_DeBounceCoolDownTicks                 (5)

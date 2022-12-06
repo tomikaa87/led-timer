@@ -20,6 +20,7 @@
 
 #include "Clock.h"
 #include "Config.h"
+#include "Keypad.h"
 
 #include "mcc_generated_files/device_config.h"
 #include "mcc_generated_files/pin_manager.h"
@@ -33,17 +34,20 @@ static struct KeypadContext
     enum {
         State_Idle,
         State_KeyPressed,
-        State_KeyHeld
+        State_KeyRepeat
     } state;
 
-    Clock_Ticks timerTicks;
+    Clock_Ticks pressTimerTicks;
+    Clock_Ticks delayTimerTicks;
+    Clock_Ticks delayTimeoutTicks;
+    
     uint8_t lastScanCode;
-    bool coolDown;
 } context = {
     .state = State_Idle,
-    .timerTicks = 0,
-    .lastScanCode = 0,
-    .coolDown = false
+    .pressTimerTicks = 0,
+    .delayTimerTicks = 0,
+    .delayTimeoutTicks = 0,
+    .lastScanCode = 0
 };
 
 static uint8_t scanKeys()
@@ -76,19 +80,20 @@ uint8_t Keypad_task()
 
     // Simple de-bouncing logic
     if (
-        context.coolDown
-        && Clock_getElapsedFastTicks(context.timerTicks) < Config_Keypad_DeBounceCoolDownTicks
+        context.delayTimeoutTicks != 0
+        && Clock_getElapsedFastTicks(context.delayTimerTicks)
+            < context.delayTimeoutTicks
     ) {
         return 0;
     }
-
-    context.coolDown = false;
+    
+    context.delayTimeoutTicks = 0;
 
     switch (context.state) {
         case State_Idle: {
             if (scanCode != 0) {
                 context.state = State_KeyPressed;
-                context.timerTicks = Clock_getFastTicks();
+                context.pressTimerTicks = Clock_getFastTicks();
                 context.lastScanCode = scanCode;
                 return scanCode;
             }
@@ -99,27 +104,32 @@ uint8_t Keypad_task()
         case State_KeyPressed: {
             if (scanCode != context.lastScanCode) {
                 context.state = State_Idle;
-                context.coolDown = true;
-                context.timerTicks = Clock_getFastTicks();
+                context.delayTimerTicks = Clock_getFastTicks();
+                context.delayTimeoutTicks = Config_Keypad_DelayAfterKeysChangedTicks;
             } else {
-                if (Clock_getElapsedFastTicks(context.timerTicks) >= Config_Keypad_HoldTimeoutTicks) {
-                    context.state = State_KeyHeld;
-                    return scanCode | (1 << 7);
-                } else {
-                    return scanCode;
+                if (
+                    Clock_getElapsedFastTicks(context.pressTimerTicks)
+                        >= Config_Keypad_RepeatTimeoutTicks
+                ) {
+                    context.state = State_KeyRepeat;
+                    context.delayTimerTicks = Clock_getFastTicks();
+                    context.delayTimeoutTicks = Config_Keypad_RepeatIntervalTicks;
+                    return scanCode | Keypad_Hold;
                 }
             }
 
             break;
         }
 
-        case State_KeyHeld: {
+        case State_KeyRepeat: {
             if (scanCode != context.lastScanCode) {
                 context.state = State_Idle;
-                context.coolDown = true;
-                context.timerTicks = Clock_getFastTicks();
+                context.delayTimerTicks = Clock_getFastTicks();
+                context.delayTimeoutTicks = Config_Keypad_DelayAfterKeysChangedTicks;
             } else {
-                return scanCode | (1 << 7);
+                context.delayTimerTicks = Clock_getFastTicks();
+                context.delayTimeoutTicks = Config_Keypad_RepeatIntervalTicks;
+                return scanCode | Keypad_Hold;
             }
 
             break;
