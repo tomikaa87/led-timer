@@ -151,7 +151,7 @@ void main(void)
         if (!UI_keyEvent(keyCode)) {
             // Key2 -> Turn the output ON/OFF
             if (keyCode == Keypad_Key2) {
-                puts("M:OutToggle\r\n");
+                puts("M:OutToggle");
             }
         }
 

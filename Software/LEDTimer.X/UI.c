@@ -112,7 +112,7 @@ static bool wakeUpDisplay()
     context.displayTimer = Clock_getFastTicks();
 
     if (!context.displayOn) {
-        puts("UI:wakeUpDisplay\r\n");
+        puts("UI:wakeUp");
 
         context.displayOn = true;
 
@@ -149,8 +149,7 @@ void UI_task()
             || Clock_getElapsedFastTicks(context.updateTimer)
                 >= Config_UI_UpdateIntervalTicks
         ) {
-            puts("UI:update");
-            puts(context.forceUpdate ? ",forced\r\n" : "\r\n");
+            puts(context.forceUpdate ? ",UI:forcedUpdate" : "UI:update");
 
             context.forceUpdate = false;
             context.updateTimer = Clock_getFastTicks();
@@ -162,7 +161,7 @@ void UI_task()
             Clock_getElapsedFastTicks(context.displayTimer)
                 >= Config_UI_DisplayTimeoutTicks
         ) {
-            puts("UI:displayOff\r\n");
+            puts("UI:displayOff");
 
             context.displayOn = false;
             SSD1306_setDisplayEnabled(false);
@@ -195,7 +194,7 @@ bool UI_keyEvent(uint8_t keyCode)
             if (!MainScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Show Settings
                 if (keyCode == Keypad_Key1) {
-                    puts("UI:ShowSettings\r\n");
+                    puts("UI:ShowSettings");
                     handled = true;
                     switchToScreen(UI_Screen_Settings);
                 }
@@ -206,7 +205,7 @@ bool UI_keyEvent(uint8_t keyCode)
             if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Back to Main
                 if (keyCode == Keypad_Key1) {
-                    puts("UI:BackToMain\r\n");
+                    puts("UI:BackToMain");
                     handled = true;
                     switchToScreen(UI_Screen_Main);
                 }
@@ -222,7 +221,7 @@ bool UI_keyEvent(uint8_t keyCode)
 
 void UI_onSystemWakeUp()
 {
-    puts("UI:wakeUp\r\n");
+    puts("UI:wakeUp");
 
     if (System_getLastWakeUpReason() == System_WakeUpReason_PowerInputChanged) {
         UI_onPowerInputChanged();
@@ -231,7 +230,7 @@ void UI_onSystemWakeUp()
 
 void UI_onPowerInputChanged()
 {
-    puts("UI:pwrChanged\r\n");
+    puts("UI:pwrChanged");
 
     wakeUpDisplay();
     context.forceUpdate = true;
