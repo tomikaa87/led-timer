@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef uint8_t ScheduleSegmentData[6];
@@ -33,3 +34,14 @@ typedef uint8_t ScheduleSegmentData[6];
  * @return Segment index from 0 to 47.
  */
 inline uint8_t Types_calculateScheduleSegmentIndex(uint16_t minutes);
+
+bool Types_getScheduleSegmentBit(
+    const ScheduleSegmentData data,
+    uint8_t segmentIndex
+);
+
+void Types_setScheduleSegmentBit(
+    ScheduleSegmentData data,
+    uint8_t segmentIndex,
+    bool value
+);

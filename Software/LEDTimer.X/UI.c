@@ -149,7 +149,7 @@ void UI_task()
             || Clock_getElapsedFastTicks(context.updateTimer)
                 >= Config_UI_UpdateIntervalTicks
         ) {
-            puts(context.forceUpdate ? ",UI:forcedUpdate" : "UI:update");
+            puts(context.forceUpdate ? "UI:forcedUpdate" : "UI:update");
 
             context.forceUpdate = false;
             context.updateTimer = Clock_getFastTicks();

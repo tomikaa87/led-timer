@@ -28,3 +28,29 @@ inline uint8_t Types_calculateScheduleSegmentIndex(const uint16_t minutes)
 
     return (uint8_t)(minutes / 30);
 }
+
+bool Types_getScheduleSegmentBit(
+    const ScheduleSegmentData data,
+    const uint8_t segmentIndex
+) {
+    uint8_t bitIndex = segmentIndex & 0b111;
+    uint8_t byteIndex = segmentIndex >> 3;
+
+    return data[byteIndex] & (1 << bitIndex);
+}
+
+void Types_setScheduleSegmentBit(
+    ScheduleSegmentData data,
+    const uint8_t segmentIndex,
+    const bool value
+) {
+    uint8_t bitIndex = segmentIndex & 0b111;
+    uint8_t byteIndex = segmentIndex >> 3;
+    uint8_t mask = (uint8_t)(1 << bitIndex);
+
+    if (value) {
+        data[byteIndex] |= mask;
+    } else {
+        data[byteIndex] &= ~mask;
+    }
+}

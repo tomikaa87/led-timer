@@ -46,10 +46,10 @@ static inline bool getStateFromSchedule()
         Clock_getMinutesSinceMidnight()
     );
 
-    uint8_t bitIndex = segmentIndex & 0b111;
-    uint8_t byteIndex = segmentIndex >> 3;
-
-    return Settings_data.scheduler.data[byteIndex] & (1 << bitIndex);
+    return Types_getScheduleSegmentBit(
+        Settings_data.scheduler.data,
+        segmentIndex
+    );
 }
 
 static inline void updateOutputState()
