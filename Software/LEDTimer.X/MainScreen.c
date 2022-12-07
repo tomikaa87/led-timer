@@ -21,6 +21,7 @@
 #include "Clock.h"
 #include "Graphics.h"
 #include "MainScreen.h"
+#include "Settings.h"
 #include "SSD1306.h"
 #include "System.h"
 #include "Text.h"
@@ -66,16 +67,14 @@ static void drawClock()
 
 static void drawScheduleBar()
 {
-    static const ScheduleSegmentData ssd = {
-        0, 0, 0, 0, 0, 0
-    };
-
-    Graphics_drawScheduleBar(ssd, false);
+    Graphics_drawScheduleBar(Settings_data.scheduler.data, false);
 }
 
 static void drawScheduleSegmentIndicator(const bool redraw)
 {
-    uint8_t segmentIndex = (uint8_t)(Clock_getMinutesSinceMidnight() / 30);
+    uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
+        Clock_getMinutesSinceMidnight()
+    );
 
     if (context.scheduleSegmentIndex != segmentIndex || redraw) {
         context.scheduleSegmentIndex = segmentIndex;

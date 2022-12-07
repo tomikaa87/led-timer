@@ -25,9 +25,7 @@
 /**
  * Settings
  */
-#define Config_Settings_ScheduleDataBaseAddress             (0)
-#define Config_Settings_ScheduleDataSize                    (sizeof(ScheduleSegmentData))
-#define Config_Settings_ScheduleDataCheksumAddress          (Config_Settings_ScheduleDataBaseAddress + Config_Settings_ScheduleDataSize)
+#define Config_Settings_DataBaseAddress                     (0)
 
 /**
  * System

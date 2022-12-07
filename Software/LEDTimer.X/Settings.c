@@ -24,6 +24,10 @@
 
 #include "mcc_generated_files/memory.h"
 
+#include <stdio.h>
+
+SettingsData Settings_data;
+
 static void saveData(
     uint8_t address,
     const uint8_t* data,
@@ -44,47 +48,89 @@ static void loadData(
     }
 }
 
+static uint8_t calculateCRC8(const uint8_t* data, uint8_t length)
+{
+#define Generator   0x07u
+#define Init        0u
+
+    uint8_t crc = Init;
+
+    while (length--) {
+        crc ^= *data++;
+
+        for (uint8_t i = 0; i < 8; ++i) {
+            if (crc & 0x80) {
+                crc = (uint8_t)(crc << 1) ^ Generator;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+
+    return crc;
+}
+
 void Settings_init()
 {
-
+    Settings_loadDefaults();
 }
 
-inline void Settings_saveScheduleData(const ScheduleSegmentData data)
+void Settings_loadDefaults()
 {
-    saveData(
-        Config_Settings_ScheduleDataBaseAddress,
-        (const uint8_t*)data,
-        Config_Settings_ScheduleDataSize
-    );
+    SettingsData data = {
+        ._checksum = 0,
+        .scheduler = {
+            .data = { 0 },
+            .enabled = false
+        },
+        .output = {
+            .brightness = 100
+        }
+    };
+
+    Settings_data = data;
 }
 
-inline void Settings_loadScheduleData(ScheduleSegmentData data)
+void Settings_load()
 {
-    loadData(
-        Config_Settings_ScheduleDataBaseAddress,
-        (uint8_t*)data,
-        Config_Settings_ScheduleDataSize
-    );
-}
-
-inline void Settings_saveScheduleDataChecksum(const uint8_t checksum)
-{
-    saveData(
-        Config_Settings_ScheduleDataCheksumAddress,
-        &checksum,
-        1
-    );
-}
-
-inline uint8_t Settings_loadScheduleDataChecksum()
-{
-    uint8_t checksum = 0;
+    puts("STNGS:load");
 
     loadData(
-        Config_Settings_ScheduleDataCheksumAddress,
-        &checksum,
-        1
+        Config_Settings_DataBaseAddress,
+        (uint8_t*)&Settings_data,
+        sizeof(SettingsData)
     );
 
-    return checksum;
+    uint8_t loadedChecksum = Settings_data._checksum;
+
+    Settings_data._checksum = 0;
+    uint8_t calculatedChecksum = calculateCRC8(
+        (uint8_t*)&Settings_data,
+        sizeof(SettingsData)
+    );
+
+    if (loadedChecksum != calculatedChecksum) {
+        puts("STNGS:checksumError");
+        Settings_loadDefaults();
+    }
+}
+
+void Settings_save()
+{
+    puts("STNGS:load");
+
+    Settings_data._checksum = 0;
+
+    uint8_t checksum = calculateCRC8(
+        (uint8_t*)&Settings_data,
+        sizeof(SettingsData)
+    );
+
+    Settings_data._checksum = checksum;
+
+    saveData(
+        Config_Settings_DataBaseAddress,
+        (uint8_t*)&Settings_data,
+        sizeof(SettingsData)
+    );
 }

@@ -46,6 +46,7 @@
 #include "Graphics.h"
 #include "Keypad.h"
 #include "OutputController.h"
+#include "Settings.h"
 #include "SSD1306.h"
 #include "System.h"
 #include "Text.h"
@@ -112,6 +113,8 @@ void main(void)
 
     System_init();
     Keypad_init();
+    Settings_init();
+    Settings_load();
     UI_init();
 
     SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);

@@ -23,11 +23,6 @@
 #include <stdbool.h>
 
 /**
- * Loads the the current settings from the persistent storage
- */
-void OutputController_loadSettings(void);
-
-/**
  * Toggles the output temporarily without altering the schedule.
  */
 void OutputController_toggle(void);

@@ -22,9 +22,28 @@
 
 #include "Types.h"
 
-void Settings_init(void);
+#include <stdbool.h>
+#include <stdint.h>
 
-inline void Settings_saveScheduleData(const ScheduleSegmentData data);
-inline void Settings_loadScheduleData(ScheduleSegmentData data);
-inline void Settings_saveScheduleDataChecksum(uint8_t checksum);
-inline uint8_t Settings_loadScheduleDataChecksum(void);
+typedef struct
+{
+    uint8_t _checksum;
+
+    struct Schedule
+    {
+        ScheduleSegmentData data;
+        bool enabled;
+    } scheduler;
+
+    struct Output
+    {
+        uint8_t brightness;
+    } output;
+} SettingsData;
+
+extern SettingsData Settings_data;
+
+void Settings_init(void);
+void Settings_loadDefaults(void);
+void Settings_load(void);
+void Settings_save(void);

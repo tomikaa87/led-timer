@@ -31,12 +31,10 @@
 
 static struct OutputControllerContext
 {
-    ScheduleSegmentData scheduleData;
     bool outputEnabled;
     bool outputShouldBeEnabled;
     uint8_t brightness;
 } context = {
-    .scheduleData = { 0 },
     .outputEnabled = false,
     .outputShouldBeEnabled = false,
     .brightness = 255
@@ -51,7 +49,7 @@ static inline bool getStateFromSchedule()
     uint8_t bitIndex = segmentIndex & 0b111;
     uint8_t byteIndex = segmentIndex >> 3;
 
-    return context.scheduleData[byteIndex] & (1 << bitIndex);
+    return Settings_data.scheduler.data[byteIndex] & (1 << bitIndex);
 }
 
 static inline void updateOutputState()
@@ -63,11 +61,6 @@ static inline void updateOutputState()
             ? context.brightness
             : 0
     );
-}
-
-void OutputController_loadSetting()
-{
-    Settings_loadScheduleData(context.scheduleData);
 }
 
 void OutputController_toggle()
