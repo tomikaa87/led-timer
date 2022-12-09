@@ -25,6 +25,7 @@
 #include "mcc_generated_files/memory.h"
 
 #include <stdio.h>
+#include <string.h>
 
 SettingsData Settings_data;
 
@@ -77,18 +78,7 @@ void Settings_init()
 
 void Settings_loadDefaults()
 {
-    SettingsData data = {
-        ._checksum = 0,
-        .scheduler = {
-            .data = { 0 },
-            .enabled = false
-        },
-        .output = {
-            .brightness = 100
-        }
-    };
-
-    Settings_data = data;
+    SettingsData_initWithDefaults(&Settings_data);
 }
 
 void Settings_load()
@@ -133,4 +123,11 @@ void Settings_save()
         (uint8_t*)&Settings_data,
         sizeof(SettingsData)
     );
+}
+
+void SettingsData_initWithDefaults(SettingsData* const data)
+{
+    memset(data, 0, sizeof(SettingsData));
+
+    data->output.brightness = 255;
 }

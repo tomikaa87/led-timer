@@ -47,3 +47,5 @@ void Settings_init(void);
 void Settings_loadDefaults(void);
 void Settings_load(void);
 void Settings_save(void);
+
+void SettingsData_initWithDefaults(SettingsData* data);
