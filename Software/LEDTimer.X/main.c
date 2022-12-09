@@ -139,7 +139,7 @@ void main(void)
     while (1)
     {
         uint8_t keyCode = Keypad_task();
-#if 1
+#if 0
         if (keyCode != 0) {
             printf(
                 "Keys(%02X): %1s %1s %1s %s\r\n",
@@ -152,14 +152,7 @@ void main(void)
         }
 #endif
 
-        if (!UI_keyEvent(keyCode)) {
-            // Key2 -> Turn the output ON/OFF
-            if (keyCode == Keypad_Key2) {
-                puts("M:OutToggle");
-
-                OutputController_toggle();
-            }
-        }
+        UI_keyEvent(keyCode);
 
         UI_task();
         OutputController_task();

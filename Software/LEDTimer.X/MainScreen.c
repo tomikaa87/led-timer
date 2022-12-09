@@ -200,8 +200,13 @@ bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
     switch (keyCode) {
         // Propagate to the UI to show the Settings
         case Keypad_Key1:
-        // Propagate to the UI to propagate forward to main() to toggle the output
+            break;
+
         case Keypad_Key2:
+            if (!hold) {
+                OutputController_toggle();
+                return true;
+            }
             break;
 
         // Key3 does nothing

@@ -169,11 +169,11 @@ void UI_task()
     }
 }
 
-bool UI_keyEvent(uint8_t keyCode)
+void UI_keyEvent(uint8_t keyCode)
 {
     // Stop propagating to avoid executing more code in main()
     if (keyCode == 0) {
-        return true;
+        return;
     }
 
     bool hold = !!(keyCode & Keypad_Hold);
@@ -184,12 +184,10 @@ bool UI_keyEvent(uint8_t keyCode)
     System_onWakeUp(System_WakeUpReason_KeyPress);
 
     if (wakeUpDisplay()) {
-        return true;
+        return;
     }
 
     context.forceUpdate = true;
-
-    bool handled = false;
 
     switch (context.screen) {
         case UI_Screen_Main:
@@ -197,7 +195,7 @@ bool UI_keyEvent(uint8_t keyCode)
                 // Key1 -> Show Settings
                 if (keyCode == Keypad_Key1) {
                     puts("UI:ShowSettings");
-                    handled = true;
+                    SettingsScreen_init();
                     switchToScreen(UI_Screen_Settings);
                 }
             }
@@ -208,7 +206,6 @@ bool UI_keyEvent(uint8_t keyCode)
                 // Key1 -> Back to Main
                 if (keyCode == Keypad_Key1) {
                     puts("UI:BackToMain");
-                    handled = true;
                     switchToScreen(UI_Screen_Main);
                 }
             }
@@ -217,8 +214,6 @@ bool UI_keyEvent(uint8_t keyCode)
         default:
             break;
     }
-
-    return handled;
 }
 
 void UI_onSystemWakeUp()
