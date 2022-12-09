@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Author: Tamas Karpati
     Created on 2022-11-29
 */
@@ -22,8 +22,17 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-    
-void Text_draw(
+
+/**
+ * Draws a text with the default font.
+ * @param s Input string
+ * @param line Position of the text from the top, measured in pages (8 pixels)
+ * @param x Position of the text from the left
+ * @param yOffset If > 0, offsets the text in the current line
+ * @param invert Set to True to draw the text inverted
+ * @return Position of the end of the text from the left
+ */
+uint8_t Text_draw(
     const char* s,
     uint8_t line,
     uint8_t x,

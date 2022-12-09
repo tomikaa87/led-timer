@@ -1003,7 +1003,7 @@ static const uint8_t Colon7Seg[Colon7Seg_Pages][Colon7Seg_CharWidth] = {
     }
 };
 
-void Text_draw(
+uint8_t Text_draw(
     const char* const s,
     const uint8_t line,
     uint8_t x,
@@ -1014,27 +1014,19 @@ void Text_draw(
     uint8_t length = (uint8_t)strlen(s);
 
     if (length == 0 || line > 7 || x > 127 || yOffset > 7) {
-        return;
+        return x;
     }
 
     SSD1306_enablePageAddressing();
     SSD1306_setPage(line);
 
     for (uint8_t i = 0; i < length; ++i) {
-        SSD1306_setStartColumn(x);
-        x += ASCIIReduced_CharWidth;
-
-        // Clear the background
-        for (uint8_t j = 0; j < ASCIIReduced_CharSpacing; ++j) {
-            const uint8_t data = 0;
-            SSD1306_sendData(&data, 1, yOffset, invert);
-            ++x;
-        }
-
         // Stop if the next character won't fit
         if (x > SSD1306_LCDWIDTH - 1) {
-            return;
+            return x;
         }
+
+        SSD1306_setStartColumn(x);
 
         char c = (char)toupper(s[i]);
 
@@ -1043,24 +1035,33 @@ void Text_draw(
                 const uint8_t data = 0;
                 SSD1306_sendData(&data, 1, yOffset, invert);
             }
-
-            continue;
-        }
-
-        const uint8_t* charData;
-
-        // If character is not supported, draw placeholder
-        // Since space is dynamically generated, the first character is '!'
-        if ((c - '!') >= ASCIIReduced_CharCount) {
-            charData = ASCIIReducedPlaceholder;
         } else {
-            // Get data for the next character
-            charData = ASCIIReduced[c - '!'];
+            const uint8_t* charData;
+
+            // If character is not supported, draw placeholder
+            // Since space is dynamically generated, the first character is '!'
+            if ((c - '!') >= ASCIIReduced_CharCount) {
+                charData = ASCIIReducedPlaceholder;
+            } else {
+                // Get data for the next character
+                charData = ASCIIReduced[c - '!'];
+            }
+
+            // Send data to the display
+            SSD1306_sendData(charData, ASCIIReduced_CharWidth, yOffset, invert);
         }
 
-        // Send data to the display
-        SSD1306_sendData(charData, ASCIIReduced_CharWidth, yOffset, invert);
+        x += ASCIIReduced_CharWidth;
+
+        // Clear the pixels between the characters
+        for (uint8_t j = 0; j < ASCIIReduced_CharSpacing; ++j) {
+            static const uint8_t data = 0;
+            SSD1306_sendData(&data, 1, yOffset, invert);
+            ++x;
+        }
     }
+
+    return x;
 }
 
 void Text_draw7Seg(

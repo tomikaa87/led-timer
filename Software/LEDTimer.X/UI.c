@@ -71,6 +71,21 @@
  *  Settings screen (default) mapping:
  *      Key1: exit to main scren
  *
+ *
+ *      Settings screen (configuration state)
+ *
+ *      [K 1]   [K 2]   [K 3]
+ *     [123456789012345678901]
+ *
+ *      BACK  |  UP   |  DOWN
+ *      SETTING NAME      n/m
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *      [ setting details   ]
+ *
  */
 
 typedef enum {
