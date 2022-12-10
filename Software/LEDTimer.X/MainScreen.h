@@ -24,4 +24,4 @@
 #include <stdint.h>
 
 void MainScreen_update(bool redraw);
-bool MainScreen_handleKeyPress(uint8_t keyCode, bool hold);
+inline bool MainScreen_handleKeyPress(uint8_t keyCode, bool hold);

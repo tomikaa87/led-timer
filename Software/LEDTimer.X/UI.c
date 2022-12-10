@@ -194,7 +194,9 @@ void UI_keyEvent(uint8_t keyCode)
     bool hold = !!(keyCode & Keypad_Hold);
     keyCode = keyCode & (Keypad_Key1 | Keypad_Key2 | Keypad_Key3);
 
+#if 0
     printf("UI:keyEvent:%u %u\r\n", keyCode, hold);
+#endif
 
     System_onWakeUp(System_WakeUpReason_KeyPress);
 

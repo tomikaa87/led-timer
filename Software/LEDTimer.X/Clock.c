@@ -53,12 +53,12 @@ inline Clock_Ticks Clock_getFastTicks()
     return Clock_interruptContext.fastTicks;
 }
 
-Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)
+inline Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)
 {
     return (Clock_Ticks)abs((int16_t)Clock_interruptContext.ticks - (int16_t)since);
 }
 
-Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
+inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
 {
     return (Clock_Ticks)abs((int16_t)Clock_interruptContext.fastTicks - (int16_t)since);
 }

@@ -25,4 +25,4 @@
 
 void SettingsScreen_init(void);
 void SettingsScreen_update(bool redraw);
-bool SettingsScreen_handleKeyPress(uint8_t keyCode, const bool hold);
+inline bool SettingsScreen_handleKeyPress(uint8_t keyCode, const bool hold);

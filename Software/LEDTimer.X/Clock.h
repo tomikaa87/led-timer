@@ -53,5 +53,5 @@ inline uint8_t Clock_getSeconds(void);
 inline uint16_t Clock_getMinutesSinceMidnight(void);
 inline Clock_Ticks Clock_getTicks(void);
 inline Clock_Ticks Clock_getFastTicks(void);
-Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);
-Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since);
+inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);
+inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since);

@@ -38,3 +38,9 @@ void OutputController_task(void);
  * @return True if the output is enabled
  */
 inline bool OutputController_isOutputEnabled(void);
+
+/**
+ * Forces turn on or off the output based on the current state. If the output
+ * is enabled, this function will update the PWM duty cycle as well.
+ */
+void OutputController_updateState(void);

@@ -33,11 +33,11 @@ static struct OutputControllerContext
 {
     bool outputEnabled;
     bool outputShouldBeEnabled;
-    uint8_t brightness;
+    Clock_Ticks lastOutputStateUpdateTicks;
 } context = {
     .outputEnabled = false,
     .outputShouldBeEnabled = false,
-    .brightness = 255
+    .lastOutputStateUpdateTicks = 0
 };
 
 static inline bool getStateFromSchedule()
@@ -52,42 +52,54 @@ static inline bool getStateFromSchedule()
     );
 }
 
-static inline void updateOutputState()
-{
-    printf("OC:output=%u\r\n", context.outputEnabled ? context.brightness : 0);
-
-    EPWM2_LoadDutyValue(
-        context.outputEnabled
-            ? context.brightness
-            : 0
-    );
-}
-
 void OutputController_toggle()
 {
     puts("OC:toggle");
 
     context.outputEnabled = !context.outputEnabled;
-    updateOutputState();
+    OutputController_updateState();
 }
 
 void OutputController_task()
 {
-    bool shouldEnableOutput =
-        !System_isRunningFromBackupBattery()
-        && getStateFromSchedule();
+    bool shouldEnableOutput = getStateFromSchedule();
+    bool updateOutputState = false;
 
+    // Update the output state on schedule changes
     if (context.outputShouldBeEnabled != shouldEnableOutput) {
         context.outputShouldBeEnabled = shouldEnableOutput;
         context.outputEnabled = shouldEnableOutput;
 
         puts(shouldEnableOutput ? "OC:outputOn" : "OC:outputOff");
 
-        updateOutputState();
+        updateOutputState = true;
+    }
+
+    // Update the output states periodically
+    if (Clock_getElapsedFastTicks(context.lastOutputStateUpdateTicks) >= 50) {
+        context.lastOutputStateUpdateTicks = Clock_getFastTicks();
+        updateOutputState = true;
+    }
+
+    if (updateOutputState) {
+        OutputController_updateState();
     }
 }
 
 inline bool OutputController_isOutputEnabled()
 {
     return context.outputEnabled;
+}
+
+void OutputController_updateState()
+{
+#if 0
+    printf("OC:output=%u\r\n", context.outputEnabled ? context.brightness : 0);
+#endif
+
+    EPWM2_LoadDutyValue(
+        (context.outputEnabled && !System_isRunningFromBackupBattery())
+            ? Settings_data.output.brightness
+            : 0
+    );
 }

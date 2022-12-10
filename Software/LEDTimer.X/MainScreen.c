@@ -40,21 +40,78 @@ static struct MainScreenContext {
 
 inline static void drawOutputToggleKeyHelp()
 {
-    Text_draw(
+    static const uint8_t MiniBulbIcon[] = {
+        0b00011110,
+        0b11100001,
+        0b10111001,
+        0b11100001,
+        0b00011110
+    };
+
+    static const uint8_t SwitchOnStateIcon[] = {
+        0b11111111,
+        0b11111111,
+        0b11111111,
+        0b11000011,
+        0b11111111,
+        0b11111111,
+        0b11111111,
+        0b10000001,
+        0b10111101,
+        0b10100101,
+        0b10111101,
+        0b10000001,
+        0b11111111
+    };
+
+    static const uint8_t SwitchOffStateIcon[] = {
+        0b11111111,
+        0b10000001,
+        0b10000001,
+        0b10111101,
+        0b10000001,
+        0b10000001,
+        0b11111111,
+        0b11111111,
+        0b11000011,
+        0b11011011,
+        0b11000011,
+        0b11111111,
+        0b11111111
+    };
+
+    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - 19 / 2, 0, false);
+
+    Graphics_drawBitmap(
         OutputController_isOutputEnabled()
-            ? "OFF"
-            : "ON ",
-        0, 54, 0, false
+            ? SwitchOffStateIcon
+            : SwitchOnStateIcon,
+        13,
+        64 - 19 / 2 + 6,
+        0,
+        false
     );
 }
 
-static void drawKeypadHelpBar()
+inline static void drawKeypadHelpBar()
 {
-    Text_draw("STNGS :       :      ", 0, 0, 0, false);
+    SSD1306_fillArea(0, 0, 128, 1, SSD1306_COLOR_BLACK);
+
+    static const uint8_t SettingsIcon[] = {
+        0b01001001,
+        0b01001001,
+        0b01001001,
+        0b01001001,
+        0b01001001,
+        0b01001001,
+    };
+
+    Graphics_drawBitmap(SettingsIcon, 6, 1, 0, false);
+
     drawOutputToggleKeyHelp();
 }
 
-static void drawClock()
+inline static void drawClock()
 {
     uint8_t hours = (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
     uint8_t minutes = (uint8_t)(Clock_getMinutesSinceMidnight() - hours * 60);
@@ -65,12 +122,12 @@ static void drawClock()
     Text_draw7Seg(s, 2, 15, false);
 }
 
-static void drawScheduleBar()
+static inline void drawScheduleBar()
 {
     Graphics_drawScheduleBar(Settings_data.scheduler.data, false);
 }
 
-static void drawScheduleSegmentIndicator(const bool redraw)
+static inline void drawScheduleSegmentIndicator(const bool redraw)
 {
     uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
         Clock_getMinutesSinceMidnight()
@@ -82,7 +139,7 @@ static void drawScheduleSegmentIndicator(const bool redraw)
     }
 }
 
-static void drawBulbIcon(const bool visible)
+inline static void drawBulbIcon(const bool visible)
 {
     static const uint8_t X = 127 - Graphics_BulbIconWidth - 15;
 
@@ -106,7 +163,7 @@ static void drawBulbIcon(const bool visible)
     }
 }
 
-static void drawPowerIndicator()
+inline static void drawPowerIndicator()
 {
     if (context.onBatteryPower) {
         static const uint8_t Width =
@@ -195,7 +252,7 @@ void MainScreen_update(const bool redraw)
     }
 }
 
-bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
+inline bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
 {
     switch (keyCode) {
         // Propagate to the UI to show the Settings

@@ -29,6 +29,12 @@
 #define ASCIIReduced_SpaceWidth             5
 #define ASCIIReduced_CharSpacing            1
 #define ASCIIReduced_CharWidth              5
+
+#define Numbers7Seg_CharCount               10
+#define Numbers7Seg_CharWidth               12
+#define Numbers7Seg_CharSpacing             2
+#define Numbers7Seg_Pages                   3
+
 static const uint8_t ASCIIReduced[ASCIIReduced_CharCount][ASCIIReduced_CharWidth] = {
     // !
     {
@@ -504,9 +510,6 @@ static const uint8_t ASCIIReducedPlaceholder[ASCIIReduced_CharWidth] = {
     0b01111111
 };
 
-#define Numbers7Seg_CharCount               10
-#define Numbers7Seg_CharWidth               12
-#define Numbers7Seg_Pages                   3
 static const uint8_t Numbers7Seg[Numbers7Seg_CharCount][Numbers7Seg_Pages][Numbers7Seg_CharWidth] = {
     {
         // 0, Page 0
@@ -1127,7 +1130,51 @@ void Text_draw7Seg(
                 SSD1306_sendData(charData, sizeof(charData), 0, invert);
             }
 
-            x += Numbers7Seg_CharWidth + 2;
+            x += Numbers7Seg_CharWidth + Numbers7Seg_CharSpacing;
         }
     }
+}
+
+uint8_t Text_calculateWidth(const char* s)
+{
+    uint8_t width = 0;
+
+    while (*s) {
+        char c = *s++;
+
+        if (c == ' ') {
+            width += ASCIIReduced_SpaceWidth;
+        } else {
+            width += ASCIIReduced_CharWidth;
+        }
+
+        if (*s != 0) {
+            width += ASCIIReduced_CharSpacing;
+        }
+    }
+
+    return width;
+}
+
+uint8_t Text_calculateWidth7Seg(const char* s)
+{
+    uint8_t width = 0;
+
+    while (*s) {
+        char c = *s++;
+
+        if ((c >= '0' && c <= '9') || c == ' ') {
+            width += Numbers7Seg_CharWidth;
+        } else if (c == ':') {
+            width += 4;
+        } else if (c == '-') {
+            width += Numbers7Seg_CharWidth - 2;
+        }
+
+        if (*s != 0) {
+            width += Numbers7Seg_CharSpacing;
+        }
+    }
+
+    return width;
 }

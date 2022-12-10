@@ -130,6 +130,8 @@ System_TaskResult System_task()
         .powerInputChanged = context.monitoring.powerInputChanged
     };
 
+    checkLDOSense();
+
     if (
         context.monitoring.powerInputChanged
         || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
@@ -137,7 +139,7 @@ System_TaskResult System_task()
     ) {
         context.monitoring.powerInputChanged = false;
         context.monitoring.lastUpdateTime = Clock_getTicks();
-        checkLDOSense();
+//        checkLDOSense();
         measureVDD();
         updateBatteryLevel();
     }

@@ -40,9 +40,20 @@ uint8_t Text_draw(
     bool invert
 );
 
+/**
+ * Draws a text with large 7-Segment LCD font
+ * @param number String with the following characters allowed: 0-9, -, <space>, :
+ * @param line Position of the text from the top, measured in pages (8 pixels)
+ * @param x Position of the text from the left
+ * @param invert Set to True to draw the text inverted
+ */
 void Text_draw7Seg(
     const char* number,
     uint8_t line,
     uint8_t x,
     bool invert
 );
+
+uint8_t Text_calculateWidth(const char* s);
+
+uint8_t Text_calculateWidth7Seg(const char* s);

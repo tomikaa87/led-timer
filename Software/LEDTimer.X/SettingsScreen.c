@@ -24,6 +24,7 @@
 #include "SettingsScreen.h"
 #include "Text.h"
 #include "SSD1306.h"
+#include "OutputController.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -50,15 +51,15 @@ static struct SettingsScreenContext {
     }
 };
 
-static void drawKeypadHelpBar()
+inline static void drawKeypadHelpBar()
 {
-    SSD1306_fillArea(0, 1, 128, 1, SSD1306_COLOR_BLACK);
+    SSD1306_fillArea(0, 0, 128, 1, SSD1306_COLOR_BLACK);
 
     switch (context.state) {
         case State_Navigation:
             Text_draw("EXIT", 0, 0, 0, false);
             Text_draw("SELECT", 0, 64 - (6 * 5 + 5 * 1) / 2, 0, false);
-            Text_draw("NEXT", 0, 127 - (4 * 5 + 3 * 1) / 2, 0, false);
+            Text_draw("NEXT", 0, 127 - (4 * 5 + 3 * 1), 0, false);
             break;
 
         case State_Configuration:
@@ -67,18 +68,18 @@ static void drawKeypadHelpBar()
             // Scheduler
             if (context.pageIndex == 0) {
                 Text_draw("SET", 0, 64 - (3 * 5 + 2 * 1) / 2, 0, false);
-                Text_draw("CLEAR", 0, 127 - (5 * 5 + 4 * 1) / 2, 0, false);
+                Text_draw("CLEAR", 0, 127 - (5 * 5 + 4 * 1), 0, false);
             }
             // Regular number setting
             else {
                 Text_draw("+", 0, 64 - (1 * 5) / 2, 0, false);
-                Text_draw("-", 0, 127 - (1 * 5) / 2, 0, false);
+                Text_draw("-", 0, 127 - (1 * 5), 0, false);
             }
             break;
     }
 }
 
-static void drawPageTitle()
+inline static void drawPageTitle()
 {
     char s[22];
 
@@ -104,7 +105,7 @@ static void drawPageTitle()
     }
 }
 
-static void drawSchedulerPage()
+inline static void drawSchedulerPage()
 {
     uint16_t minutesSinceMidnightForSegment =
         (uint16_t)context.schedulerPage.segmentIndex * 30;
@@ -117,11 +118,7 @@ static void drawSchedulerPage()
     Text_draw7Seg(
         s,
         2,
-        64 - (
-            4 * 12      /* number width */
-            + 4         /* colon width */
-            + 4 * 2     /* spacing */
-        ) / 2,
+        64 - Text_calculateWidth7Seg(s) / 2,
         false
     );
 
@@ -129,9 +126,11 @@ static void drawSchedulerPage()
     Graphics_drawScheduleBar(context.modifiedSettings.scheduler.data, false);
 }
 
-static void drawBrightnessPage()
+inline static void drawBrightnessPage()
 {
-
+    char s[4];
+    snprintf(s, sizeof(s), "%3u", context.modifiedSettings.output.brightness);
+    Text_draw7Seg(s, 3, 64 - Text_calculateWidth7Seg(s) / 2, false);
 }
 
 static void drawCurrentPage(const bool redraw)
@@ -165,6 +164,32 @@ static void navigateToNextPage()
     drawCurrentPage(true);
 }
 
+static void adjustScheduleSegmentAndStepForward(const bool set)
+{
+    Types_setScheduleSegmentBit(
+        context.modifiedSettings.scheduler.data,
+        context.schedulerPage.segmentIndex,
+        set
+    );
+
+    if (++context.schedulerPage.segmentIndex >= 48) {
+        context.schedulerPage.segmentIndex = 0;
+    }
+
+    drawCurrentPage(false);
+}
+
+static void adjustOutputBrightness(const bool increase)
+{
+    if (increase) {
+        ++context.modifiedSettings.output.brightness;
+    } else {
+        --context.modifiedSettings.output.brightness;
+    }
+
+    drawCurrentPage(false);
+}
+
 void SettingsScreen_init()
 {
     context.state = State_Navigation;
@@ -173,31 +198,91 @@ void SettingsScreen_init()
     context.schedulerPage.segmentIndex = 0;
 
     memcpy(&context.modifiedSettings, &Settings_data, sizeof(SettingsData));
-
-    drawCurrentPage(true);
 }
 
 void SettingsScreen_update(const bool redraw)
 {
+    drawCurrentPage(redraw);
 }
 
-bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
+inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
 {
+    // Avoid jumping between states
+    if (hold && context.state == State_Navigation) {
+        return true;
+    }
+
     switch (keyCode) {
         case Keypad_Key1:
-            if (context.state == State_Configuration) {
-                context.state = State_Navigation;
-                return true;
+            switch (context.state) {
+                case State_Navigation:
+                    // Save settings on exit
+                    Settings_data = context.modifiedSettings;
+                    Settings_save();
+                    OutputController_updateState();
+
+                    // UI will handle this by switching to the main screen
+                    return false;
+
+                case State_Configuration:
+                    context.state = State_Navigation;
+
+                    // For convenience, reset the scheduler segment index
+                    context.schedulerPage.segmentIndex = 0;
+
+                    drawCurrentPage(true);
+                    break;
+
+                default:
+                    break;
             }
             break;
 
         case Keypad_Key2:
-        case Keypad_Key3:
-            if (context.state == State_Navigation) {
-                navigateToNextPage();
+            switch (context.state) {
+                case State_Navigation:
+                    context.state = State_Configuration;
+                    drawCurrentPage(true);
+                    break;
+
+                case State_Configuration:
+                    // Scheduler config: SET
+                    if (context.pageIndex == 0) {
+                        adjustScheduleSegmentAndStepForward(true);
+                    }
+                    // Brightness config: +
+                    else if (context.pageIndex == 1) {
+                        adjustOutputBrightness(true);
+                    }
+                    break;
+
+                default:
+                    break;
             }
-            return true;
+            break;
+
+        case Keypad_Key3:
+            switch (context.state) {
+                case State_Navigation:
+                    navigateToNextPage();
+                    break;
+
+                case State_Configuration:
+                    // Scheduler config: CLEAR
+                    if (context.pageIndex == 0) {
+                        adjustScheduleSegmentAndStepForward(false);
+                    }
+                    // Brightness config: -
+                    else if (context.pageIndex == 1) {
+                        adjustOutputBrightness(false);
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+            break;
     }
 
-    return false;
+    return true;
 }
