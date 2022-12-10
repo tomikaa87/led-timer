@@ -99,11 +99,13 @@ static struct UIContext {
     Clock_Ticks displayTimer;
     Clock_Ticks updateTimer;
     bool forceUpdate;
+    volatile uint8_t externalEvents;
 } context = {
     .screen = UI_Screen_Main,
     .displayOn = true,
     .updateTimer = 0,
-    .forceUpdate = true
+    .forceUpdate = true,
+    .externalEvents = 0
 };
 
 static void updateScreen(const bool redraw)
@@ -157,12 +159,24 @@ void UI_init()
 
 void UI_task()
 {
+    // Check external events
+    if (context.externalEvents & UI_ExternalEvent_SystemWakeUp) {
+        // TODO
+    }
+    if (context.externalEvents & UI_ExternalEvent_PowerInputChanged) {
+        wakeUpDisplay();
+        context.forceUpdate = true;
+    }
+    if (context.externalEvents & UI_ExternalEvent_BatteryLevelMeasurementFinished) {
+        context.forceUpdate = true;
+    }
+    context.externalEvents = 0;
+
     if (context.displayOn) {
         // Update the contents of the current screen periodically
         if (
             context.forceUpdate
-            || Clock_getElapsedFastTicks(context.updateTimer)
-                >= Config_UI_UpdateIntervalTicks
+            || (Clock_getElapsedFastTicks(context.updateTimer) >= Config_UI_UpdateIntervalTicks)
         ) {
             puts(context.forceUpdate ? "UI:forcedUpdate" : "UI:update");
 
@@ -233,19 +247,7 @@ void UI_keyEvent(uint8_t keyCode)
     }
 }
 
-void UI_onSystemWakeUp()
+inline void UI_setExternalEvent(const UI_ExternalEvent event)
 {
-    puts("UI:wakeUp");
-
-    if (System_getLastWakeUpReason() == System_WakeUpReason_PowerInputChanged) {
-        UI_onPowerInputChanged();
-    }
-}
-
-void UI_onPowerInputChanged()
-{
-    puts("UI:pwrChanged");
-
-    wakeUpDisplay();
-    context.forceUpdate = true;
+    context.externalEvents |= event;
 }

@@ -32,10 +32,8 @@
 
 static struct MainScreenContext {
     uint8_t scheduleSegmentIndex;
-    bool onBatteryPower;
 } context = {
-    .scheduleSegmentIndex = 0,
-    .onBatteryPower = false
+    .scheduleSegmentIndex = 0
 };
 
 inline static void drawOutputToggleKeyHelp()
@@ -165,7 +163,7 @@ inline static void drawBulbIcon(const bool visible)
 
 inline static void drawPowerIndicator()
 {
-    if (context.onBatteryPower) {
+    if (System_isRunningFromBackupBattery()) {
         static const uint8_t Width =
             Graphics_BatteryIndicatorCapWidth
             + Graphics_BatteryIndicatorBodyFullWidth * 10
@@ -242,14 +240,7 @@ void MainScreen_update(const bool redraw)
     drawClock();
     drawScheduleSegmentIndicator(redraw);
     drawOutputToggleKeyHelp();
-
-    if (
-        redraw
-        || (context.onBatteryPower != System_isRunningFromBackupBattery())
-    ) {
-        context.onBatteryPower = System_isRunningFromBackupBattery();
-        drawPowerIndicator();
-    }
+    drawPowerIndicator();
 }
 
 inline bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)

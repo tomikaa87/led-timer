@@ -57,6 +57,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+static struct MainContext
+{
+    volatile bool adcConversionFinished;
+} context = {
+    .adcConversionFinished = false
+};
+
 void __interrupt() isr(void)
 {
     if (IOCIE && IOCIF) {
@@ -81,6 +88,7 @@ void __interrupt() isr(void)
         if (ADIE && ADIF) {
             ADIF = 0;
             System_handleADCInterrupt(((uint16_t)ADRESH) << 8 | ADRESL);
+            context.adcConversionFinished = true;
         }
 
         if (TMR4IE & TMR4IF) {
@@ -195,19 +203,23 @@ void main(void)
 
         UI_keyEvent(keyCode);
 
-        UI_task();
-        OutputController_task();
-
-        // This must be the last task to handle sleep mode properly
         System_TaskResult systemTaskResult = System_task();
 
         if (systemTaskResult.powerInputChanged) {
-            UI_onPowerInputChanged();
+            UI_setExternalEvent(UI_ExternalEvent_PowerInputChanged);
         }
+
+        if (context.adcConversionFinished) {
+            context.adcConversionFinished = false;
+            UI_setExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
+        }
+
+        UI_task();
+        OutputController_task();
 
         if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
             System_sleep();
-            UI_onSystemWakeUp();
+            UI_setExternalEvent(UI_ExternalEvent_SystemWakeUp);
         }
     }
 }

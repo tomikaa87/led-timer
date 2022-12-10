@@ -40,13 +40,11 @@ void UI_task(void);
  */
 void UI_keyEvent(uint8_t keyCode);
 
-/**
- * Runs the tasks that should be done when the system wakes up from sleep.
- */
-void UI_onSystemWakeUp(void);
+typedef enum
+{
+    UI_ExternalEvent_SystemWakeUp =                     (1 << 0),
+    UI_ExternalEvent_PowerInputChanged =                (1 << 1),
+    UI_ExternalEvent_BatteryLevelMeasurementFinished =  (1 << 2)
+} UI_ExternalEvent;
 
-/**
- * Runs the tasks that should be done when the power input changes from
- * main input to the backup battery or vica-versa.
- */
-void UI_onPowerInputChanged(void);
+inline void UI_setExternalEvent(UI_ExternalEvent event);
