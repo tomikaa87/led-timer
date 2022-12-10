@@ -36,3 +36,6 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
 
 ## Clock setting
 ![Clock setting](/Images/IMG_2655.jpg)
+
+## Prototype setup
+![Prototype setup](/Images/IMG_2649.jpg)
