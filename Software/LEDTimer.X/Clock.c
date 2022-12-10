@@ -43,6 +43,12 @@ inline uint16_t Clock_getMinutesSinceMidnight()
     return Clock_interruptContext.minutesSinceMidnight;
 }
 
+void Clock_setMinutesSinceMidnight(const uint16_t value)
+{
+    TMR1_WriteTimer(0);
+    Clock_interruptContext.minutesSinceMidnight = value;
+}
+
 inline Clock_Ticks Clock_getTicks()
 {
     return Clock_interruptContext.ticks;
