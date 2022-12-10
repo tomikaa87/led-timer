@@ -42,7 +42,9 @@
 */
 
 #include "mcc_generated_files/mcc.h"
+
 #include "Clock.h"
+#include "Config.h"
 #include "Graphics.h"
 #include "Keypad.h"
 #include "OutputController.h"
@@ -93,9 +95,43 @@ void __interrupt() isr(void)
     }
 }
 
-inline void setupI2C()
+inline static void setupI2C()
 {
     SSP1CON1bits.SSPEN = 1;
+}
+
+inline static void showStartupScreen()
+{
+    SSD1306_clear();
+
+    static const uint8_t MiniBulbIcon[] = {
+        0b00011110,
+        0b11100001,
+        0b10111001,
+        0b11100001,
+        0b00011110
+    };
+
+    static const char* Title = "LED TIMER";
+    static const char* GitHub = "GITHUB.COM/TOMIKAA87";
+
+    uint8_t titleWidth = Text_calculateWidth(Title);
+    uint8_t iconPos = 64 - (titleWidth + 5 + 5) / 2;
+
+    Graphics_drawBitmap(MiniBulbIcon, 5, iconPos, 1, false);
+    Text_draw(Title, 1, iconPos + 10, 0, false);
+
+    const char* firmwareVersion = "v" Config_FirmwareVersion;
+
+    Text_draw(
+        firmwareVersion,
+        3,
+        64 - Text_calculateWidth(firmwareVersion) / 2,
+        0,
+        false
+    );
+
+    Text_draw(GitHub, 6, 64 - Text_calculateWidth(GitHub) / 2, 0, false);
 }
 
 /*
@@ -115,9 +151,14 @@ void main(void)
     Keypad_init();
     Settings_init();
     Settings_load();
-    UI_init();
 
     SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
+
+    showStartupScreen();
+    __delay_ms(5000);
+    SSD1306_clear();
+
+    UI_init();
 
     System_onWakeUp(System_WakeUpReason_Startup);
 

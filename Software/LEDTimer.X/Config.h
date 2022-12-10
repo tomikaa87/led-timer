@@ -23,6 +23,11 @@
 #include "Types.h"
 
 /**
+ * General
+ */
+#define Config_FirmwareVersion                              "1.0.0"
+
+/**
  * Settings
  */
 #define Config_Settings_DataBaseAddress                     (0)
