@@ -170,6 +170,19 @@ void UI_task()
     if (context.externalEvents & UI_ExternalEvent_BatteryLevelMeasurementFinished) {
         context.forceUpdate = true;
     }
+    if (context.externalEvents & UI_ExternalEvent_SystemGoingToSleep) {
+        // Turn off the display immediately to conserve power
+        if (context.displayOn) {
+            puts("UI:displayOff(->sleep)");
+
+            context.displayOn = false;
+            SSD1306_setDisplayEnabled(false);
+        }
+
+        context.externalEvents = 0;
+
+        return;
+    }
     context.externalEvents = 0;
 
     if (context.displayOn) {
