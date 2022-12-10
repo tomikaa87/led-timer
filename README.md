@@ -16,3 +16,23 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
   * OLED screen with schedule, output state, battery level indication and more
   * Each screen shows a legend for individual key functions
 * Backup battery - timekeeping and changing settings work without external power
+
+# Images of the prototype
+
+## Main screen
+![Main screen](/Images/IMG_2650.jpg)
+
+## Main screen functions explained
+![Main screen functions](/Images/IMG_2650_legend.jpg)
+
+## Settings screen
+![Settings screen](/Images/IMG_2651.jpg)
+
+## Scheduler settings
+![Scheduler settings](/Images/IMG_2653.jpg)
+
+## LED output brightness setting
+![LED brightness setting](/Images/IMG_2654.jpg)
+
+## Clock setting
+![Clock setting](/Images/IMG_2655.jpg)
