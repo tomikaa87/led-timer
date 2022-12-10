@@ -17,6 +17,8 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
   * Each screen shows a legend for individual key functions
 * Backup battery - timekeeping and changing settings work without external power
 
+A custom-made PCB and a 3D-printable enclosure is still in development and should be published soon.
+
 # Images of the prototype
 
 ## Main screen
