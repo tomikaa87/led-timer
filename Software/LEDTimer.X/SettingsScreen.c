@@ -100,9 +100,10 @@ inline static void drawPageTitle()
 {
     char s[22];
 
-    static const char* Titles[2] = {
+    static const char* Titles[] = {
         "Schedule",
-        "LED Brightness"
+        "LED Brightness",
+        "Clock"
     };
 
     // If this needs to be optimized to spare program space,
