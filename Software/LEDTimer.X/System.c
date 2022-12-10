@@ -120,6 +120,10 @@ void System_init()
 
     checkLDOSense();
     measureVDD();
+
+    // Wait for the initial measurement to avoid invalid readings after startup
+    while (!System_interruptContext.adc.updated);
+
     updateBatteryLevel();
 }
 

@@ -150,6 +150,21 @@ void main(void)
     // initialize the device
     SYSTEM_Initialize();
 
+    // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
+    // Use the following macros to:
+
+    // Enable the Global Interrupts
+    INTERRUPT_GlobalInterruptEnable();
+
+    // Enable the Peripheral Interrupts
+    INTERRUPT_PeripheralInterruptEnable();
+
+    // Disable the Global Interrupts
+    //INTERRUPT_GlobalInterruptDisable();
+
+    // Disable the Peripheral Interrupts
+    //INTERRUPT_PeripheralInterruptDisable();
+
     setupI2C();
 
     __delay_ms(100);
@@ -169,21 +184,6 @@ void main(void)
     UI_init();
 
     System_onWakeUp(System_WakeUpReason_Startup);
-
-    // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
-    // Use the following macros to:
-
-    // Enable the Global Interrupts
-    INTERRUPT_GlobalInterruptEnable();
-
-    // Enable the Peripheral Interrupts
-    INTERRUPT_PeripheralInterruptEnable();
-
-    // Disable the Global Interrupts
-    //INTERRUPT_GlobalInterruptDisable();
-
-    // Disable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptDisable();
 
     while (1)
     {
@@ -212,6 +212,10 @@ void main(void)
         if (context.adcConversionFinished) {
             context.adcConversionFinished = false;
             UI_setExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
+        }
+
+        if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
+            UI_setExternalEvent(UI_ExternalEvent_SystemGoingToSleep);
         }
 
         UI_task();
