@@ -175,7 +175,7 @@ void main(void)
     Settings_init();
     Settings_load();
 
-    SSD1306_setContrastLevel(SSD1306_CONTRAST_LOWEST);
+    SSD1306_setContrastLevel(Settings_data.display.brightness);
 
     showStartupScreen();
     __delay_ms(5000);

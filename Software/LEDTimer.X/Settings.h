@@ -39,6 +39,11 @@ typedef struct
     {
         uint8_t brightness;
     } output;
+
+    struct Display
+    {
+        uint8_t brightness;
+    } display;
 } SettingsData;
 
 extern SettingsData Settings_data;

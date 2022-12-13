@@ -36,8 +36,16 @@ static struct SettingsScreenContext {
         State_Configuration
     } state;
 
+    enum Page {
+        Page_Schedule,
+        Page_LEDBrightness,
+        Page_Clock,
+        Page_DisplayBrightness,
+
+        Page_Last = Page_DisplayBrightness
+    } page;
+
     uint8_t pageIndex;
-    const uint8_t pageCount;
     SettingsData modifiedSettings;
 
     struct SchedulerPageContext {
@@ -52,7 +60,6 @@ static struct SettingsScreenContext {
 } context = {
     .state = State_Navigation,
     .pageIndex = 0,
-    .pageCount = 3,
     .schedulerPage = {
         .segmentIndex = 0
     },
@@ -77,13 +84,10 @@ inline static void drawKeypadHelpBar()
         case State_Configuration:
             Text_draw("BACK", 0, 0, 0, false);
 
-            // Scheduler
-            if (context.pageIndex == 0) {
+            if (context.pageIndex == Page_Schedule) {
                 Text_draw("SET", 0, 64 - (3 * 5 + 2 * 1) / 2, 0, false);
                 Text_draw("CLEAR", 0, 127 - (5 * 5 + 4 * 1), 0, false);
-            }
-            // Clock
-            else if (context.pageIndex == 2) {
+            } else if (context.pageIndex == Page_Clock) {
                 Text_draw("HOUR", 0, 64 - (4 * 5 + 3 * 1) / 2, 0, false);
                 Text_draw("MINUTE", 0, 127 - (6 * 5 + 5 * 1), 0, false);
             }
@@ -100,10 +104,11 @@ inline static void drawPageTitle()
 {
     char s[22];
 
-    static const char* Titles[] = {
+    static const char* Titles[Page_Last + 1] = {
         "Schedule",
         "LED Brightness",
-        "Clock"
+        "Clock",
+        "Disp. Brightness"
     };
 
     // If this needs to be optimized to spare program space,
@@ -111,7 +116,7 @@ inline static void drawPageTitle()
     snprintf(
         s, sizeof(s), "%u/%u: %s",
         context.pageIndex + 1,
-        context.pageCount,
+        Page_Last + 1,
         Titles[context.pageIndex]
     );
 
@@ -164,6 +169,13 @@ inline static void drawClockPage()
     Text_draw7Seg(s, 3, 64 - Text_calculateWidth7Seg(s) / 2, false);
 }
 
+inline static void drawDisplayBrightnessPage()
+{
+    char s[4];
+    snprintf(s, sizeof(s), "%u", context.modifiedSettings.display.brightness);
+    Text_draw7Seg(s, 3, 64 - Text_calculateWidth7Seg(s) / 2, false);
+}
+
 static void drawCurrentPage(const bool redraw)
 {
     if (redraw) {
@@ -172,16 +184,20 @@ static void drawCurrentPage(const bool redraw)
     }
 
     switch (context.pageIndex) {
-        case 0:
+        case Page_Schedule:
             drawSchedulerPage();
             break;
 
-        case 1:
+        case Page_LEDBrightness:
             drawBrightnessPage();
             break;
 
-        case 2:
+        case Page_Clock:
             drawClockPage();
+            break;
+
+        case Page_DisplayBrightness:
+            drawDisplayBrightnessPage();
             break;
 
         default:
@@ -192,7 +208,7 @@ static void drawCurrentPage(const bool redraw)
 void updateClockPageTime()
 {
     // Update the clock
-    if (context.pageIndex == 2) {
+    if (context.pageIndex == Page_Clock) {
         context.clockPage.hours =
             (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
 
@@ -205,7 +221,7 @@ void updateClockPageTime()
 
 static void navigateToNextPage()
 {
-    if (++context.pageIndex >= context.pageCount) {
+    if (++context.pageIndex > Page_Last) {
         context.pageIndex = 0;
     }
 
@@ -254,10 +270,26 @@ static void adjustClock(const bool hours)
     }
 }
 
+static void adjustDisplayBrightness(const bool increase)
+{
+    if (increase) {
+        if (++context.modifiedSettings.display.brightness > SSD1306_CONTRAST_HIGH) {
+            context.modifiedSettings.display.brightness = SSD1306_CONTRAST_LOWEST;
+        }
+    } else {
+        // Check if the value overflown
+        if (--context.modifiedSettings.display.brightness > SSD1306_CONTRAST_HIGH) {
+            context.modifiedSettings.display.brightness = SSD1306_CONTRAST_HIGH;
+        };
+    }
+
+    drawCurrentPage(false);
+}
+
 void SettingsScreen_init()
 {
     context.state = State_Navigation;
-    context.pageIndex = 0;
+    context.pageIndex = Page_Schedule;
 
     context.schedulerPage.segmentIndex = 0;
 
@@ -284,6 +316,7 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
                     Settings_data = context.modifiedSettings;
                     Settings_save();
                     OutputController_updateState();
+                    SSD1306_setContrastLevel(Settings_data.display.brightness);
 
                     // UI will handle this by switching to the main screen
                     return false;
@@ -295,7 +328,7 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
                     context.schedulerPage.segmentIndex = 0;
 
                     // Update the system clock
-                    if (context.pageIndex == 2) {
+                    if (context.pageIndex == Page_Clock) {
                         Clock_setMinutesSinceMidnight(
                             context.clockPage.hours * 60
                             + context.clockPage.minutes
@@ -322,16 +355,20 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
 
                 case State_Configuration:
                     // Scheduler config: SET
-                    if (context.pageIndex == 0) {
+                    if (context.pageIndex == Page_Schedule) {
                         adjustScheduleSegmentAndStepForward(true);
                     }
                     // Brightness config: +
-                    else if (context.pageIndex == 1) {
+                    else if (context.pageIndex == Page_LEDBrightness) {
                         adjustOutputBrightness(true);
                     }
                     // Clock: HOURS+
-                    else if (context.pageIndex == 2) {
+                    else if (context.pageIndex == Page_Clock) {
                         adjustClock(true);
+                    }
+                    // Display brightness: +
+                    else if (context.pageIndex == Page_DisplayBrightness) {
+                        adjustDisplayBrightness(true);
                     }
                     break;
 
@@ -348,16 +385,20 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
 
                 case State_Configuration:
                     // Scheduler config: CLEAR
-                    if (context.pageIndex == 0) {
+                    if (context.pageIndex == Page_Schedule) {
                         adjustScheduleSegmentAndStepForward(false);
                     }
                     // Brightness config: -
-                    else if (context.pageIndex == 1) {
+                    else if (context.pageIndex == Page_LEDBrightness) {
                         adjustOutputBrightness(false);
                     }
                     // Clock: MINUTES+
-                    else if (context.pageIndex == 2) {
+                    else if (context.pageIndex == Page_Clock) {
                         adjustClock(false);
+                    }
+                    // Display brightness: -
+                    else if (context.pageIndex == Page_DisplayBrightness) {
+                        adjustDisplayBrightness(false);
                     }
                     break;
 

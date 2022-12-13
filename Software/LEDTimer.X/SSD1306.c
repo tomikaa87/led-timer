@@ -195,7 +195,6 @@ void SSD1306_setContrastLevel(const SSD1306_ContrastLevel level)
     uint8_t contrast = 0;
 
     switch (level) {
-        default:
         case SSD1306_CONTRAST_HIGH:
             contrast = 0xCF;
             break;
@@ -204,6 +203,7 @@ void SSD1306_setContrastLevel(const SSD1306_ContrastLevel level)
             contrast = 0x60;
             break;
 
+        default:
         case SSD1306_CONTRAST_LOW:
             contrast = 0x20;
             break;
