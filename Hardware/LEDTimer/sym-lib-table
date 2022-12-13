@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name "LEDTimer")(type "KiCad")(uri "${KIPRJMOD}/LEDTimer.kicad_sym")(options "")(descr ""))
+  (lib (name "Renata HU2032LF")(type "Legacy")(uri "${KIPRJMOD}/Batt_Renata_HU2032-LF/eec.lib")(options "")(descr ""))
 )

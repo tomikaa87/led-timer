@@ -1,0 +1,39 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# Renata HU2032-LF
+#
+DEF HU2032-LF BT 0 40 Y Y 1 L N
+F0 "BT" 0 0 50 H V L CNN 
+F1 "HU2032-LF" 0 100 50 H V L CNN 
+F2 "Renata-HU2032-LF-0-0-*" 0 200 50 H I L CNN 
+F3 "http://www.renata.com/fileadmin/downloads/productsheets/battery_holders/HU2032-LF.pdf" 0 300 50 H I L CNN 
+F4 "Batt" 0 400 50 H I L CNN "category"
+F5 "unset" 0 500 50 H I L CNN "device class L1"
+F6 "unset" 0 600 50 H I L CNN "device class L2"
+F7 "unset" 0 700 50 H I L CNN "device class L3"
+F8 "5.35mm" 0 800 50 H I L CNN "height"
+F9 "CAPAD1016W80L630D240" 0 900 50 H I L CNN "ipc land pattern name"
+F10 "yes" 0 1000 50 H I L CNN "lead free"
+F11 "becd477f1eeb5d71" 0 1100 50 H I L CNN "library id"
+F12 "Renata" 0 1200 50 H I L CNN "manufacturer"
+F13 "Coin Cell Battery Holders THRU HOLE FOR CR2032" 0 1300 50 H I L CNN "mouser description"
+F14 "614-HU2032-LF" 0 1400 50 H I L CNN "mouser part number"
+F15 "PTH2" 0 1500 50 H I L CNN "package"
+F16 "yes" 0 1600 50 H I L CNN "rohs"
+F17 "0mm" 0 1700 50 H I L CNN "standoff height"
+F18 "+100°C" 0 1800 50 H I L CNN "temperature range high"
+F19 "-40°C" 0 1900 50 H I L CNN "temperature range low"
+DRAW
+X ANODE 2 0 -100 100 D 40 0 1 1 P 
+X CATHODE 1 0 -500 100 U 40 0 1 1 P 
+P 2 1 1 0 100 -200 -100 -200 N
+P 2 1 1 0 50 -260 -50 -260 N
+P 2 1 1 0 100 -330 -100 -330 N
+P 2 1 1 0 50 -400 -50 -400 N
+T 1 100 -120 60 1 1 +
+T 0 150 -500 60 1 1 -
+ENDDRAW
+ENDDEF
+#
+# End Library

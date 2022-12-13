@@ -1,4 +1,5 @@
 (fp_lib_table
-  (lib (name "Library")(type "KiCad")(uri "${KIPRJMOD}/Library.pretty")(options "")(descr ""))
   (lib (name "LEDTimer")(type "KiCad")(uri "${KIPRJMOD}/LEDTimer.pretty")(options "")(descr ""))
+  (lib (name "Renata HU2032LF")(type "KiCad")(uri "${KIPRJMOD}/Batt_Renata_HU2032-LF/eec.pretty")(options "")(descr ""))
+  (lib (name "SPDT Switch")(type "KiCad")(uri "${KIPRJMOD}/footprints.pretty")(options "")(descr ""))
 )
