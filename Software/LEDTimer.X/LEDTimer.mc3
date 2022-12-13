@@ -408,11 +408,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ECCP2" name="pwmFreq"/>
-         <value>62500.000</value>
+         <value>31250.000</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ECCP2" name="pwmPeriod"/>
-         <value>1.6E-5</value>
+         <value>3.2E-5</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="ECCP2" name="pwmResolution"/>
@@ -2219,7 +2219,7 @@
          <value>dontupdate</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2SEL%aux3"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2SEL%aux1"/>
          <value>RC3</value>
       </entry>
       <entry>
@@ -2271,7 +2271,7 @@
          <value>IO_SW3</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="P2BSEL%aux4"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="P2BSEL%aux2"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
@@ -2327,15 +2327,15 @@
          <value>input</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RXDTSEL%aux1"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RXDTSEL%aux4"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1GSEL%aux2"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1GSEL%aux0"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="TXCKSEL%aux0"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="TXCKSEL%aux3"/>
          <value>RC4</value>
       </entry>
       <entry>
@@ -4505,12 +4505,12 @@
          <hash>34a07a51dd78776f5361c2aa5ef777feba56718dbe33451b6c2d35a72409df60</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\examples\i2c_master_example.h</file>
-         <hash>44dc378ed670d467759c06bad58e202290a8551d776ff30a8efd58173b2444dd</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\fvr.h</file>
          <hash>25574f7b25856ee406b24b870b818d0116b339bdc481902799ccb88debbabe1a</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\examples\i2c_master_example.h</file>
+         <hash>44dc378ed670d467759c06bad58e202290a8551d776ff30a8efd58173b2444dd</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\fvr.c</file>
@@ -4561,12 +4561,12 @@
          <hash>652fa3b40fea1226a80103f33770cec2932291b1ca9b86a7032b41bc59527e1e</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\epwm2.h</file>
-         <hash>9c889144b9b12107cdc936e33b3df4d9b59809d6a2a78cd3eab82aa38c534e7e</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\tmr1.c</file>
          <hash>1e3c78b5335d31f70322dcdf24c35918f504cfb2f530184ecff95b990b591d63</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\epwm2.h</file>
+         <hash>9c889144b9b12107cdc936e33b3df4d9b59809d6a2a78cd3eab82aa38c534e7e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr4.c</file>
