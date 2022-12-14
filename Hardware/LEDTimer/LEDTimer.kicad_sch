@@ -2458,7 +2458,7 @@
     (uuid fff8192d-12e8-4d67-ae96-488e592bbcc2)
     (property "Reference" "D1" (id 0) (at 66.04 43.18 0))
     (property "Value" "BAT54C" (id 1) (at 66.04 45.72 0))
-    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (id 2) (at 67.945 42.545 0)
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-416" (id 2) (at 67.945 42.545 0)
       (effects (font (size 1.27 1.27)) (justify left) hide)
     )
     (property "Datasheet" "http://www.diodes.com/_files/datasheets/ds11005.pdf" (id 3) (at 64.008 39.37 0)
@@ -2514,7 +2514,7 @@
       (reference "CG1") (unit 1) (value "22p") (footprint "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder")
     )
     (path "/fff8192d-12e8-4d67-ae96-488e592bbcc2"
-      (reference "D1") (unit 1) (value "BAT54C") (footprint "Package_TO_SOT_SMD:SOT-23")
+      (reference "D1") (unit 1) (value "BAT54C") (footprint "Package_TO_SOT_SMD:SOT-416")
     )
     (path "/a074c02e-cb09-4f77-8b38-7831a3988ff3"
       (reference "J1") (unit 1) (value "ICSP") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical")
