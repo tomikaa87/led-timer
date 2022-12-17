@@ -47,6 +47,7 @@ void Clock_setMinutesSinceMidnight(const uint16_t value)
 {
     TMR1_WriteTimer(0);
     Clock_interruptContext.minutesSinceMidnight = value;
+    Clock_interruptContext.seconds = 0;
 }
 
 inline Clock_Ticks Clock_getTicks()
