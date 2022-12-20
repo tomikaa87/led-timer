@@ -25,7 +25,7 @@
 /**
  * General
  */
-#define Config_FirmwareVersion                              "1.0.3"
+#define Config_FirmwareVersion                              "1.0.4"
 
 /**
  * Settings
@@ -37,7 +37,6 @@
  */
 #define Config_System_StartupAwakeLengthTicks               (6)
 #define Config_System_KeyPressWakeUpLengthTicks             (6)
-#define Config_System_PowerInputChangeWakeUpLengthTicks     (6)
 #define Config_System_MonitoringUpdateIntervalTicks         (2)
 
 #define Config_System_VDDCalMilliVolts                      (3140ul)

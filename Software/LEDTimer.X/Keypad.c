@@ -40,7 +40,7 @@ static struct KeypadContext
     Clock_Ticks pressTimerTicks;
     Clock_Ticks delayTimerTicks;
     Clock_Ticks delayTimeoutTicks;
-    
+
     uint8_t lastScanCode;
 } context = {
     .state = State_Idle,
@@ -66,10 +66,6 @@ static uint8_t scanKeys()
     return scanCode;
 }
 
-// TODO implement the keypad handling logic used in pic-thermostat
-// The current implementation makes hard to handle repeated presses
-// of the same key
-
 void Keypad_init()
 {
 }
@@ -86,7 +82,7 @@ uint8_t Keypad_task()
     ) {
         return 0;
     }
-    
+
     context.delayTimeoutTicks = 0;
 
     switch (context.state) {

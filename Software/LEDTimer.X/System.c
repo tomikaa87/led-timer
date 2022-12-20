@@ -28,6 +28,9 @@
 #include <stdio.h>
 #include <xc.h>
 
+// Debug
+#include "UI.h"
+
 volatile uint16_t _System_adcResult = 0;
 
 System_InterruptContext System_interruptContext = {
@@ -37,7 +40,8 @@ System_InterruptContext System_interruptContext = {
     },
     .ldoSense = {
         .updated = false
-    }
+    },
+    .externalWakeUpSource = false
 };
 
 static struct SystemContext
@@ -52,9 +56,7 @@ static struct SystemContext
     struct _Monitoring
     {
         Clock_Ticks lastUpdateTime;
-        volatile bool onBatteryPower;       // True if the system is running from battery power
-        uint8_t batteryLevel;               // Estimated batter level: 0..10
-        volatile bool powerInputChanged;
+        uint8_t batteryLevel;               // Estimated battery level: 0..10
     } monitoring;
 } context = {
     .sleep = {
@@ -64,9 +66,7 @@ static struct SystemContext
     },
     .monitoring = {
         .lastUpdateTime = 0,
-        .onBatteryPower = true,
         .batteryLevel = 0,
-        .powerInputChanged = false
     }
 };
 
@@ -81,11 +81,6 @@ static void measureVDD()
 
     ADC_SelectChannel(channel_FVR);
     ADC_StartConversion();
-}
-
-static void checkLDOSense()
-{
-    context.monitoring.onBatteryPower = !IO_LDO_SENSE_GetValue();
 }
 
 void updateBatteryLevel()
@@ -118,7 +113,6 @@ void System_init()
 {
     ADC_SelectChannel(channel_FVR);
 
-    checkLDOSense();
     measureVDD();
 
     // Wait for the initial measurement to avoid invalid readings after startup
@@ -131,19 +125,17 @@ System_TaskResult System_task()
 {
     System_TaskResult result = {
         .action = System_TaskResult_NoActionNeeded,
-        .powerInputChanged = context.monitoring.powerInputChanged
+        .powerInputChanged = System_interruptContext.ldoSense.updated
     };
 
-    checkLDOSense();
+    System_interruptContext.ldoSense.updated = false;
 
     if (
-        context.monitoring.powerInputChanged
+        result.powerInputChanged
         || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
             >= Config_System_MonitoringUpdateIntervalTicks
     ) {
-        context.monitoring.powerInputChanged = false;
         context.monitoring.lastUpdateTime = Clock_getTicks();
-//        checkLDOSense();
         measureVDD();
         updateBatteryLevel();
     }
@@ -153,24 +145,20 @@ System_TaskResult System_task()
             = Clock_getElapsedTicks(context.sleep.lastWakeUpTime);
 
         switch (context.sleep.wakeUpReason) {
+            default:
             case System_WakeUpReason_None:
+                context.sleep.enabled = System_isRunningFromBackupBattery();
                 break;
 
             case System_WakeUpReason_Startup:
                 if (elapsedSinceWakeUp >= Config_System_StartupAwakeLengthTicks) {
-                    context.sleep.enabled = context.monitoring.onBatteryPower;
+                    context.sleep.enabled = System_isRunningFromBackupBattery();
                 }
                 break;
 
             case System_WakeUpReason_KeyPress:
                 if (elapsedSinceWakeUp >= Config_System_KeyPressWakeUpLengthTicks) {
-                    context.sleep.enabled = context.monitoring.onBatteryPower;
-                }
-                break;
-
-            case System_WakeUpReason_PowerInputChanged:
-                if (elapsedSinceWakeUp >= Config_System_PowerInputChangeWakeUpLengthTicks) {
-                    context.sleep.enabled = context.monitoring.onBatteryPower;
+                    context.sleep.enabled = System_isRunningFromBackupBattery();
                 }
                 break;
         }
@@ -186,10 +174,6 @@ void System_onWakeUp(const System_WakeUpReason reason)
     context.sleep.enabled = false;
     context.sleep.lastWakeUpTime = Clock_getTicks();
     context.sleep.wakeUpReason = reason;
-
-    if (reason == System_WakeUpReason_PowerInputChanged) {
-        context.monitoring.powerInputChanged = true;
-    }
 }
 
 inline System_WakeUpReason System_getLastWakeUpReason()
@@ -197,8 +181,9 @@ inline System_WakeUpReason System_getLastWakeUpReason()
     return context.sleep.wakeUpReason;
 }
 
-void System_sleep()
+System_SleepResult System_sleep()
 {
+#if 0
     printf(
         "SYS:SLP,T=%u,FT=%u,MSM=%u,SEC=%u\r\n",
         Clock_getTicks(),
@@ -206,6 +191,7 @@ void System_sleep()
         Clock_getMinutesSinceMidnight(),
         Clock_getSeconds()
     );
+#endif
 
     // Send out all the data before going to sleep
     while (TRMT == 0);
@@ -216,25 +202,39 @@ void System_sleep()
 
     context.sleep.wakeUpReason = System_WakeUpReason_None;
 
+    _DebugState.sleeping = true;
+    _DebugState.externalWakeUp = false;
+    _DebugState.ldoSenseValue = IO_LDO_SENSE_GetValue();
+    UI_updateDebugDisplay();
+
     SLEEP();
 
     // The next instruction will always be executed before the ISR
 
     FVRCONbits.FVREN = fvren;
 
+    // Clear the flag so the next task() call can update it properly
+    context.sleep.enabled = false;
+
+    _DebugState.sleeping = false;
+    _DebugState.externalWakeUp = System_interruptContext.externalWakeUpSource;
+    _DebugState.ldoSenseValue = IO_LDO_SENSE_GetValue();
+    UI_updateDebugDisplay();
+
     // Wait for the oscillator to stabilize
     while (OSCSTATbits.HFIOFS == 0);
 
-    if (context.sleep.wakeUpReason == System_WakeUpReason_PowerInputChanged) {
-        checkLDOSense();
-        measureVDD();
-        updateBatteryLevel();
+    if (System_interruptContext.externalWakeUpSource) {
+        System_interruptContext.externalWakeUpSource = false;
+        return System_SleepResult_WakeUpFromExternalSource;
     }
+
+    return System_SleepResult_WakeUpFromInternalSource;
 }
 
 inline bool System_isRunningFromBackupBattery()
 {
-    return context.monitoring.onBatteryPower;
+    return IO_LDO_SENSE_GetValue() == 0;
 }
 
 uint16_t System_getVDDMilliVolts()

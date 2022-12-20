@@ -77,8 +77,8 @@ void ADC_Initialize(void)
     // ADRESH 0;
     ADRESH = 0x00;
 
-    // GO_nDONE stop; ADON enabled; CHS AN0;
-    ADCON0 = 0x01;
+    // GO_nDONE stop; ADON enabled; CHS FVR;
+    ADCON0 = 0x7D;
 
     // Enabling ADC interrupt.
     PIE1bits.ADIE = 1;

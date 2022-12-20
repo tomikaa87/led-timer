@@ -54,7 +54,7 @@ static inline bool getStateFromSchedule()
 
 void OutputController_toggle()
 {
-    puts("OC:toggle");
+//    puts("OC:toggle");
 
     context.outputEnabled = !context.outputEnabled;
     OutputController_updateState();
@@ -70,11 +70,12 @@ void OutputController_task()
         context.outputShouldBeEnabled = shouldEnableOutput;
         context.outputEnabled = shouldEnableOutput;
 
-        puts(shouldEnableOutput ? "OC:outputOn" : "OC:outputOff");
+//        puts(shouldEnableOutput ? "OC:outputOn" : "OC:outputOff");
 
         updateOutputState = true;
     }
 
+    // TODO check why it this needed
     // Update the output states periodically
     if (Clock_getElapsedFastTicks(context.lastOutputStateUpdateTicks) >= 50) {
         context.lastOutputStateUpdateTicks = Clock_getFastTicks();

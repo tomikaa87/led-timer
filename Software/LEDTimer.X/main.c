@@ -70,17 +70,19 @@ void __interrupt() isr(void)
         // RA0 IOC - SW1
         if (IOCAF0) {
             IOCAF0 = 0;
+            System_handleExternalWakeUp();
         }
 
         // RA1 IOC - SW2
         if (IOCAF1) {
             IOCAF1 = 0;
+            System_handleExternalWakeUp();
         }
 
         // RA2 IOC - LDO_SENSE
         if (IOCAF2) {
             IOCAF2 = 0;
-            System_handleLDOSenseInterrupt();
+            System_handleExternalWakeUp();
         }
     }
 
@@ -185,45 +187,76 @@ void main(void)
 
     System_onWakeUp(System_WakeUpReason_Startup);
 
+    bool runHeavyTasks = true;
+
+    Clock_Ticks lastTicks = 0;
+
+    System_TaskResult systemTaskResult = {
+        .action = System_TaskResult_NoActionNeeded,
+        .powerInputChanged = false
+    };
+
     while (1)
     {
-        uint8_t keyCode = Keypad_task();
-#if 0
-        if (keyCode != 0) {
-            printf(
-                "Keys(%02X): %1s %1s %1s %s\r\n",
-                keyCode,
-                keyCode & Keypad_Key1 ? "1" : "",
-                keyCode & Keypad_Key2 ? "2" : "",
-                keyCode & Keypad_Key3 ? "3" : "",
-                keyCode & Keypad_Hold ? "Hold" : ""
-            );
-        }
-#endif
-
-        UI_keyEvent(keyCode);
-
-        System_TaskResult systemTaskResult = System_task();
-
-        if (systemTaskResult.powerInputChanged) {
-            UI_setExternalEvent(UI_ExternalEvent_PowerInputChanged);
+        if (Clock_getTicks() != lastTicks) {
+            lastTicks = Clock_getTicks();
+            UI_updateDebugDisplay();
         }
 
-        if (context.adcConversionFinished) {
-            context.adcConversionFinished = false;
-            UI_setExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
+        if (runHeavyTasks) {
+            uint8_t keyCode = Keypad_task();
+    #if 0
+            if (keyCode != 0) {
+                printf(
+                    "Keys(%02X): %1s %1s %1s %s\r\n",
+                    keyCode,
+                    keyCode & Keypad_Key1 ? "1" : "",
+                    keyCode & Keypad_Key2 ? "2" : "",
+                    keyCode & Keypad_Key3 ? "3" : "",
+                    keyCode & Keypad_Hold ? "Hold" : ""
+                );
+            }
+    #endif
+
+            UI_keyEvent(keyCode);
+
+            systemTaskResult = System_task();
+
+            if (systemTaskResult.powerInputChanged) {
+                UI_setExternalEvent(UI_ExternalEvent_PowerInputChanged);
+            }
+
+            if (context.adcConversionFinished) {
+                context.adcConversionFinished = false;
+                UI_setExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
+            }
+
+            if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
+                UI_setExternalEvent(UI_ExternalEvent_SystemGoingToSleep);
+            }
+
+            UI_task();
         }
 
-        if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
-            UI_setExternalEvent(UI_ExternalEvent_SystemGoingToSleep);
-        }
-
-        UI_task();
         OutputController_task();
 
         if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
-            System_sleep();
-            UI_setExternalEvent(UI_ExternalEvent_SystemWakeUp);
+            if (runHeavyTasks) {
+                ++_DebugState.heavyTaskUpdateValue;
+            }
+
+            System_SleepResult sleepResult = System_sleep();
+
+            runHeavyTasks =
+                sleepResult == System_SleepResult_WakeUpFromExternalSource;
+
+            if (runHeavyTasks) {
+                UI_setExternalEvent(UI_ExternalEvent_SystemWakeUp);
+                ++_DebugState.heavyTaskUpdateValue;
+            } else {
+                // Go back to sleep without running System_task()
+                systemTaskResult.action = System_TaskResult_EnterSleepMode;
+            }
         }
     }
 }

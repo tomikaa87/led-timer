@@ -108,6 +108,54 @@ static struct UIContext {
     .externalEvents = 0
 };
 
+DebugState _DebugState = {
+    .sleeping = false,
+    .externalWakeUp = false,
+    .ldoSenseValue = false,
+    .updateValue = 0,
+    .heavyTaskUpdateValue = 0
+};
+
+void UI_updateDebugDisplay()
+{
+    static const uint8_t Page = 1;
+
+    SSD1306_enablePageAddressing();
+    SSD1306_setStartColumn(0);
+    SSD1306_setPage(Page);
+
+    // First column pixels:
+    //  0: sleeping (white = true)
+
+    uint8_t testData[2] = { 0 };
+
+    if (++_DebugState.updateValue >= 4) {
+        _DebugState.updateValue = 0;
+    }
+
+    if (_DebugState.heavyTaskUpdateValue >= 4) {
+        _DebugState.heavyTaskUpdateValue = 0;
+    }
+
+    testData[0] =
+        (_DebugState.sleeping            ? (1 << 0) : 0)
+        | (_DebugState.externalWakeUp    ? (1 << 1) : 0)
+        | (_DebugState.ldoSenseValue     ? (1 << 2) : 0)
+        | (uint8_t)((_DebugState.heavyTaskUpdateValue & 0b11) << 4)
+        | (uint8_t)((_DebugState.updateValue & 0b11) << 6)
+        ;
+
+    for (uint8_t i = 0; i < sizeof(testData) * 2; ++i) {
+        // Every other column is a separator
+        if ((i & 1) != 0) {
+            const uint8_t FF = 0xff;
+            SSD1306_sendData(&FF, 1, 0, false);
+        } else {
+            SSD1306_sendData(testData + (i >> 1), 1, 0, false);
+        }
+    }
+}
+
 static void updateScreen(const bool redraw)
 {
     switch (context.screen) {
@@ -122,6 +170,8 @@ static void updateScreen(const bool redraw)
         default:
             break;
     }
+
+    UI_updateDebugDisplay();
 }
 
 static bool wakeUpDisplay()
@@ -129,7 +179,7 @@ static bool wakeUpDisplay()
     context.displayTimer = Clock_getFastTicks();
 
     if (!context.displayOn) {
-        puts("UI:wakeUp");
+//        puts("UI:wakeUp");
 
         context.displayOn = true;
 
@@ -161,7 +211,7 @@ void UI_task()
 {
     // Check external events
     if (context.externalEvents & UI_ExternalEvent_SystemWakeUp) {
-        // TODO
+        // TODO handle wake up events
     }
     if (context.externalEvents & UI_ExternalEvent_PowerInputChanged) {
         wakeUpDisplay();
@@ -173,7 +223,7 @@ void UI_task()
     if (context.externalEvents & UI_ExternalEvent_SystemGoingToSleep) {
         // Turn off the display immediately to conserve power
         if (context.displayOn) {
-            puts("UI:displayOff(->sleep)");
+//            puts("UI:displayOff(->sleep)");
 
             context.displayOn = false;
             SSD1306_setDisplayEnabled(false);
@@ -191,7 +241,7 @@ void UI_task()
             context.forceUpdate
             || (Clock_getElapsedFastTicks(context.updateTimer) >= Config_UI_UpdateIntervalTicks)
         ) {
-            puts(context.forceUpdate ? "UI:forcedUpdate" : "UI:update");
+//            puts(context.forceUpdate ? "UI:forcedUpdate" : "UI:update");
 
             context.forceUpdate = false;
             context.updateTimer = Clock_getFastTicks();
@@ -203,10 +253,10 @@ void UI_task()
             Clock_getElapsedFastTicks(context.displayTimer)
                 >= Config_UI_DisplayTimeoutTicks
         ) {
-            puts("UI:displayOff");
+//            puts("UI:displayOff");
 
             context.displayOn = false;
-            SSD1306_setDisplayEnabled(false);
+//            SSD1306_setDisplayEnabled(false);
         }
     }
 }
@@ -238,7 +288,7 @@ void UI_keyEvent(uint8_t keyCode)
             if (!MainScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Show Settings
                 if (keyCode == Keypad_Key1) {
-                    puts("UI:ShowSettings");
+//                    puts("UI:ShowSettings");
                     SettingsScreen_init();
                     switchToScreen(UI_Screen_Settings);
                 }
@@ -249,7 +299,7 @@ void UI_keyEvent(uint8_t keyCode)
             if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Back to Main
                 if (keyCode == Keypad_Key1) {
-                    puts("UI:BackToMain");
+//                    puts("UI:BackToMain");
                     switchToScreen(UI_Screen_Main);
                 }
             }

@@ -21,6 +21,7 @@
 #pragma once
 
 #include "Clock.h"
+#include "mcc_generated_files/pin_manager.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,8 +30,7 @@ typedef enum
 {
     System_WakeUpReason_None,
     System_WakeUpReason_Startup,
-    System_WakeUpReason_KeyPress,
-    System_WakeUpReason_PowerInputChanged
+    System_WakeUpReason_KeyPress
 } System_WakeUpReason;
 
 typedef enum
@@ -45,6 +45,12 @@ typedef struct
     bool powerInputChanged;
 } System_TaskResult;
 
+typedef enum
+{
+    System_SleepResult_WakeUpFromExternalSource,
+    System_SleepResult_WakeUpFromInternalSource
+} System_SleepResult;
+
 typedef volatile struct
 {
     struct
@@ -57,6 +63,8 @@ typedef volatile struct
     {
         bool updated;
     } ldoSense;
+
+    bool externalWakeUpSource;
 } System_InterruptContext;
 
 #define System_handleADCInterrupt(RESULT) { \
@@ -68,6 +76,11 @@ typedef volatile struct
 #define System_handleLDOSenseInterrupt() { \
     extern volatile System_InterruptContext System_interruptContext; \
     System_interruptContext.ldoSense.updated = true; \
+}
+
+#define System_handleExternalWakeUp() { \
+    extern volatile System_InterruptContext System_interruptContext; \
+    System_interruptContext.externalWakeUpSource = true; \
 }
 
 void System_init(void);
@@ -89,8 +102,9 @@ inline System_WakeUpReason System_getLastWakeUpReason();
 /**
  * Puts the MCU into sleep mode. The system wakes up if there is an external
  * interrupt or the main clock timer (Timer1) overflows.
+ * @return Reason why the system has been woken up
  */
-void System_sleep(void);
+System_SleepResult System_sleep(void);
 
 /**
  * Indicates that the system is running on the backup battery by reading the

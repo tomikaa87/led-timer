@@ -23,6 +23,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef volatile struct
+{
+    bool sleeping;
+    bool externalWakeUp;
+    bool ldoSenseValue;
+    uint8_t updateValue;
+    uint8_t heavyTaskUpdateValue;
+} DebugState;
+
+void UI_updateDebugDisplay(void);
+
+extern DebugState _DebugState;
+
 /**
  * Initializes the display and the internal logic.
  */
