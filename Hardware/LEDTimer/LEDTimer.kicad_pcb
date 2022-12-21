@@ -634,7 +634,7 @@
 
   (footprint "LEDTimer:EVQ9P701P" (layer "F.Cu")
     (tedit 0) (tstamp 815dddcc-3096-4406-9bfe-6de035d26ca9)
-    (at 150.3 103.975 180)
+    (at 150.3 104.3 180)
     (property "Sheetfile" "LEDTimer.kicad_sch")
     (property "Sheetname" "")
     (path "/dcde6f5e-7db5-4041-b0a9-497b30b5eb2d")
@@ -1072,7 +1072,7 @@
 
   (footprint "LEDTimer:EVQ9P701P" (layer "F.Cu")
     (tedit 0) (tstamp aff890ae-8cf1-42a8-b635-f96a70b1ae24)
-    (at 140.3 103.975 180)
+    (at 140.3 104.3 180)
     (property "Sheetfile" "LEDTimer.kicad_sch")
     (property "Sheetname" "")
     (path "/99d73699-42b3-4b7b-be6f-d198680a7a80")
@@ -1224,7 +1224,7 @@
 
   (footprint "LEDTimer:EVQ9P701P" (layer "F.Cu")
     (tedit 0) (tstamp bd1bee4c-9aa4-4616-a25d-2cb4053e0fb7)
-    (at 130.3 103.975 180)
+    (at 130.3 104.3 180)
     (property "Sheetfile" "LEDTimer.kicad_sch")
     (property "Sheetname" "")
     (path "/61ef768e-29ad-4e81-a904-4b22416bcd0a")
