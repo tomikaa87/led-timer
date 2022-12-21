@@ -68,6 +68,7 @@ void EUSART_DefaultErrorHandler(void);
 
 void EUSART_Initialize(void)
 {
+#if DEBUG_ENABLE_PRINT
     // Set the EUSART module to the options selected in the user interface.
 
     // ABDOVF no_overflow; SCKP Non-Inverted; BRG16 16bit_generator; WUE disabled; ABDEN disabled;
@@ -92,7 +93,9 @@ void EUSART_Initialize(void)
 #endif
 
     eusartRxLastError.status = 0;
-
+#else
+    RCSTA = 0;
+#endif
 }
 
 bool EUSART_is_tx_ready(void)
@@ -135,16 +138,23 @@ uint8_t EUSART_Read(void)
 
 void EUSART_Write(uint8_t txData)
 {
+    (void)txData;
+#if DEBUG_ENABLE_PRINT
     while(0 == PIR1bits.TXIF || TRMT == 0)
     {
     }
 
     TXREG = txData;    // Write the data byte to the USART.
+#endif
 }
 
 char getch(void)
 {
+#if DEBUG_ENABLE_PRINT
     return EUSART_Read();
+#else
+    return 0;
+#endif
 }
 
 void putch(char txData)

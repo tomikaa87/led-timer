@@ -189,7 +189,6 @@ void main(void)
 
     bool runHeavyTasks = true;
 
-    Clock_Ticks lastTicks = 0;
 
     System_TaskResult systemTaskResult = {
         .action = System_TaskResult_NoActionNeeded,
@@ -198,14 +197,17 @@ void main(void)
 
     while (1)
     {
+#if DEBUG_ENABLE
+        static Clock_Ticks lastTicks = 0;
         if (Clock_getTicks() != lastTicks) {
             lastTicks = Clock_getTicks();
             UI_updateDebugDisplay();
         }
+#endif
 
         if (runHeavyTasks) {
             uint8_t keyCode = Keypad_task();
-    #if 0
+    #if DEBUG_ENABLE_PRINT
             if (keyCode != 0) {
                 printf(
                     "Keys(%02X): %1s %1s %1s %s\r\n",
@@ -241,9 +243,11 @@ void main(void)
         OutputController_task();
 
         if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
+#if DEBUG_ENABLE
             if (runHeavyTasks) {
                 ++_DebugState.heavyTaskUpdateValue;
             }
+#endif
 
             System_SleepResult sleepResult = System_sleep();
 
@@ -252,7 +256,9 @@ void main(void)
 
             if (runHeavyTasks) {
                 UI_setExternalEvent(UI_ExternalEvent_SystemWakeUp);
+#if DEBUG_ENABLE
                 ++_DebugState.heavyTaskUpdateValue;
+#endif
             } else {
                 // Go back to sleep without running System_task()
                 systemTaskResult.action = System_TaskResult_EnterSleepMode;

@@ -108,6 +108,7 @@ static struct UIContext {
     .externalEvents = 0
 };
 
+#if DEBUG_ENABLE
 DebugState _DebugState = {
     .sleeping = false,
     .externalWakeUp = false,
@@ -155,6 +156,7 @@ void UI_updateDebugDisplay()
         }
     }
 }
+#endif
 
 static void updateScreen(const bool redraw)
 {
@@ -171,7 +173,9 @@ static void updateScreen(const bool redraw)
             break;
     }
 
+#if DEBUG_ENABLE
     UI_updateDebugDisplay();
+#endif
 }
 
 static bool wakeUpDisplay()
@@ -179,7 +183,9 @@ static bool wakeUpDisplay()
     context.displayTimer = Clock_getFastTicks();
 
     if (!context.displayOn) {
-//        puts("UI:wakeUp");
+#if DEBUG_ENABLE_PRINT
+        puts("UI:wakeUp");
+#endif
 
         context.displayOn = true;
 
@@ -223,10 +229,14 @@ void UI_task()
     if (context.externalEvents & UI_ExternalEvent_SystemGoingToSleep) {
         // Turn off the display immediately to conserve power
         if (context.displayOn) {
-//            puts("UI:displayOff(->sleep)");
+#if DEBUG_ENABLE_PRINT
+            puts("UI:displayOff(->sleep)");
+#endif
 
             context.displayOn = false;
+#if !DEBUG_ENABLE
             SSD1306_setDisplayEnabled(false);
+#endif
         }
 
         context.externalEvents = 0;
@@ -241,7 +251,9 @@ void UI_task()
             context.forceUpdate
             || (Clock_getElapsedFastTicks(context.updateTimer) >= Config_UI_UpdateIntervalTicks)
         ) {
-//            puts(context.forceUpdate ? "UI:forcedUpdate" : "UI:update");
+#if DEBUG_ENABLE_PRINT
+            puts(context.forceUpdate ? "UI:forcedUpdate" : "UI:update");
+#endif
 
             context.forceUpdate = false;
             context.updateTimer = Clock_getFastTicks();
@@ -253,10 +265,14 @@ void UI_task()
             Clock_getElapsedFastTicks(context.displayTimer)
                 >= Config_UI_DisplayTimeoutTicks
         ) {
-//            puts("UI:displayOff");
+#if DEBUG_ENABLE_PRINT
+            puts("UI:displayOff");
+#endif
 
             context.displayOn = false;
-//            SSD1306_setDisplayEnabled(false);
+#if !DEBUG_ENABLE
+            SSD1306_setDisplayEnabled(false);
+#endif
         }
     }
 }
@@ -271,7 +287,7 @@ void UI_keyEvent(uint8_t keyCode)
     bool hold = !!(keyCode & Keypad_Hold);
     keyCode = keyCode & (Keypad_Key1 | Keypad_Key2 | Keypad_Key3);
 
-#if 0
+#if DEBUG_ENABLE_PRINT
     printf("UI:keyEvent:%u %u\r\n", keyCode, hold);
 #endif
 
@@ -288,7 +304,9 @@ void UI_keyEvent(uint8_t keyCode)
             if (!MainScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Show Settings
                 if (keyCode == Keypad_Key1) {
-//                    puts("UI:ShowSettings");
+#if DEBUG_ENABLE_PRINT
+                    puts("UI:ShowSettings");
+#endif
                     SettingsScreen_init();
                     switchToScreen(UI_Screen_Settings);
                 }
@@ -299,7 +317,9 @@ void UI_keyEvent(uint8_t keyCode)
             if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Back to Main
                 if (keyCode == Keypad_Key1) {
-//                    puts("UI:BackToMain");
+#if DEBUG_ENABLE_PRINT
+                    puts("UI:BackToMain");
+#endif
                     switchToScreen(UI_Screen_Main);
                 }
             }

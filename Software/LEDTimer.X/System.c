@@ -100,6 +100,7 @@ void updateBatteryLevel()
         / (Config_System_VBatMaxMilliVolts - Config_System_VBatMinMilliVolts)
     );
 
+#if DEBUG_ENABLE_PRINT
     printf(
         "SYS:VDD=%u(ADC=%u),VBat=%u,L=%u\r\n",
         System_getVDDMilliVolts(),
@@ -107,6 +108,7 @@ void updateBatteryLevel()
         System_getVBatMilliVolts(),
         context.monitoring.batteryLevel
     );
+#endif
 }
 
 void System_init()
@@ -183,7 +185,7 @@ inline System_WakeUpReason System_getLastWakeUpReason()
 
 System_SleepResult System_sleep()
 {
-#if 0
+#if DEBUG_ENABLE_PRINT
     printf(
         "SYS:SLP,T=%u,FT=%u,MSM=%u,SEC=%u\r\n",
         Clock_getTicks(),
@@ -202,10 +204,12 @@ System_SleepResult System_sleep()
 
     context.sleep.wakeUpReason = System_WakeUpReason_None;
 
+#if DEBUG_ENABLE
     _DebugState.sleeping = true;
     _DebugState.externalWakeUp = false;
     _DebugState.ldoSenseValue = IO_LDO_SENSE_GetValue();
     UI_updateDebugDisplay();
+#endif
 
     SLEEP();
 
@@ -216,10 +220,12 @@ System_SleepResult System_sleep()
     // Clear the flag so the next task() call can update it properly
     context.sleep.enabled = false;
 
+#if DEBUG_ENABLE
     _DebugState.sleeping = false;
     _DebugState.externalWakeUp = System_interruptContext.externalWakeUpSource;
     _DebugState.ldoSenseValue = IO_LDO_SENSE_GetValue();
     UI_updateDebugDisplay();
+#endif
 
     // Wait for the oscillator to stabilize
     while (OSCSTATbits.HFIOFS == 0);

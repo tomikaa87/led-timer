@@ -138,7 +138,7 @@
         <property key="call-prologues" value="false"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
-        <property key="define-macros" value=""/>
+        <property key="define-macros" value="DEBUG_ENABLE_PRINT=0;DEBUG_ENABLE=0"/>
         <property key="disable-optimizations" value="false"/>
         <property key="extra-include-directories"
                   value="/Applications/microchip/xc8/v2.40/pic/include/proc;/opt/microchip/xc8/v2.40/pic/include/proc;/opt/microchip/xc8/v2.40/pic/include"/>

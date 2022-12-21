@@ -54,7 +54,9 @@ static inline bool getStateFromSchedule()
 
 void OutputController_toggle()
 {
-//    puts("OC:toggle");
+#if DEBUG_ENABLE_PRINT
+    puts("OC:toggle");
+#endif
 
     context.outputEnabled = !context.outputEnabled;
     OutputController_updateState();
@@ -70,7 +72,9 @@ void OutputController_task()
         context.outputShouldBeEnabled = shouldEnableOutput;
         context.outputEnabled = shouldEnableOutput;
 
-//        puts(shouldEnableOutput ? "OC:outputOn" : "OC:outputOff");
+#if DEBUG_ENABLE_PRINT
+        puts(shouldEnableOutput ? "OC:outputOn" : "OC:outputOff");
+#endif
 
         updateOutputState = true;
     }
@@ -94,7 +98,7 @@ inline bool OutputController_isOutputEnabled()
 
 void OutputController_updateState()
 {
-#if 0
+#if DEBUG_ENABLE_PRINT
     printf("OC:output=%u\r\n", context.outputEnabled ? context.brightness : 0);
 #endif
 

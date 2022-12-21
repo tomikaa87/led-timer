@@ -83,7 +83,9 @@ void Settings_loadDefaults()
 
 void Settings_load()
 {
-//    puts("STNGS:load");
+#if DEBUG_ENABLE_PRINT
+    puts("STNGS:load");
+#endif
 
     loadData(
         Config_Settings_DataBaseAddress,
@@ -100,14 +102,18 @@ void Settings_load()
     );
 
     if (loadedChecksum != calculatedChecksum) {
-//        puts("STNGS:checksumError");
+#if DEBUG_ENABLE_PRINT
+        puts("STNGS:checksumError");
+#endif
         Settings_loadDefaults();
     }
 }
 
 void Settings_save()
 {
-//    puts("STNGS:load");
+#if DEBUG_ENABLE_PRINT
+    puts("STNGS:load");
+#endif
 
     Settings_data._checksum = 0;
 

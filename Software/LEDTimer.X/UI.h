@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#if DEBUG_ENABLE
 typedef volatile struct
 {
     bool sleeping;
@@ -35,6 +36,7 @@ typedef volatile struct
 void UI_updateDebugDisplay(void);
 
 extern DebugState _DebugState;
+#endif
 
 /**
  * Initializes the display and the internal logic.
