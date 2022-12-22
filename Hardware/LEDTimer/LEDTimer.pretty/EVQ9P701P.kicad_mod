@@ -17,10 +17,10 @@
   (fp_rect (start -0.85 -2.25) (end 0.85 -1.6) (layer "F.SilkS") (width 0.12) (fill none) (tstamp e2dbc1f6-28b2-4a07-bc87-6548c3b58b6d))
   (fp_rect (start -3 -1.6) (end 3 1.6) (layer "F.SilkS") (width 0.12) (fill none) (tstamp feb0d0c6-f826-44f9-a35f-1e88c0c1b544))
   (fp_rect (start -3.1 -2.35) (end 3.1 1.7) (layer "F.CrtYd") (width 0.05) (fill none) (tstamp e6e31eb5-4431-4b89-b3fd-fd9342fc00ac))
-  (pad "1" thru_hole circle (at 2.025 -0.8) (size 0.8 0.8) (drill 0.61) (layers *.Cu *.Mask) (tstamp 08ca750f-c742-4408-aaca-ee0d45cce95e))
+  (pad "1" thru_hole circle (at 2.025 -0.8) (size 0.9 0.9) (drill 0.61) (layers *.Cu *.Mask) (tstamp 08ca750f-c742-4408-aaca-ee0d45cce95e))
   (pad "1" smd rect (at -1.925 -0.725) (size 1.65 1.05) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 5b81f9b5-6479-4762-a828-8ad0f096ffe7))
   (pad "1" smd rect (at 1.925 -0.725) (size 1.65 1.05) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 9a31eb8d-999f-4a08-a88a-c6e65ab6049b))
-  (pad "1" thru_hole circle (at -2.025 -0.8) (size 0.8 0.8) (drill 0.61) (layers *.Cu *.Mask) (tstamp 9c738a70-26bd-4a3d-a3d6-b876012083ca))
+  (pad "1" thru_hole circle (at -2.025 -0.8) (size 0.9 0.9) (drill 0.61) (layers *.Cu *.Mask) (tstamp 9c738a70-26bd-4a3d-a3d6-b876012083ca))
   (pad "2" smd rect (at 1.925 0.725) (size 1.65 1.05) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 14c30363-001a-4b00-ad6c-84e651a17a3e))
   (pad "2" smd rect (at -1.925 0.725) (size 1.65 1.05) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp e59c28d2-423a-4cb7-83ad-fb164947bd4f))
   (model "${KIPRJMOD}/YD-3414 - Side SMD Switch .stp"

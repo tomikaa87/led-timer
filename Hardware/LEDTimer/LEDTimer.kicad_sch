@@ -2043,8 +2043,8 @@
   (symbol (lib_id "Connector:Conn_01x02_Male") (at 20.32 41.91 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 5fea63b6-f6d3-4655-9ba8-29ebbdc154a7)
-    (property "Reference" "J3" (id 0) (at 20.955 36.195 0))
-    (property "Value" "PWR_IN" (id 1) (at 20.955 38.735 0))
+    (property "Reference" "J3" (id 0) (at 20.955 36.83 0))
+    (property "Value" "PWR" (id 1) (at 20.955 39.37 0))
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Horizontal" (id 2) (at 20.32 41.91 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -2868,7 +2868,7 @@
       (reference "J2") (unit 1) (value "LED") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Horizontal")
     )
     (path "/5fea63b6-f6d3-4655-9ba8-29ebbdc154a7"
-      (reference "J3") (unit 1) (value "PWR_IN") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Horizontal")
+      (reference "J3") (unit 1) (value "PWR") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Horizontal")
     )
     (path "/ca50989c-806e-4138-b3ff-f2b2f96652a0"
       (reference "JP1") (unit 1) (value "OLED1") (footprint "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm")
