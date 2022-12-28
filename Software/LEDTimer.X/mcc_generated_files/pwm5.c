@@ -61,11 +61,11 @@
     // PWM5POL active_hi; PWM5EN enabled;
     PWM5CON = 0x80;
 
-    // PWM5DCH 31;
-    PWM5DCH = 0x1F;
+    // PWM5DCH 0;
+    PWM5DCH = 0x00;
 
-    // PWM5DCL 3;
-    PWM5DCL = 0xC0;
+    // PWM5DCL 0;
+    PWM5DCL = 0x00;
 
     // Select timer
     PWMTMRSbits.P5TSEL = 1;

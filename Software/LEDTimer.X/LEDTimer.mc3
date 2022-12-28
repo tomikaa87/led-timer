@@ -2120,7 +2120,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM5" name="ccpr"/>
-         <value>127</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM5" name="clockFreq"/>
@@ -2128,7 +2128,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM5" name="dutyCycle"/>
-         <value>50</value>
+         <value>0.0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM5" name="intermoduleEnable"/>
@@ -2160,7 +2160,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM5" name="pwmdc"/>
-         <value>127</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="PWM5" name="timerselpresence"/>
@@ -2216,11 +2216,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM5" registerAlias="PWMDCH"/>
-         <value>31</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM5" registerAlias="PWMDCL"/>
-         <value>192</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PWM5" registerAlias="PWMTMRS"/>
@@ -2240,11 +2240,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM5" registerAlias="PWMDCH" settingAlias="PWMDCH"/>
-         <value>31</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM5" registerAlias="PWMDCL" settingAlias="PWMDCL"/>
-         <value>3</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PWM5" registerAlias="PWMTMRS" settingAlias="CTSEL"/>
@@ -4890,7 +4890,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/pwm5.h</file>
-         <hash>17575c0202cef2edf6cab97bbdc2765eb5ef8a6460a918fa9d60a1a683884159</hash>
+         <hash>b6d71e5bac08d7a6dbb74f147d5666fe82ab6e84f08b1dbadfc10e5584367172</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/fvr.c</file>
@@ -4902,7 +4902,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/pwm5.c</file>
-         <hash>b0e24fc303ecd7a34fd0228e8ee0cbbbfb6f606134991b42022edb7d9738f990</hash>
+         <hash>1ae57c4d6b58b28317c3bb3effffc375a6240a95b4695c33dc8276a5a3c76bf3</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/memory.h</file>
