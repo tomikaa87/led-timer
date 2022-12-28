@@ -19,6 +19,10 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
 
 A custom-made PCB and a 3D-printable enclosure is still in development and should be published soon.
 
+# PCB
+
+The interactive BOM can be accessed ![HERE](/Hardware/LEDTimer/bom/ibom.html)
+
 # Images of the prototype
 
 ## Main screen
