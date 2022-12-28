@@ -2631,11 +2631,11 @@
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid c2cb0ccd-2078-4e7c-97f9-6201b7726a1c)
     (property "Reference" "U2" (id 0) (at 149.225 93.98 0))
-    (property "Value" "PIC16F1825" (id 1) (at 149.225 96.52 0))
+    (property "Value" "PIC16F18326" (id 1) (at 149.225 96.52 0))
     (property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" (id 2) (at 150.495 120.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/41440a.pdf" (id 3) (at 150.495 123.19 0)
+    (property "Datasheet" "http://ww1.microchip.com/downloads/en/devicedoc/40001839b.pdf" (id 3) (at 150.495 123.19 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid ec79f409-1a8a-4ffa-ad7b-36bbc63c9f74))
@@ -3094,7 +3094,7 @@
       (reference "U1") (unit 1) (value "AP7383-36WW7") (footprint "Package_TO_SOT_SMD:SOT-23-5")
     )
     (path "/c2cb0ccd-2078-4e7c-97f9-6201b7726a1c"
-      (reference "U2") (unit 1) (value "PIC16F1825") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
+      (reference "U2") (unit 1) (value "PIC16F18326") (footprint "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm")
     )
     (path "/0f86b760-eddb-4ded-9e00-18319adfd610"
       (reference "U3") (unit 1) (value "Display_128x64_096_I2C") (footprint "LEDTimer:Display_128x64_096_I2C")
