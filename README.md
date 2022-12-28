@@ -21,7 +21,18 @@ A custom-made PCB and a 3D-printable enclosure is still in development and shoul
 
 # PCB
 
+The first version of the PCB is a 4-layer design that can be manufactured for $2 at JLC PCB.
+It's almost as small as the 0.96" SSD1306 OLED display module itself. 
+
 The interactive BOM can be accessed ![HERE](/Hardware/LEDTimer/bom/ibom.html)
+
+## 3D renders of the PCB
+
+![Front side](/Images/pcb-front.jpg)
+
+![Front side with display](/Images/pcb-front-display.jpg)
+
+![Back side](/Images/pcb-back.jpg)
 
 # Images of the prototype
 
