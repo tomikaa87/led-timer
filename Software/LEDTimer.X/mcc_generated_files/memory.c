@@ -122,7 +122,7 @@ int8_t FLASH_WriteBlock(uint16_t writeAddr, uint16_t *flashWordArray)
         NVMADRH = ((writeAddr & 0xFF00) >> 8);
 
 	// Load data in current address
-        NVMDATL = flashWordArray[i];
+        NVMDATL = (uint8_t)(flashWordArray[i]);
         NVMDATH = ((flashWordArray[i] & 0xFF00) >> 8);
 
         if(i == (WRITE_FLASH_BLOCKSIZE-1))

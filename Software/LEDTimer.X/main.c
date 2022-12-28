@@ -79,6 +79,12 @@ void __interrupt() isr(void)
             System_handleExternalWakeUp();
         }
 
+        // RC5 IOC - SW3
+        if (IOCCF5) {
+            IOCCF5 = 0;
+            System_handleExternalWakeUp();
+        }
+
         // RA2 IOC - LDO_SENSE
         if (IOCAF2) {
             IOCAF2 = 0;
