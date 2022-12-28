@@ -11,11 +11,11 @@
     This is the generated driver implementation file for the MEMORY driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
   @Description
-    This source file provides implementations of driver APIs for MEMORY.
+    This file provides implementations of driver APIs for MEMORY.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
-        Device            :  PIC16F1825
-        Driver Version    :  2.02
+        Device            :  PIC16F18326
+        Driver Version    :  2.0.2
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.36 and above
         MPLAB             :  MPLAB X 6.00
@@ -60,17 +60,16 @@ uint16_t FLASH_ReadWord(uint16_t flashAddr)
     uint8_t GIEBitValue = INTCONbits.GIE;   // Save interrupt enable
 
     INTCONbits.GIE = 0;     // Disable interrupts
-    EEADRL = (flashAddr & 0x00FF);
-    EEADRH = ((flashAddr & 0xFF00) >> 8);
+    NVMADRL = (flashAddr & 0x00FF);
+    NVMADRH = ((flashAddr & 0xFF00) >> 8);
 
-    EECON1bits.CFGS = 0;    // Deselect Configuration space
-    EECON1bits.EEPGD = 1;   // Select Program Memory
-    EECON1bits.RD = 1;      // Initiate Read
+    NVMCON1bits.NVMREGS = 0;    // Deselect Configuration space
+    NVMCON1bits.RD = 1;      // Initiate Read
     NOP();
     NOP();
-    INTCONbits.GIE = GIEBitValue;   // Restore interrupt enable
+    INTCONbits.GIE = GIEBitValue;	// Restore interrupt enable
 
-    return ((uint16_t)((EEDATH << 8) | EEDATL));
+    return ((uint16_t)((NVMDATH << 8) | NVMDATL));
 }
 
 void FLASH_WriteWord(uint16_t flashAddr, uint16_t *ramBuf, uint16_t word)
@@ -96,9 +95,8 @@ int8_t FLASH_WriteBlock(uint16_t writeAddr, uint16_t *flashWordArray)
 {
     uint16_t    blockStartAddr  = (uint16_t )(writeAddr & ((END_FLASH-1) ^ (ERASE_FLASH_BLOCKSIZE-1)));
     uint8_t     GIEBitValue = INTCONbits.GIE;   // Save interrupt enable
-    uint8_t     i,j,numberOfWriteBlocks=0,dataCounter=0;
+    uint8_t i;
 
-    numberOfWriteBlocks = (ERASE_FLASH_BLOCKSIZE/WRITE_FLASH_BLOCKSIZE);
 
     // Flash write must start at the beginning of a row
     if( writeAddr != blockStartAddr )
@@ -106,48 +104,43 @@ int8_t FLASH_WriteBlock(uint16_t writeAddr, uint16_t *flashWordArray)
         return -1;
     }
 
-    INTCONbits.GIE = 0;     // Disable interrupts
+    INTCONbits.GIE = 0;         // Disable interrupts
 
     // Block erase sequence
     FLASH_EraseBlock(writeAddr);
 
-    for(j=0; j<numberOfWriteBlocks; j++)
+    // Block write sequence
+    NVMCON1bits.NVMREGS = 0;    // Deselect Configuration space
+    NVMCON1bits.WREN = 1;    // Enable wrties
+    NVMCON1bits.LWLO = 1;    // Only load write latches
+
+    for (i=0; i<WRITE_FLASH_BLOCKSIZE; i++)
     {
-		// Block write sequence
-		EECON1bits.EEPGD = 1;   // Select Program Memory
-		EECON1bits.CFGS = 0;    // Deselect Configuration space
-		EECON1bits.WREN = 1;    // Enable writes
-		EECON1bits.LWLO = 1;    // Only load write latches
+        // Load lower 8 bits of write address
+        NVMADRL = (writeAddr & 0xFF);
+        // Load upper 6 bits of write address
+        NVMADRH = ((writeAddr & 0xFF00) >> 8);
 
-		for (i=0; i<WRITE_FLASH_BLOCKSIZE; i++)
-		{
-			// Load lower 8 bits of write address
-			EEADRL = (writeAddr & 0xFF);
-			// Load upper 6 bits of write address
-			EEADRH = ((writeAddr & 0xFF00) >> 8);
+	// Load data in current address
+        NVMDATL = flashWordArray[i];
+        NVMDATH = ((flashWordArray[i] & 0xFF00) >> 8);
 
-			// Load data in current address
-			EEDATL = (uint8_t)(flashWordArray[dataCounter]);
-			EEDATH = ((flashWordArray[dataCounter] & 0xFF00) >> 8);
-			dataCounter++;
+        if(i == (WRITE_FLASH_BLOCKSIZE-1))
+        {
+            // Start Flash program memory write
+            NVMCON1bits.LWLO = 0;
+        }
 
-			if(i == (WRITE_FLASH_BLOCKSIZE-1))
-			{
-				// Start Flash program memory write
-				EECON1bits.LWLO = 0;
-			}
+        NVMCON2 = 0x55;
+        NVMCON2 = 0xAA;
+        NVMCON1bits.WR = 1;
+        NOP();
+        NOP();
 
-			EECON2 = 0x55;
-			EECON2 = 0xAA;
-			EECON1bits.WR = 1;
-			NOP();
-			NOP();
+	    writeAddr++;
+    }
 
-			writeAddr++;
-		}
-	}
-
-    EECON1bits.WREN = 0; // Disable writes
+    NVMCON1bits.WREN = 0;       // Disable writes
     INTCONbits.GIE = GIEBitValue;   // Restore interrupt enable
 
     return 0;
@@ -157,68 +150,68 @@ void FLASH_EraseBlock(uint16_t startAddr)
 {
     uint8_t GIEBitValue = INTCONbits.GIE;   // Save interrupt enable
 
-    INTCONbits.GIE = 0;     // Disable interrupts
+
+    INTCONbits.GIE = 0; // Disable interrupts
     // Load lower 8 bits of erase address boundary
-    EEADRL = (startAddr & 0xFF);
+    NVMADRL = (startAddr & 0xFF);
     // Load upper 6 bits of erase address boundary
-    EEADRH = ((startAddr & 0xFF00) >> 8);
+    NVMADRH = ((startAddr & 0xFF00) >> 8);
 
     // Block erase sequence
-    EECON1bits.CFGS = 0;    // Deselect Configuration space
-    EECON1bits.EEPGD = 1;   // Select Program Memory
-    EECON1bits.FREE = 1;    // Specify an erase operation
-    EECON1bits.WREN = 1;    // Allows erase cycles
+    NVMCON1bits.NVMREGS = 0;    // Deselect Configuration space
+    NVMCON1bits.FREE = 1;    // Specify an erase operation
+    NVMCON1bits.WREN = 1;    // Allows erase cycles
 
     // Start of required sequence to initiate erase
-    EECON2 = 0x55;
-    EECON2 = 0xAA;
-    EECON1bits.WR = 1;      // Set WR bit to begin erase
+    NVMCON2 = 0x55;
+    NVMCON2 = 0xAA;
+    NVMCON1bits.WR = 1;      // Set WR bit to begin erase
     NOP();
     NOP();
 
-    EECON1bits.WREN = 0;       // Disable writes
-    INTCONbits.GIE = GIEBitValue;   // Restore interrupt enable
+    NVMCON1bits.WREN = 0;       // Disable writes
+    INTCONbits.GIE = GIEBitValue;	// Restore interrupt enable
 }
 
 /**
   Section: Data EEPROM Module APIs
 */
 
-void DATAEE_WriteByte(uint8_t bAdd, uint8_t bData)
+void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData)
 {
-    uint8_t GIEBitValue = 0;
+    uint8_t GIEBitValue = INTCONbits.GIE;
 
-    EEADRL = (uint8_t)(bAdd & 0x0ff);    // Data Memory Address to write
-    EEDATL = bData;             // Data Memory Value to write
-    EECON1bits.EEPGD = 0;   // Point to DATA memory
-    EECON1bits.CFGS = 0;        // Deselect Configuration space
-    EECON1bits.WREN = 1;        // Enable writes
-
-    GIEBitValue = INTCONbits.GIE;
-    INTCONbits.GIE = 0;     // Disable INTs
-    EECON2 = 0x55;
-    EECON2 = 0xAA;
-    EECON1bits.WR = 1;      // Set WR bit to begin write
+    NVMADRH = ((bAdd >> 8) & 0xFF);
+    NVMADRL = (bAdd & 0xFF);
+    NVMDATL = bData;
+    NVMCON1bits.NVMREGS = 1;
+    NVMCON1bits.WREN = 1;
+    INTCONbits.GIE = 0;     // Disable interrupts
+    NVMCON2 = 0x55;
+    NVMCON2 = 0xAA;
+    NVMCON1bits.WR = 1;
     // Wait for write to complete
-    while (EECON1bits.WR)
+    while (NVMCON1bits.WR)
     {
     }
 
-    EECON1bits.WREN = 0;    // Disable writes
-    INTCONbits.GIE = GIEBitValue;
+    NVMCON1bits.WREN = 0;
+    INTCONbits.GIE = GIEBitValue;   // restore interrupt enable
 }
 
-uint8_t DATAEE_ReadByte(uint8_t bAdd)
+uint8_t DATAEE_ReadByte(uint16_t bAdd)
 {
-    EEADRL = (uint8_t)(bAdd & 0x0ff);    // Data Memory Address to read
-    EECON1bits.CFGS = 0;    // Deselect Configuration space
-    EECON1bits.EEPGD = 0;   // Point to DATA memory
-    EECON1bits.RD = 1;      // EE Read
+    NVMADRH = ((bAdd >> 8) & 0xFF);
+    NVMADRL = (bAdd & 0xFF);
+    NVMCON1bits.NVMREGS = 1;
+    NVMCON1bits.RD = 1;
     NOP();  // NOPs may be required for latency at high frequencies
     NOP();
 
-    return (EEDATL);
+    return (NVMDATL);
 }
+
+
 /**
  End of File
 */

@@ -24,7 +24,7 @@
 #include "System.h"
 #include "Types.h"
 
-#include "mcc_generated_files/epwm2.h"
+#include "mcc_generated_files/pwm5.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -102,7 +102,7 @@ void OutputController_updateState()
     printf("OC:output=%u\r\n", context.outputEnabled ? context.brightness : 0);
 #endif
 
-    EPWM2_LoadDutyValue(
+    PWM5_LoadDutyValue(
         (context.outputEnabled && !System_isRunningFromBackupBattery())
             ? Settings_data.output.brightness
             : 0

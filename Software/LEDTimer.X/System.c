@@ -228,7 +228,11 @@ System_SleepResult System_sleep()
 #endif
 
     // Wait for the oscillator to stabilize
-    while (OSCSTATbits.HFIOFS == 0);
+    while (
+        OSCCON3bits.ORDY == 0
+        || OSCCON3bits.NOSCR == 0
+        || OSCSTAT1bits.HFOR == 0
+    );
 
     if (System_interruptContext.externalWakeUpSource) {
         System_interruptContext.externalWakeUpSource = false;

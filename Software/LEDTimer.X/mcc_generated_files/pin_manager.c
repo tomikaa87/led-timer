@@ -14,7 +14,7 @@
     This header file provides implementations for pin APIs for all pins selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
-        Device            :  PIC16F1825
+        Device            :  PIC16F18326
         Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.36 and above
@@ -54,6 +54,7 @@
 void (*IOCAF0_InterruptHandler)(void);
 void (*IOCAF1_InterruptHandler)(void);
 void (*IOCAF2_InterruptHandler)(void);
+void (*IOCCF5_InterruptHandler)(void);
 
 
 void PIN_MANAGER_Initialize(void)
@@ -67,28 +68,39 @@ void PIN_MANAGER_Initialize(void)
     /**
     TRISx registers
     */
-    TRISA = 0x3F;
-    TRISC = 0x37;
+    TRISA = 0x37;
+    TRISC = 0x3F;
 
     /**
     ANSELx registers
     */
-    ANSELC = 0x04;
-    ANSELA = 0x00;
+    ANSELC = 0x1C;
+    ANSELA = 0x30;
 
     /**
     WPUx registers
     */
     WPUA = 0x03;
     WPUC = 0x20;
-    OPTION_REGbits.nWPUEN = 0;
-
 
     /**
-    APFCONx registers
+    ODx registers
     */
-    APFCON0 = 0x00;
-    APFCON1 = 0x00;
+    ODCONA = 0x00;
+    ODCONC = 0x00;
+
+    /**
+    SLRCONx registers
+    */
+    SLRCONA = 0x37;
+    SLRCONC = 0x3F;
+
+    /**
+    INLVLx registers
+    */
+    INLVLA = 0x3F;
+    INLVLC = 0x3F;
+
 
     /**
     IOCx registers
@@ -111,6 +123,12 @@ void PIN_MANAGER_Initialize(void)
     IOCAPbits.IOCAP1 = 0;
     //interrupt on change for group IOCAP - positive
     IOCAPbits.IOCAP2 = 1;
+    //interrupt on change for group IOCCF - flag
+    IOCCFbits.IOCCF5 = 0;
+    //interrupt on change for group IOCCN - negative
+    IOCCNbits.IOCCN5 = 1;
+    //interrupt on change for group IOCCP - positive
+    IOCCPbits.IOCCP5 = 0;
 
 
 #if 0
@@ -118,11 +136,17 @@ void PIN_MANAGER_Initialize(void)
     IOCAF0_SetInterruptHandler(IOCAF0_DefaultInterruptHandler);
     IOCAF1_SetInterruptHandler(IOCAF1_DefaultInterruptHandler);
     IOCAF2_SetInterruptHandler(IOCAF2_DefaultInterruptHandler);
+    IOCCF5_SetInterruptHandler(IOCCF5_DefaultInterruptHandler);
 #endif
 
     // Enable IOCI interrupt
-    INTCONbits.IOCIE = 1;
+    PIE0bits.IOCIE = 1;
 
+
+    RC0PPS = 0x18;   //RC0->MSSP1:SCL1;
+    SSP1CLKPPS = 0x10;   //RC0->MSSP1:SCL1;
+    RC1PPS = 0x19;   //RC1->MSSP1:SDA1;
+    SSP1DATPPS = 0x11;   //RC1->MSSP1:SDA1;
 }
 
 void PIN_MANAGER_IOC(void)
@@ -141,6 +165,11 @@ void PIN_MANAGER_IOC(void)
     if(IOCAFbits.IOCAF2 == 1)
     {
         IOCAF2_ISR();
+    }
+	// interrupt on change for pin IOCCF5
+    if(IOCCFbits.IOCCF5 == 1)
+    {
+        IOCCF5_ISR();
     }
 }
 
@@ -232,6 +261,36 @@ void IOCAF2_SetInterruptHandler(void (* InterruptHandler)(void)){
 void IOCAF2_DefaultInterruptHandler(void){
     // add your IOCAF2 interrupt custom code
     // or set custom function using IOCAF2_SetInterruptHandler()
+}
+
+/**
+   IOCCF5 Interrupt Service Routine
+*/
+void IOCCF5_ISR(void) {
+
+    // Add custom IOCCF5 code
+
+    // Call the interrupt handler for the callback registered at runtime
+    if(IOCCF5_InterruptHandler)
+    {
+        IOCCF5_InterruptHandler();
+    }
+    IOCCFbits.IOCCF5 = 0;
+}
+
+/**
+  Allows selecting an interrupt handler for IOCCF5 at application runtime
+*/
+void IOCCF5_SetInterruptHandler(void (* InterruptHandler)(void)){
+    IOCCF5_InterruptHandler = InterruptHandler;
+}
+
+/**
+  Default interrupt handler for IOCCF5
+*/
+void IOCCF5_DefaultInterruptHandler(void){
+    // add your IOCCF5 interrupt custom code
+    // or set custom function using IOCCF5_SetInterruptHandler()
 }
 
 /**

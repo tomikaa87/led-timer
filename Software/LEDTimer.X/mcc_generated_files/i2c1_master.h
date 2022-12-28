@@ -1,20 +1,20 @@
 /**
-  I2C Generated Driver API Header File
+  I2C1 Generated Driver API Header File
 
   @Company
     Microchip Technology Inc.
 
   @File Name
-    i2c_master.h
+    i2c1_master.h
 
   @Summary
-    This is the generated header file for the I2C driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+    This is the generated header file for the I2C1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
   @Description
-    This header file provides APIs for driver for I2C.
+    This header file provides APIs for driver for I2C1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
-        Device            :  PIC16F1825
+        Device            :  PIC16F18326
         Driver Version    :  1.0.0
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.36 and above or later
@@ -44,8 +44,8 @@
     SOFTWARE.
 */
 
-#ifndef I2C_MASTER_H
-#define I2C_MASTER_H
+#ifndef I2C1_MASTER_H
+#define I2C1_MASTER_H
 
 /**
   Section: Included Files
@@ -56,90 +56,90 @@
 #include <stdbool.h>
 
 typedef enum {
-    I2C_NOERR, // The message was sent.
-    I2C_BUSY,  // Message was not sent, bus was busy.
-    I2C_FAIL   // Message was not sent, bus failure
+    I2C1_NOERR, // The message was sent.
+    I2C1_BUSY,  // Message was not sent, bus was busy.
+    I2C1_FAIL   // Message was not sent, bus failure
                // If you are interested in the failure reason,
                // Sit on the event call-backs.
-} i2c_error_t;
+} i2c1_error_t;
 
 typedef enum
 {
-    I2C_STOP=1,
-    I2C_RESTART_READ,
-    I2C_RESTART_WRITE,
-    I2C_CONTINUE,
-    I2C_RESET_LINK
-} i2c_operations_t;
+    I2C1_STOP=1,
+    I2C1_RESTART_READ,
+    I2C1_RESTART_WRITE,
+    I2C1_CONTINUE,
+    I2C1_RESET_LINK
+} i2c1_operations_t;
 
-typedef uint8_t i2c_address_t;
-typedef i2c_operations_t (*i2c_callback_t)(void *funPtr);
+typedef uint8_t i2c1_address_t;
+typedef i2c1_operations_t (*i2c1_callback_t)(void *funPtr);
 
 // common callback responses
-i2c_operations_t I2C_CallbackReturnStop(void *funPtr);
-i2c_operations_t I2C_CallbackReturnReset(void *funPtr);
-i2c_operations_t I2C_CallbackRestartWrite(void *funPtr);
-i2c_operations_t I2C_CallbackRestartRead(void *funPtr);
+i2c1_operations_t I2C1_CallbackReturnStop(void *funPtr);
+i2c1_operations_t I2C1_CallbackReturnReset(void *funPtr);
+i2c1_operations_t I2C1_CallbackRestartWrite(void *funPtr);
+i2c1_operations_t I2C1_CallbackRestartRead(void *funPtr);
 
 /**
- * \brief Initialize I2C interface
+ * \brief Initialize I2C1 interface
  *
  * \return Nothing
  */
-void I2C_Initialize(void);
+void I2C1_Initialize(void);
 
 /**
- * \brief Open the I2C for communication
+ * \brief Open the I2C1 for communication
  *
  * \param[in] address The slave address to use in the transfer
  *
  * \return Initialization status.
- * \retval I2C_NOERR The I2C open was successful
- * \retval I2C_BUSY  The I2C open failed because the interface is busy
- * \retval I2C_FAIL  The I2C open failed with an error
+ * \retval I2C1_NOERR The I2C1 open was successful
+ * \retval I2C1_BUSY  The I2C1 open failed because the interface is busy
+ * \retval I2C1_FAIL  The I2C1 open failed with an error
  */
-i2c_error_t I2C_Open(i2c_address_t address);
+i2c1_error_t I2C1_Open(i2c1_address_t address);
 
 /**
- * \brief Close the I2C interface
+ * \brief Close the I2C1 interface
  *
  * \return Status of close operation.
- * \retval I2C_NOERR The I2C open was successful
- * \retval I2C_BUSY  The I2C open failed because the interface is busy
- * \retval I2C_FAIL  The I2C open failed with an error
+ * \retval I2C1_NOERR The I2C1 open was successful
+ * \retval I2C1_BUSY  The I2C1 open failed because the interface is busy
+ * \retval I2C1_FAIL  The I2C1 open failed with an error
  */
-i2c_error_t I2C_Close(void);
+i2c1_error_t I2C1_Close(void);
 
 /**
- * \brief Start an operation on an opened I2C interface
+ * \brief Start an operation on an opened I2C1 interface
  *
  * \param[in] read Set to true for read, false for write
  *
  * \return Status of operation
- * \retval I2C_NOERR The I2C open was successful
- * \retval I2C_BUSY  The I2C open failed because the interface is busy
- * \retval I2C_FAIL  The I2C open failed with an error
+ * \retval I2C1_NOERR The I2C1 open was successful
+ * \retval I2C1_BUSY  The I2C1 open failed because the interface is busy
+ * \retval I2C1_FAIL  The I2C1 open failed with an error
  */
-i2c_error_t I2C_MasterOperation(bool read);
+i2c1_error_t I2C1_MasterOperation(bool read);
 
 /**
- * \brief Identical to I2C_MasterOperation(false);
+ * \brief Identical to I2C1_MasterOperation(false);
  */
-i2c_error_t I2C_MasterWrite(void); // to be depreciated
+i2c1_error_t I2C1_MasterWrite(void); // to be depreciated
 
 /**
- * \brief Identical to I2C_MasterOperation(true);
+ * \brief Identical to I2C1_MasterOperation(true);
  */
-i2c_error_t I2C_MasterRead(void); // to be depreciated
+i2c1_error_t I2C1_MasterRead(void); // to be depreciated
 
 /**
- * \brief Set timeout to be used for I2C operations. Uses the Timeout driver.
+ * \brief Set timeout to be used for I2C1 operations. Uses the Timeout driver.
  *
  * \param[in] to Timeout in ticks
  *
  * \return Nothing
  */
-void I2C_SetTimeout(uint8_t timeOut);
+void I2C1_SetTimeout(uint8_t timeOut);
 
 /**
  * \brief Sets up the data buffer to use, and number of bytes to transfer
@@ -149,7 +149,7 @@ void I2C_SetTimeout(uint8_t timeOut);
  *
  * \return Nothing
  */
-void I2C_SetBuffer(void *buffer, size_t bufferSize);
+void I2C1_SetBuffer(void *buffer, size_t bufferSize);
 
 // Event Callback functions.
 
@@ -161,7 +161,7 @@ void I2C_SetBuffer(void *buffer, size_t bufferSize);
  *
  * \return Nothing
  */
-void I2C_SetDataCompleteCallback(i2c_callback_t cb, void *ptr);
+void I2C1_SetDataCompleteCallback(i2c1_callback_t cb, void *ptr);
 
 /**
  * \brief Set callback to be called when there has been a bus collision and arbitration was lost.
@@ -171,7 +171,7 @@ void I2C_SetDataCompleteCallback(i2c_callback_t cb, void *ptr);
  *
  * \return Nothing
  */
-void I2C_SetWriteCollisionCallback(i2c_callback_t cb, void *ptr);
+void I2C1_SetWriteCollisionCallback(i2c1_callback_t cb, void *ptr);
 
 /**
  * \brief Set callback to be called when the transmitted address was Nack'ed.
@@ -181,7 +181,7 @@ void I2C_SetWriteCollisionCallback(i2c_callback_t cb, void *ptr);
  *
  * \return Nothing
  */
-void I2C_SetAddressNackCallback(i2c_callback_t cb, void *ptr);
+void I2C1_SetAddressNackCallback(i2c1_callback_t cb, void *ptr);
 
 /**
  * \brief Set callback to be called when the transmitted data was Nack'ed.
@@ -191,7 +191,7 @@ void I2C_SetAddressNackCallback(i2c_callback_t cb, void *ptr);
  *
  * \return Nothing
  */
-void I2C_SetDataNackCallback(i2c_callback_t cb, void *ptr);
+void I2C1_SetDataNackCallback(i2c1_callback_t cb, void *ptr);
 
 /**
  * \brief Set callback to be called when there was a bus timeout.
@@ -201,6 +201,6 @@ void I2C_SetDataNackCallback(i2c_callback_t cb, void *ptr);
  *
  * \return Nothing
  */
-void I2C_SetTimeoutCallback(i2c_callback_t cb, void *ptr);
+void I2C1_SetTimeoutCallback(i2c1_callback_t cb, void *ptr);
 
-#endif //I2C_MASTER_H
+#endif //I2C1_MASTER_H

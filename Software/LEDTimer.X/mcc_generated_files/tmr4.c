@@ -14,7 +14,7 @@
     This source file provides APIs for TMR4.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
-        Device            :  PIC16F1825
+        Device            :  PIC16F18326
         Driver Version    :  2.01
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.36 and above
@@ -72,16 +72,16 @@ void TMR4_Initialize(void)
     TMR4 = 0x00;
 
     // Clearing IF flag before enabling the interrupt.
-    PIR3bits.TMR4IF = 0;
+    PIR2bits.TMR4IF = 0;
 
     // Enabling TMR4 interrupt.
-    PIE3bits.TMR4IE = 1;
+    PIE2bits.TMR4IE = 1;
 
     // Set Default Interrupt Handler
 #if 0
     TMR4_SetInterruptHandler(TMR4_DefaultInterruptHandler);
 #endif
-    
+
     // T4CKPS 1:16; T4OUTPS 1:10; TMR4ON on;
     T4CON = 0x4E;
 }
@@ -122,7 +122,7 @@ void TMR4_ISR(void)
 {
 
     // clear the TMR4 interrupt flag
-    PIR3bits.TMR4IF = 0;
+    PIR2bits.TMR4IF = 0;
 
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes

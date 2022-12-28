@@ -14,7 +14,7 @@
     This source file provides APIs for TMR1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
-        Device            :  PIC16F1825
+        Device            :  PIC16F18326
         Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.36 and above
@@ -65,7 +65,7 @@ void TMR1_Initialize(void)
 {
     //Set the Timer to the options selected in the GUI
 
-    //T1GSS T1G_pin; TMR1GE disabled; T1GTM disabled; T1GPOL low; T1GGO done; T1GSPM disabled;
+    //T1GSS T1G_pin; TMR1GE disabled; T1GTM disabled; T1GPOL low; T1GGO_nDONE done; T1GSPM disabled;
     T1GCON = 0x00;
 
     //TMR1H 0;
@@ -88,7 +88,7 @@ void TMR1_Initialize(void)
     TMR1_SetInterruptHandler(TMR1_DefaultInterruptHandler);
 #endif
 
-    // T1CKPS 1:1; T1OSCEN enabled; nT1SYNC do_not_synchronize; TMR1CS External; TMR1ON enabled;
+    // T1CKPS 1:1; T1SOSC SOSC_enabled; T1SYNC do_not_synchronize; TMR1CS External; TMR1ON enabled;
     T1CON = 0x8D;
 }
 
@@ -121,7 +121,7 @@ uint16_t TMR1_ReadTimer(void)
 
 void TMR1_WriteTimer(uint16_t timerVal)
 {
-    if (T1CONbits.nT1SYNC == 1)
+    if (T1CONbits.T1SYNC == 1)
     {
         // Stop the Timer by writing to TMRxON bit
         T1CONbits.TMR1ON = 0;
@@ -148,7 +148,7 @@ void TMR1_Reload(void)
 
 void TMR1_StartSinglePulseAcquisition(void)
 {
-    T1GCONbits.T1GGO = 1;
+    T1GCONbits.T1GGO_nDONE = 1;
 }
 
 uint8_t TMR1_CheckGateValueStatus(void)

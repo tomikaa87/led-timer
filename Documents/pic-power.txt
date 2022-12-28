@@ -1,0 +1,13 @@
+1825:
+	IPD: 		23 ua
+	T1OSC: 		24 ua
+	BOR:		30 ua
+
+	Total sleep:	~77 ua
+
+18326:
+	IPD:		0.4 ua
+	T1OSC/SOSC:	3.0 ua
+	BOR:		12 ua
+
+	Total sleep:	~15.4 ua

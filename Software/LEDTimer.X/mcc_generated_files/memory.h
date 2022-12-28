@@ -14,8 +14,8 @@
     This header file provides APIs for driver for MEMORY.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
-        Device            :  PIC16F1825
-        Driver Version    :  2.02
+        Device            :  PIC16F18326
+        Driver Version    :  2.0.2
     The generated drivers are tested against the following:
         Compiler          :  XC8 2.36 and above
         MPLAB             :  MPLAB X 6.00
@@ -66,7 +66,7 @@
 
 #define WRITE_FLASH_BLOCKSIZE    32
 #define ERASE_FLASH_BLOCKSIZE    32
-#define END_FLASH                0x2000
+#define END_FLASH                0x4000
 
 /**
   Section: Flash Module APIs
@@ -118,7 +118,7 @@ uint16_t FLASH_ReadWord(uint16_t flashAddr);
 
   @Example
     <code>
-    uint16_t    writeData = 0x55AA;
+    uint16_t    writeData = 0x15AA;
     uint16_t    flashAddr = 0x01C0;
     uint16_t    Buf[ERASE_FLASH_BLOCKSIZE];
 
@@ -142,8 +142,8 @@ void FLASH_WriteWord(uint16_t flashAddr, uint16_t *ramBuf, uint16_t word);
     *flashWordArray   - Pointer to an array of size 'WRITE_FLASH_BLOCKSIZE' at least
 
   @Returns
-    -1 if the given address is not a valid block starting address of Flash
-    0  in case of valid block starting address
+    -1, if the given address is not a valid block starting address of Flash
+    0, in case of valid block starting address
 
   @Example
     <code>
@@ -188,6 +188,8 @@ int8_t FLASH_WriteBlock(uint16_t writeAddr, uint16_t *flashWordArray);
 */
 void FLASH_EraseBlock(uint16_t startAddr);
 
+
+
 /**
   Section: Data EEPROM Module APIs
 */
@@ -211,13 +213,13 @@ void FLASH_EraseBlock(uint16_t startAddr);
 
   @Example
     <code>
-    uint8_t dataeeAddr = 0x10;
+    uint16_t dataeeAddr = 0xF010;
     uint8_t dataeeData = 0x55;
 
     DATAEE_WriteByte(dataeeAddr, dataeeData);
     </code>
 */
-void DATAEE_WriteByte(uint8_t bAdd, uint8_t bData);
+void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData);
 
 /**
   @Summary
@@ -237,13 +239,14 @@ void DATAEE_WriteByte(uint8_t bAdd, uint8_t bData);
 
   @Example
     <code>
-    uint8_t dataeeAddr = 0x10;
+    uint16_t dataeeAddr = 0xF010;
     uint8_t readData;
 
     readData = DATAEE_ReadByte(dataeeAddr);
     </code>
 */
-uint8_t DATAEE_ReadByte(uint8_t bAdd);
+uint8_t DATAEE_ReadByte(uint16_t bAdd);
+
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -255,3 +258,4 @@ uint8_t DATAEE_ReadByte(uint8_t bAdd);
 /**
  End of File
 */
+
