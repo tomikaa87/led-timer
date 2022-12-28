@@ -1,5 +1,5 @@
 # led-timer
-Programmable timer for low voltage LED lights (e.g. christmas LED strings) with a Microchip PIC16
+Programmable timer for low voltage LED lights (e.g. christmas LED strings) with a Microchip PIC16.
 
 **This project is in work-in-progress state**
 
@@ -10,7 +10,7 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
 * Low power microcontroller - battery-friendly power consumption (LED output current not included)
   * 4 mA (screen on)
   * 0.2 mA (screen off)
-  * 41 μA (deep-sleep, only time-keeping) - more than 4000 hours from a standard CR2032 lithium battery
+  * 16 μA (deep-sleep, only time-keeping) - more than 10000 hours from a standard CR2032 lithium battery
 * Easy-to-use and intuitive user interface:
   * 3 buttons for changing settings, toggling the output etc.
   * OLED screen with schedule, output state, battery level indication and more
