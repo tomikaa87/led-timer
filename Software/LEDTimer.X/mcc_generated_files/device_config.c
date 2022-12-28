@@ -55,7 +55,7 @@
 
 // CONFIG2
 #pragma config MCLRE = ON    // Master Clear Enable bit->MCLR/VPP pin function is MCLR; Weak pull-up enabled
-#pragma config PWRTE = OFF    // Power-up Timer Enable bit->PWRT disabled
+#pragma config PWRTE = ON    // Power-up Timer Enable bit->PWRT enabled
 #pragma config WDTE = OFF    // Watchdog Timer Enable bits->WDT disabled; SWDTEN is ignored
 #pragma config LPBOREN = OFF    // Low-power BOR enable bit->ULPBOR disabled
 #pragma config BOREN = ON    // Brown-out Reset Enable bits->Brown-out Reset enabled, SBOREN bit ignored
@@ -65,7 +65,7 @@
 #pragma config DEBUG = OFF    // Debugger enable bit->Background debugger disabled
 
 // CONFIG3
-#pragma config WRT = OFF    // User NVM self-write protection bits->Write protection off
+#pragma config WRT = ALL    // User NVM self-write protection bits->0000h to 3FFFh write protected, no addresses may be modified
 #pragma config LVP = ON    // Low Voltage Programming Enable bit->Low Voltage programming enabled. MCLR/VPP pin function is MCLR. MCLRE configuration bit is ignored.
 
 // CONFIG4
