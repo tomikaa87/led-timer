@@ -22,7 +22,11 @@ A custom-made PCB and a 3D-printable enclosure is still in development and shoul
 # PCB
 
 The first version of the PCB is a 4-layer design that can be manufactured for $2 at JLC PCB.
-It's almost as small as the 0.96" SSD1306 OLED display module itself. 
+It's almost as small as the 0.96" SSD1306 OLED display module itself. Because different display modules have varying pinouts (VDD and GND swapped), the function of the first two pins are configurable via solder jumpers.
+The switch on the slide can turn of the timer completely to conserve battery power while the timer is in storage.
+The three buttons on the bottom are for navigation on the user interface.
+The battery holder on the back side receives a standard CR2032 3V lithium cell.
+The power input and LED output connectors are standard 2.54 mm pitch pin headers.
 
 The interactive BOM can be accessed ![HERE](/Hardware/LEDTimer/bom/ibom.html)
 
