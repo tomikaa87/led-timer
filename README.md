@@ -19,6 +19,16 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
 
 A custom-made PCB and a 3D-printable enclosure is still in development and should be published soon.
 
+# Case
+
+I've made a simple 3D-printable case in FreeCAD. It's a two-part design which can be assembled using M2 self-tapping screws.
+
+![Front](/Images/case-front.png)
+![Bottom-right](/Images/case-bottom-right.png)
+![Top-left](/Images/case-bottom-left.png)
+![Back-left](/Images/case-back-left.png)
+![Without back cover](/Images/case-no-back.png)
+
 # PCB
 
 The first version of the PCB is a 4-layer design that can be manufactured for $2 at JLC PCB.
