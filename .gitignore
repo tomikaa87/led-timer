@@ -26,3 +26,10 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# FreeCAD
+*.pyc
+*.fcstd1
+*.FCStd1
+*.fcstd2
+*.FCStd2
+Hardware/Private
