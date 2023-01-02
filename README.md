@@ -25,7 +25,7 @@ I've made a simple 3D-printable case in FreeCAD. It's a two-part design which ca
 
 ![Front](/Images/case-front.png)
 ![Bottom-right](/Images/case-bottom-right.png)
-![Top-left](/Images/case-bottom-left.png)
+![Top-left](/Images/case-top-left.png)
 ![Back-left](/Images/case-back-left.png)
 ![Without back cover](/Images/case-no-back.png)
 
