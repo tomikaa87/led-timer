@@ -80,7 +80,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     WPUx registers
     */
-    WPUA = 0x03;
+    WPUA = 0x07;
     WPUC = 0x20;
 
     /**
@@ -144,7 +144,6 @@ void PIN_MANAGER_Initialize(void)
 
 
     RC0PPS = 0x18;   //RC0->MSSP1:SCL1;
-    T1CKIPPS = 0x05;   //RA5->TMR1:T1CKI;
     SSP1CLKPPS = 0x10;   //RC0->MSSP1:SCL1;
     RC3PPS = 0x02;   //RC3->PWM5:PWM5;
     RC1PPS = 0x19;   //RC1->MSSP1:SDA1;

@@ -196,7 +196,7 @@ System_SleepResult System_sleep()
 #endif
 
     // Send out all the data before going to sleep
-    while (TRMT == 0);
+    while (UART1MD && TRMT == 0);
 
     // Disable the FVR to conserve power
     uint8_t fvren = FVRCONbits.FVREN;
@@ -230,7 +230,6 @@ System_SleepResult System_sleep()
     // Wait for the oscillator to stabilize
     while (
         OSCCON3bits.ORDY == 0
-        || OSCCON3bits.NOSCR == 0
         || OSCSTAT1bits.HFOR == 0
     );
 
@@ -244,7 +243,7 @@ System_SleepResult System_sleep()
 
 inline bool System_isRunningFromBackupBattery()
 {
-    return IO_LDO_SENSE_GetValue() == 0;
+    return IO_LDO_SENSE_GetValue() == 1;
 }
 
 uint16_t System_getVDDMilliVolts()
