@@ -199,7 +199,7 @@ System_SleepResult System_sleep()
     while (UART1MD == 0 && TRMT == 0);
 
     // Disable the FVR to conserve power
-    FVRMD = 1;
+    FVRCONbits.FVREN = 0;
 
     context.sleep.wakeUpReason = System_WakeUpReason_None;
 
@@ -214,7 +214,7 @@ System_SleepResult System_sleep()
 
     // The next instruction will always be executed before the ISR
 
-    FVRMD = 0;
+    FVRCONbits.FVREN = 1;
 
     // Clear the flag so the next task() call can update it properly
     context.sleep.enabled = false;
