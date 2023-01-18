@@ -42,7 +42,7 @@
 #define Config_System_VDDCalMilliVolts                      (3140ul)
 #define Config_System_VDDCalADCValue                        (332ul)
 
-#define Config_System_VBatDiodeDropMilliVolts               (221)
+#define Config_System_VBatDiodeDropMilliVolts               (270)
 
 #define Config_System_VBatMinMilliVolts                     (2500u)
 #define Config_System_VBatMaxMilliVolts                     (3000u)
