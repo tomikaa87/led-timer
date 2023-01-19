@@ -174,7 +174,7 @@ inline static void showStartupScreen()
         PCON0bits.nRI = 1;
     }
 
-    if (!PCON0bits.nBOR) {
+    if (BORRDY && !PCON0bits.nBOR) {
         Text_draw("B", 0, 30, 0, false);
         PCON0bits.nBOR = 1;
     }

@@ -4028,7 +4028,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG2"/>
-         <value>15073</value>
+         <value>14881</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG3"/>
@@ -4060,7 +4060,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG2" settingAlias="BOREN"/>
-         <value>ON</value>
+         <value>OFF</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG2" settingAlias="BORV"/>
@@ -4877,36 +4877,32 @@
          <hash>e343ce4849f2e367cb9853a2a61f6c961176c2540e1eb6a42275e25ce477c790</hash>
       </entry>
       <entry>
+         <file>mcc_generated_files/mcc.c</file>
+         <hash>699dbab113116525df886319439274042db09653562d24597c4412e2ac617ca8</hash>
+      </entry>
+      <entry>
          <file>mcc_generated_files/fvr.h</file>
          <hash>9016e5497963c61b4dc9c2397330d7d5e82b36340fec9db0f90174b7e32072a1</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files/mcc.c</file>
-         <hash>63cd748c0c459b086963910779338fe00befb3d1f4b888ae7ba2943e04331c1b</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files/pwm5.h</file>
-         <hash>db3344d03de808f0fdc2abce8210c7501fd8049008de4fbca86f8f6957716df9</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/pin_manager.c</file>
          <hash>b89ac714acbfe0037d7adcbf001a47316f8d2a2a9c71f0c9ae86fc8f03e3a4be</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/fvr.c</file>
-         <hash>af8df198809afe6b36db6f4568b18c1a9eae69e3e51b44096e62a6d6b1868eea</hash>
+         <file>mcc_generated_files/pwm5.h</file>
+         <hash>db3344d03de808f0fdc2abce8210c7501fd8049008de4fbca86f8f6957716df9</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/pwm5.c</file>
-         <hash>da8b123f312771867c17544237dae3568a4c95f027f9ee23eeb4cbe53e982d7b</hash>
+         <file>mcc_generated_files/fvr.c</file>
+         <hash>af8df198809afe6b36db6f4568b18c1a9eae69e3e51b44096e62a6d6b1868eea</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/pin_manager.h</file>
          <hash>17e7a1dff1d7a5b282e6fe2610bb28363956feab9d4f503425ee034a6e85f290</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/i2c1_master.h</file>
-         <hash>5635692ddf794819ba82e7bc11895b8eb57384416e9b5fa567a2eadd1185ea9e</hash>
+         <file>mcc_generated_files/pwm5.c</file>
+         <hash>da8b123f312771867c17544237dae3568a4c95f027f9ee23eeb4cbe53e982d7b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/tmr1.c</file>
@@ -4915,6 +4911,10 @@
       <entry>
          <file>mcc_generated_files/memory.h</file>
          <hash>6d38092856abcdcff7468a05e362516b7a82a25208e1bfba5cbb9b98fa0cca3b</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/i2c1_master.h</file>
+         <hash>5635692ddf794819ba82e7bc11895b8eb57384416e9b5fa567a2eadd1185ea9e</hash>
       </entry>
       <entry>
          <file>main.c</file>
@@ -4937,12 +4937,12 @@
          <hash>7c8f2be4143116a5190702055df4095d3952a6bdda220a8e4b2c536ff0937848</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files/i2c1_master.c</file>
-         <hash>3723c91345ad9069678c833411fcb44cc81e6dd495a27f0e84e772ce13ddaffb</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files/tmr2.c</file>
          <hash>e60bcd038c8cca0b7562fd56c28845b880f3679d48643001f7e06225814dc72f</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files/i2c1_master.c</file>
+         <hash>3723c91345ad9069678c833411fcb44cc81e6dd495a27f0e84e772ce13ddaffb</hash>
       </entry>
       <entry>
          <file>mcc_generated_files/examples/i2c1_master_example.h</file>
@@ -4962,7 +4962,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files/device_config.c</file>
-         <hash>aca0f6573b07d1d58e82043dffe6d47a9fb740cdc9f1d124427da04f7fa56cfd</hash>
+         <hash>8d281c942edb32cba6d089e056624ba1e80150214690ed5f22870d1f35142c8f</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>
