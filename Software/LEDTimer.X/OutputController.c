@@ -26,6 +26,10 @@
 
 #include "mcc_generated_files/pwm5.h"
 
+#if DEBUG_ENABLE
+#include "UI.h"
+#endif
+
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -53,7 +57,7 @@ static inline bool getStateFromSchedule()
     return Types_getScheduleSegmentBit(
         Settings_data.scheduler.data,
         segmentIndex
-    );
+    ) ? 1 : 0;
 }
 
 /*
@@ -149,15 +153,15 @@ void OutputController_task()
 {
     context.stateFromSchedule = getStateFromSchedule();
     
-    bool outputState = calculateOutputState(
-        context.stateFromSchedule,
-        System_isRunningFromBackupBattery(),
-        context.outputOverride
-    );
-    
     context.outputOverride = calculateOverrideState(
         context.stateFromSchedule,
         context.prevStateFromSchedule,
+        context.outputOverride
+    );
+    
+    bool outputState = calculateOutputState(
+        context.stateFromSchedule,
+        System_isRunningFromBackupBattery(),
         context.outputOverride
     );
     
@@ -167,6 +171,15 @@ void OutputController_task()
         context.forceOutputStateUpdate
     );
     
+#if DEBUG_ENABLE
+    _DebugState.oc_stateFromSchedule = context.stateFromSchedule;
+    _DebugState.oc_prevStateFromSchedule = context.prevStateFromSchedule;
+    _DebugState.oc_outputOverride = context.outputOverride;
+    _DebugState.oc_outputState = outputState;
+    _DebugState.oc_forceUpdate = context.forceOutputStateUpdate;
+    UI_updateDebugDisplay();
+#endif
+
     context.prevOutputState = outputState;
     context.prevStateFromSchedule = context.stateFromSchedule;
     context.forceOutputStateUpdate = 0;

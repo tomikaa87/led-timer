@@ -31,6 +31,13 @@ typedef volatile struct
     bool ldoSenseValue;
     uint8_t updateValue;
     uint8_t heavyTaskUpdateValue;
+
+    uint8_t oc_stateFromSchedule : 1;
+    uint8_t oc_prevStateFromSchedule : 1;
+    uint8_t oc_outputOverride : 1;
+    uint8_t oc_outputState : 1;
+    uint8_t oc_forceUpdate : 1;
+    uint8_t oc_reserved : 3;
 } DebugState;
 
 void UI_updateDebugDisplay(void);

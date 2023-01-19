@@ -30,6 +30,7 @@
 
 #include "stdbool.h"
 #include "stdio.h"
+#include "string.h"
 
 /*
  *  Screen width = 21 chars (128 / (5 + 1))
@@ -109,13 +110,7 @@ static struct UIContext {
 };
 
 #if DEBUG_ENABLE
-DebugState _DebugState = {
-    .sleeping = false,
-    .externalWakeUp = false,
-    .ldoSenseValue = false,
-    .updateValue = 0,
-    .heavyTaskUpdateValue = 0
-};
+DebugState _DebugState;
 
 void UI_updateDebugDisplay()
 {
@@ -144,6 +139,14 @@ void UI_updateDebugDisplay()
         | (_DebugState.ldoSenseValue     ? (1 << 2) : 0)
         | (uint8_t)((_DebugState.heavyTaskUpdateValue & 0b11) << 4)
         | (uint8_t)((_DebugState.updateValue & 0b11) << 6)
+        ;
+
+    testData[1] =
+        (_DebugState.oc_stateFromSchedule           ? (1 << 0) : 0)
+        | (_DebugState.oc_prevStateFromSchedule    ? (1 << 1) : 0)
+        | (_DebugState.oc_outputOverride           ? (1 << 2) : 0)
+        | (_DebugState.oc_outputState              ? (1 << 3) : 0)
+        | (_DebugState.oc_forceUpdate              ? (1 << 4) : 0)
         ;
 
     for (uint8_t i = 0; i < sizeof(testData) * 2; ++i) {
@@ -211,6 +214,10 @@ void UI_init()
     context.displayOn = true;
     context.displayTimer = Clock_getFastTicks();
     updateScreen(true);
+
+#if DEBUG_ENABLE
+    memset((void *)&_DebugState, 0, sizeof(DebugState));
+#endif
 }
 
 void UI_task()
