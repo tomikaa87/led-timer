@@ -177,12 +177,12 @@ void FLASH_EraseBlock(uint16_t startAddr)
   Section: Data EEPROM Module APIs
 */
 
-void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData)
+void DATAEE_WriteByte(uint8_t bAdd, uint8_t bData)
 {
     uint8_t GIEBitValue = INTCONbits.GIE;
 
-    NVMADRH = ((bAdd >> 8) & 0xFF);
-    NVMADRL = (bAdd & 0xFF);
+    NVMADRH = 0x70;
+    NVMADRL = bAdd;
     NVMDATL = bData;
     NVMCON1bits.NVMREGS = 1;
     NVMCON1bits.WREN = 1;
@@ -199,10 +199,10 @@ void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData)
     INTCONbits.GIE = GIEBitValue;   // restore interrupt enable
 }
 
-uint8_t DATAEE_ReadByte(uint16_t bAdd)
+uint8_t DATAEE_ReadByte(uint8_t bAdd)
 {
-    NVMADRH = ((bAdd >> 8) & 0xFF);
-    NVMADRL = (bAdd & 0xFF);
+    NVMADRH = 0x70;
+    NVMADRL = bAdd;
     NVMCON1bits.NVMREGS = 1;
     NVMCON1bits.RD = 1;
     NOP();  // NOPs may be required for latency at high frequencies

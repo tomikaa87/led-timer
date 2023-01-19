@@ -219,7 +219,7 @@ void FLASH_EraseBlock(uint16_t startAddr);
     DATAEE_WriteByte(dataeeAddr, dataeeData);
     </code>
 */
-void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData);
+void DATAEE_WriteByte(uint8_t bAdd, uint8_t bData);
 
 /**
   @Summary
@@ -245,7 +245,7 @@ void DATAEE_WriteByte(uint16_t bAdd, uint8_t bData);
     readData = DATAEE_ReadByte(dataeeAddr);
     </code>
 */
-uint8_t DATAEE_ReadByte(uint16_t bAdd);
+uint8_t DATAEE_ReadByte(uint8_t bAdd);
 
 
 #ifdef __cplusplus  // Provide C++ Compatibility
