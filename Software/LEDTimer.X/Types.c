@@ -36,7 +36,7 @@ bool Types_getScheduleSegmentBit(
     uint8_t bitIndex = segmentIndex & 0b111;
     uint8_t byteIndex = segmentIndex >> 3;
 
-    return data[byteIndex] & (1 << bitIndex);
+    return (data[byteIndex] & (1 << bitIndex)) ? 1 : 0;
 }
 
 void Types_setScheduleSegmentBit(

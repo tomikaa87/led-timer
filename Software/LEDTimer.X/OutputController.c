@@ -57,7 +57,7 @@ static inline bool getStateFromSchedule()
     return Types_getScheduleSegmentBit(
         Settings_data.scheduler.data,
         segmentIndex
-    ) ? 1 : 0;
+    );
 }
 
 /*
@@ -152,25 +152,25 @@ void OutputController_toggle()
 void OutputController_task()
 {
     context.stateFromSchedule = getStateFromSchedule();
-    
+
     context.outputOverride = calculateOverrideState(
         context.stateFromSchedule,
         context.prevStateFromSchedule,
         context.outputOverride
     );
-    
+
     bool outputState = calculateOutputState(
         context.stateFromSchedule,
         System_isRunningFromBackupBattery(),
         context.outputOverride
     );
-    
+
     bool updateOutput = calculateOutputUpdateState(
         outputState,
         context.prevOutputState,
         context.forceOutputStateUpdate
     );
-    
+
 #if DEBUG_ENABLE
     _DebugState.oc_stateFromSchedule = context.stateFromSchedule;
     _DebugState.oc_prevStateFromSchedule = context.prevStateFromSchedule;
@@ -183,7 +183,7 @@ void OutputController_task()
     context.prevOutputState = outputState;
     context.prevStateFromSchedule = context.stateFromSchedule;
     context.forceOutputStateUpdate = 0;
-    
+
     if (updateOutput) {
 #if DEBUG_ENABLE_PRINT
         puts(outputState ? "OC:outputOn" : "OC:outputOff");
