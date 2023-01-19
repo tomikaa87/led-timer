@@ -31,13 +31,18 @@
 
 static struct OutputControllerContext
 {
-    bool outputEnabled;
-    bool outputShouldBeEnabled;
-    Clock_Ticks lastOutputStateUpdateTicks;
+    uint8_t outputOverride : 1;
+    uint8_t prevOutputState : 1;
+    uint8_t forceOutputStateUpdate : 1;
+    uint8_t stateFromSchedule : 1;
+    uint8_t prevStateFromSchedule : 1;
+    uint8_t reserved: 4;
 } context = {
-    .outputEnabled = false,
-    .outputShouldBeEnabled = false,
-    .lastOutputStateUpdateTicks = 0
+    .outputOverride = 0,
+    .prevOutputState = 0,
+    .forceOutputStateUpdate = 0,
+    .stateFromSchedule = 0,
+    .prevStateFromSchedule = 0
 };
 
 static inline bool getStateFromSchedule()
@@ -52,59 +57,161 @@ static inline bool getStateFromSchedule()
     );
 }
 
+/*
+    A = stateFromSchedule
+    B = runningFromBattery
+    C = outputOverride
+    output: F = A'B'C + AB'C'
+
+    A	B	C	F
+    0	0	0	0
+    0	0	1	1
+    0	1	0	0
+    0	1	1	0
+    1	0	0	1
+    1	0	1	0
+    1	1	0	0
+    1	1	1	0
+ */
+static bool calculateOutputState(
+    const bool stateFromSchedule,
+    const bool runningFromBattery,
+    const bool outputOverride
+) {
+    return
+        (!stateFromSchedule && !runningFromBattery && outputOverride)
+        || (stateFromSchedule && !runningFromBattery && !outputOverride);
+}
+
+/*
+    A = stateFromSchedule
+    B = prevStateFromSchedule
+    C = outputOverride
+    newOverride: F = A'B'C + ABC
+
+    A	B	C	F
+    0	0	0	0
+    0	0	1	1
+    0	1	0	0
+    0	1	1	0
+    1	0	0	0
+    1	0	1	0
+    1	1	0	0
+    1	1	1	1
+ */
+static bool calculateOverrideState(
+    const bool stateFromSchedule,
+    const bool prevStateFromSchedule,
+    const bool outputOverride
+) {
+    return
+        (!stateFromSchedule && !prevStateFromSchedule && outputOverride)
+        || (stateFromSchedule && prevStateFromSchedule && outputOverride);
+}
+
+/*
+    A = output
+    B = prevOutput
+    C = forceUpdate
+    update: F = A'B + AB' + C
+
+    A	B	C	F
+    0	0	0	0
+    0	0	1	1
+    0	1	0	1
+    0	1	1	1
+    1	0	0	1
+    1	0	1	1
+    1	1	0	0
+    1	1	1	1
+ */
+static bool calculateOutputUpdateState(
+    const bool outputState,
+    const bool prevOutputState,
+    const bool forceUpdate
+) {
+    return
+        (!outputState && prevOutputState)
+        || (outputState && !prevOutputState)
+        || forceUpdate;
+}
+
 void OutputController_toggle()
 {
 #if DEBUG_ENABLE_PRINT
     puts("OC:toggle");
 #endif
 
-    context.outputEnabled = !context.outputEnabled;
+    context.outputOverride = !context.outputOverride;
     OutputController_updateState();
 }
 
 void OutputController_task()
 {
-    bool shouldEnableOutput = getStateFromSchedule();
-    bool updateOutputState = false;
-
-    // Update the output state on schedule changes
-    if (context.outputShouldBeEnabled != shouldEnableOutput) {
-        context.outputShouldBeEnabled = shouldEnableOutput;
-        context.outputEnabled = shouldEnableOutput;
-
+    context.stateFromSchedule = getStateFromSchedule();
+    
+    bool outputState = calculateOutputState(
+        context.stateFromSchedule,
+        System_isRunningFromBackupBattery(),
+        context.outputOverride
+    );
+    
+    context.outputOverride = calculateOverrideState(
+        context.stateFromSchedule,
+        context.prevStateFromSchedule,
+        context.outputOverride
+    );
+    
+    bool updateOutput = calculateOutputUpdateState(
+        outputState,
+        context.prevOutputState,
+        context.forceOutputStateUpdate
+    );
+    
+    context.prevOutputState = outputState;
+    context.prevStateFromSchedule = context.stateFromSchedule;
+    context.forceOutputStateUpdate = 0;
+    
+    if (updateOutput) {
 #if DEBUG_ENABLE_PRINT
-        puts(shouldEnableOutput ? "OC:outputOn" : "OC:outputOff");
+        puts(outputState ? "OC:outputOn" : "OC:outputOff");
 #endif
-
-        updateOutputState = true;
+        PWM5_LoadDutyValue(
+            outputState
+                ? Settings_data.output.brightness
+                : 0
+        );
     }
+}
 
-    // TODO check why it this needed
-    // Update the output states periodically
-    if (Clock_getElapsedFastTicks(context.lastOutputStateUpdateTicks) >= 50) {
-        context.lastOutputStateUpdateTicks = Clock_getFastTicks();
-        updateOutputState = true;
-    }
+/*
+    A = stateFromSchedule
+    B = outputOverride
+    outputStateOnExtPwr: F = A'B + AB'
 
-    if (updateOutputState) {
-        OutputController_updateState();
-    }
+    A	B	F
+    0	0	0
+    0	1	1
+    1	0	1
+    1	1	0
+ */
+inline bool OutputController_outputEnableTargetState()
+{
+    return
+        (!context.stateFromSchedule && context.outputOverride)
+        || (context.stateFromSchedule && !context.outputOverride);
 }
 
 inline bool OutputController_isOutputEnabled()
 {
-    return context.outputEnabled;
+    return context.prevOutputState;
 }
 
 void OutputController_updateState()
 {
 #if DEBUG_ENABLE_PRINT
-    printf("OC:output=%u\r\n", context.outputEnabled ? context.brightness : 0);
+    printf("OC:forceUpdate");
 #endif
 
-    PWM5_LoadDutyValue(
-        (context.outputEnabled && !System_isRunningFromBackupBattery())
-            ? Settings_data.output.brightness
-            : 0
-    );
+    context.forceOutputStateUpdate = 1;
 }

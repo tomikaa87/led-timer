@@ -81,7 +81,7 @@ inline static void drawOutputToggleKeyHelp()
     Graphics_drawBitmap(MiniBulbIcon, 5, 64 - 19 / 2, 0, false);
 
     Graphics_drawBitmap(
-        OutputController_isOutputEnabled()
+        OutputController_outputEnableTargetState()
             ? SwitchOffStateIcon
             : SwitchOnStateIcon,
         13,

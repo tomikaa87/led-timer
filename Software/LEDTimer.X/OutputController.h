@@ -34,8 +34,14 @@ void OutputController_toggle(void);
 void OutputController_task(void);
 
 /**
- * Returns the current state of the output.
- * @return True if the output is enabled
+ * Returns the output state in case there is external power
+ * @return True if the output is enabled on external power
+ */
+inline bool OutputController_outputEnableTargetState(void);
+
+/**
+ * Returns the actual state of the output
+ * @return True of the output actually enabled
  */
 inline bool OutputController_isOutputEnabled(void);
 
