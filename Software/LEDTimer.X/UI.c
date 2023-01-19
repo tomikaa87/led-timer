@@ -143,10 +143,10 @@ void UI_updateDebugDisplay()
 
     testData[1] =
         (_DebugState.oc_stateFromSchedule           ? (1 << 0) : 0)
-        | (_DebugState.oc_prevStateFromSchedule    ? (1 << 1) : 0)
-        | (_DebugState.oc_outputOverride           ? (1 << 2) : 0)
-        | (_DebugState.oc_outputState              ? (1 << 3) : 0)
-        | (_DebugState.oc_forceUpdate              ? (1 << 4) : 0)
+        | (_DebugState.oc_prevStateFromSchedule     ? (1 << 1) : 0)
+        | (_DebugState.oc_outputOverride            ? (1 << 2) : 0)
+        | (_DebugState.oc_outputState               ? (1 << 3) : 0)
+        | (_DebugState.oc_forceUpdate               ? (1 << 4) : 0)
         ;
 
     for (uint8_t i = 0; i < sizeof(testData) * 2; ++i) {
@@ -231,6 +231,9 @@ void UI_task()
         context.forceUpdate = true;
     }
     if (context.externalEvents & UI_ExternalEvent_BatteryLevelMeasurementFinished) {
+        context.forceUpdate = true;
+    }
+    if (context.externalEvents & UI_ExternalEvent_OutputStateChanged) {
         context.forceUpdate = true;
     }
     if (context.externalEvents & UI_ExternalEvent_SystemGoingToSleep) {

@@ -149,7 +149,7 @@ void OutputController_toggle()
     OutputController_updateState();
 }
 
-void OutputController_task()
+OutputController_TaskResult OutputController_task()
 {
     context.stateFromSchedule = getStateFromSchedule();
 
@@ -193,7 +193,11 @@ void OutputController_task()
                 ? Settings_data.output.brightness
                 : 0
         );
+
+        return OutputController_TaskResult_OutputStateChanged;
     }
+
+    return OutputController_TaskResult_StateUnchanged;
 }
 
 /*

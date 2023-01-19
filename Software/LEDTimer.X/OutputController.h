@@ -27,11 +27,17 @@
  */
 void OutputController_toggle(void);
 
+typedef enum {
+    OutputController_TaskResult_StateUnchanged,
+    OutputController_TaskResult_OutputStateChanged
+} OutputController_TaskResult;
+
 /**
  * Runs the essential tasks, like switching the output based on
  * the saved schedule.
+ * @return Result of the task representing internal state changes
  */
-void OutputController_task(void);
+OutputController_TaskResult OutputController_task(void);
 
 /**
  * Returns the output state in case there is external power

@@ -276,7 +276,9 @@ void main(void)
             UI_task();
         }
 
-        OutputController_task();
+        if (OutputController_task() == OutputController_TaskResult_OutputStateChanged) {
+            UI_setExternalEvent(UI_ExternalEvent_OutputStateChanged);
+        }
 
         if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
 #if DEBUG_ENABLE

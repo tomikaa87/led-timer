@@ -67,7 +67,8 @@ typedef enum
     UI_ExternalEvent_SystemWakeUp =                     (1 << 0),
     UI_ExternalEvent_SystemGoingToSleep =               (1 << 1),
     UI_ExternalEvent_PowerInputChanged =                (1 << 2),
-    UI_ExternalEvent_BatteryLevelMeasurementFinished =  (1 << 3)
+    UI_ExternalEvent_BatteryLevelMeasurementFinished =  (1 << 3),
+    UI_ExternalEvent_OutputStateChanged =               (1 << 4)
 } UI_ExternalEvent;
 
 inline void UI_setExternalEvent(UI_ExternalEvent event);
