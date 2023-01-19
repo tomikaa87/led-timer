@@ -148,6 +148,36 @@ inline static void showStartupScreen()
     );
 
     Text_draw(GitHub, 6, 64 - Text_calculateWidth(GitHub) / 2, 0, false);
+
+    if (PCON0bits.STKOVF) {
+        Text_draw("O", 0, 0, 0, false);
+        PCON0bits.STKOVF = 0;
+    }
+
+    if (PCON0bits.STKUNF) {
+        Text_draw("U", 0, 6, 0, false);
+        PCON0bits.STKUNF = 0;
+    }
+
+    if (!PCON0bits.nRWDT) {
+        Text_draw("U", 0, 12, 0, false);
+        PCON0bits.nRWDT = 1;
+    }
+
+    if (!PCON0bits.nRMCLR) {
+        Text_draw("M", 0, 18, 0, false);
+        PCON0bits.nRMCLR = 1;
+    }
+
+    if (!PCON0bits.nRI) {
+        Text_draw("I", 0, 24, 0, false);
+        PCON0bits.nRI = 1;
+    }
+
+    if (!PCON0bits.nBOR) {
+        Text_draw("B", 0, 30, 0, false);
+        PCON0bits.nBOR = 1;
+    }
 }
 
 /*
