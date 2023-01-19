@@ -46,46 +46,64 @@ inline static void drawOutputToggleKeyHelp()
         0b00011110
     };
 
-    static const uint8_t SwitchOnStateIcon[] = {
+    static const uint8_t SwitchOffStateIcon[] = {
+        0b00111100,
+        0b01111110,
         0b11111111,
         0b11111111,
         0b11111111,
-        0b11000011,
         0b11111111,
         0b11111111,
         0b11111111,
+        0b10111101,
+        0b10000001,
+        0b10000001,
         0b10000001,
         0b10111101,
         0b10100101,
         0b10111101,
         0b10000001,
-        0b11111111
+        0b10000001,
+        0b10000001,
+        0b01000010,
+        0b00111100
     };
 
-    static const uint8_t SwitchOffStateIcon[] = {
-        0b11111111,
+    static const uint8_t SwitchOnStateIcon[] = {
+        0b00111100,
+        0b01000010,
+        0b10000001,
+        0b10000001,
         0b10000001,
         0b10000001,
         0b10111101,
         0b10000001,
         0b10000001,
+        0b10000001,
+        0b10000001,
+        0b10111101,
         0b11111111,
         0b11111111,
-        0b11000011,
-        0b11011011,
-        0b11000011,
         0b11111111,
-        0b11111111
+        0b11111111,
+        0b11111111,
+        0b11111111,
+        0b01111110,
+        0b00111100
     };
 
-    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - 19 / 2, 0, false);
+    static const uint8_t width =
+        sizeof(MiniBulbIcon)
+        + sizeof(SwitchOffStateIcon);
+
+    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - width / 2, 0, false);
 
     Graphics_drawBitmap(
         OutputController_outputEnableTargetState()
             ? SwitchOffStateIcon
             : SwitchOnStateIcon,
-        13,
-        64 - 19 / 2 + 6,
+        sizeof(SwitchOnStateIcon),
+        64 - width / 2 + 7,
         0,
         false
     );
