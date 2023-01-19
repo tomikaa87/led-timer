@@ -36,7 +36,6 @@ static struct OutputControllerContext
     uint8_t forceOutputStateUpdate : 1;
     uint8_t stateFromSchedule : 1;
     uint8_t prevStateFromSchedule : 1;
-    uint8_t reserved: 4;
 } context = {
     .outputOverride = 0,
     .prevOutputState = 0,
