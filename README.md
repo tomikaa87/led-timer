@@ -10,7 +10,7 @@ Programmable timer for low voltage LED lights (e.g. christmas LED strings) with 
 * Low power microcontroller - battery-friendly power consumption (LED output current not included)
   * 4 mA (screen on)
   * 0.2 mA (screen off)
-  * 16 μA (deep-sleep, only time-keeping) - more than 10000 hours from a standard CR2032 lithium battery
+  * ~6 μA (deep-sleep, only time-keeping) - more than 2 years from a standard CR2032 lithium battery
 * Easy-to-use and intuitive user interface:
   * 3 buttons for changing settings, toggling the output etc.
   * OLED screen with schedule, output state, battery level indication and more
