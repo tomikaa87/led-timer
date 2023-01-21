@@ -203,6 +203,9 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
+    // Enable low-power sleep mode
+    VREGPM = 1;
+
     setupI2C();
 
     __delay_ms(100);
