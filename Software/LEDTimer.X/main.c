@@ -88,7 +88,7 @@ void __interrupt() isr(void)
         // RA2 IOC - LDO_SENSE
         if (IOCAF2) {
             IOCAF2 = 0;
-            System_handleExternalWakeUp();
+            System_handleLDOSenseInterrupt();
         }
     }
 

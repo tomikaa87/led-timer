@@ -30,7 +30,8 @@ typedef enum
 {
     System_WakeUpReason_None,
     System_WakeUpReason_Startup,
-    System_WakeUpReason_KeyPress
+    System_WakeUpReason_KeyPress,
+    System_WakeUpReason_PowerInputChanged
 } System_WakeUpReason;
 
 typedef enum
@@ -76,6 +77,7 @@ typedef volatile struct
 #define System_handleLDOSenseInterrupt() { \
     extern volatile System_InterruptContext System_interruptContext; \
     System_interruptContext.ldoSense.updated = true; \
+    System_interruptContext.externalWakeUpSource = true; \
 }
 
 #define System_handleExternalWakeUp() { \

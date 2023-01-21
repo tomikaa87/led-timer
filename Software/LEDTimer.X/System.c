@@ -130,6 +130,15 @@ System_TaskResult System_task()
         .powerInputChanged = System_interruptContext.ldoSense.updated
     };
 
+    // To keep the screen on for a while after a power input change,
+    // but avoid overwriting the existing reason (if any)
+    if (
+        context.sleep.wakeUpReason == System_WakeUpReason_None
+        && result.powerInputChanged
+    ) {
+        System_onWakeUp(System_WakeUpReason_PowerInputChanged);
+    }
+
     System_interruptContext.ldoSense.updated = false;
 
     if (
@@ -160,6 +169,12 @@ System_TaskResult System_task()
 
             case System_WakeUpReason_KeyPress:
                 if (elapsedSinceWakeUp >= Config_System_KeyPressWakeUpLengthTicks) {
+                    context.sleep.enabled = System_isRunningFromBackupBattery();
+                }
+                break;
+
+            case System_WakeUpReason_PowerInputChanged:
+                if (elapsedSinceWakeUp >= Config_System_PowerInputChangeWakeUpLengthTicks) {
                     context.sleep.enabled = System_isRunningFromBackupBattery();
                 }
                 break;

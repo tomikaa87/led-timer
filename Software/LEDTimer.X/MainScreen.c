@@ -181,15 +181,27 @@ inline static void drawBulbIcon(const bool visible)
 
 inline static void drawPowerIndicator()
 {
+    // TODO use the PowerInputChanged event in the future
+    static bool lastPowerInputType = false;
+
+    static const uint8_t BatteryIndicatorWidth =
+        Graphics_BatteryIndicatorCapWidth
+        + Graphics_BatteryIndicatorBodyFullWidth * 10
+        + Graphics_BatteryIndicatorEndCapWidth;
+
+    if (System_isRunningFromBackupBattery() != lastPowerInputType) {
+        lastPowerInputType = System_isRunningFromBackupBattery();
+
+        static const uint8_t ClearWidth =
+            (BatteryIndicatorWidth > Graphics_ExternalPowerIndicatorWidth)
+                ? BatteryIndicatorWidth
+                : Graphics_ExternalPowerIndicatorWidth;
+
+        SSD1306_fillArea(127 - ClearWidth, 0, ClearWidth, 1, SSD1306_COLOR_BLACK);
+    }
+
     if (System_isRunningFromBackupBattery()) {
-        static const uint8_t Width =
-            Graphics_BatteryIndicatorCapWidth
-            + Graphics_BatteryIndicatorBodyFullWidth * 10
-            + Graphics_BatteryIndicatorEndCapWidth;
-
-        uint8_t x = 127 - Width;
-
-        SSD1306_fillArea(x, 0, Width, 1, SSD1306_COLOR_BLACK);
+        uint8_t x = 127 - BatteryIndicatorWidth;
 
         Graphics_drawBitmap(
             (uint8_t*)Graphics_BatteryIndicatorCap,
@@ -234,8 +246,6 @@ inline static void drawPowerIndicator()
         );
     } else {
         static const uint8_t X = 127 - Graphics_ExternalPowerIndicatorWidth;
-
-        SSD1306_fillArea(X, 0, Graphics_ExternalPowerIndicatorWidth, 1, SSD1306_COLOR_BLACK);
 
         Graphics_drawBitmap(
             (uint8_t*)Graphics_ExternalPowerIndicator,
