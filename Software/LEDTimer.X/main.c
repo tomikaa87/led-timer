@@ -222,6 +222,26 @@ void main(void)
     SSD1306_setContrastLevel(Settings_data.display.brightness);
 
     showStartupScreen();
+
+    // Sunrise/Sunset calculation test code
+
+#if 1
+    SunriseSunsetData data;
+
+    SunriseSunset_setPosition(&data, 19.046867, 47.467442);
+    SunriseSunset_setTimeZone(&data, 1, false);
+
+    SunriseSunset_Time sunrise = SunriseSunset_calculate(&data, false, 28);
+    SunriseSunset_Time sunset = SunriseSunset_calculate(&data, true, 28);
+
+    char s[20];
+    sprintf(s, "%2d:%02d, %2d:%02d",
+        sunrise.hour, sunrise.minute,
+        sunset.hour, sunset.minute
+    );
+    Text_draw(s, 7, 0, 0, false);
+#endif
+
     __delay_ms(5000);
     SSD1306_clear();
 
@@ -235,17 +255,6 @@ void main(void)
         .action = System_TaskResult_NoActionNeeded,
         .powerInputChanged = false
     };
-
-    // Sunrise/Sunset calculation test code
-#if 1
-    SunriseSunsetData data;
-
-    SunriseSunset_setPosition(&data, 19.046867, 47.467442);
-    SunriseSunset_setTimeZone(&data, 1, false);
-
-    (void)SunriseSunset_calculate(&data, false, 28);
-    (void)SunriseSunset_calculate(&data, true, 28);
-#endif
 
     while (1)
     {
