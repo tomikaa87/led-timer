@@ -54,6 +54,9 @@
 #include "Text.h"
 #include "UI.h"
 
+// FIXME for testing
+#include "SunsetSunrise.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -228,11 +231,21 @@ void main(void)
 
     bool runHeavyTasks = true;
 
-
     System_TaskResult systemTaskResult = {
         .action = System_TaskResult_NoActionNeeded,
         .powerInputChanged = false
     };
+
+    // Sunrise/Sunset calculation test code
+#if 1
+    SunriseSunsetData data;
+
+    SunriseSunset_setPosition(&data, 19.046867, 47.467442);
+    SunriseSunset_setTimeZone(&data, 1, false);
+
+    (void)SunriseSunset_calculate(&data, false, 28);
+    (void)SunriseSunset_calculate(&data, true, 28);
+#endif
 
     while (1)
     {
