@@ -100,7 +100,7 @@
         <platformTool>noID</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.40</languageToolchainVersion>
-        <platform>2</platform>
+        <platform>4</platform>
       </toolsSet>
       <packs>
         <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.15.191"/>
@@ -183,10 +183,10 @@
         <property key="code-model-rom" value=""/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
-        <property key="data-model-size-of-double" value="32"/>
-        <property key="data-model-size-of-double-gcc" value="no-short-double"/>
-        <property key="data-model-size-of-float" value="32"/>
-        <property key="data-model-size-of-float-gcc" value="no-short-float"/>
+        <property key="data-model-size-of-double" value="24"/>
+        <property key="data-model-size-of-double-gcc" value="short-double"/>
+        <property key="data-model-size-of-float" value="24"/>
+        <property key="data-model-size-of-float-gcc" value="short-float"/>
         <property key="display-class-usage" value="true"/>
         <property key="display-hex-usage" value="false"/>
         <property key="display-overall-usage" value="true"/>
@@ -204,7 +204,7 @@
         <property key="input-libraries" value="libm"/>
         <property key="keep-generated-startup.as" value="false"/>
         <property key="link-in-c-library" value="true"/>
-        <property key="link-in-c-library-gcc" value=""/>
+        <property key="link-in-c-library-gcc" value="-mc90lib"/>
         <property key="link-in-peripheral-library" value="false"/>
         <property key="managed-stack" value="false"/>
         <property key="opt-xc8-linker-file" value="false"/>

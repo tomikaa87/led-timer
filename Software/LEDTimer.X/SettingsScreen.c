@@ -113,8 +113,15 @@ inline static void drawPageTitle()
 
     // If this needs to be optimized to spare program space,
     // replace it with multiple Text_draw calls
-    snprintf(
-        s, sizeof(s), "%u/%u: %s",
+//    snprintf(
+//        s, sizeof(s), "%u/%u: %s",
+//        context.pageIndex + 1,
+//        Page_Last + 1,
+//        Titles[context.pageIndex]
+//    );
+    sprintf(
+        s,
+        "%u/%u: %s",
         context.pageIndex + 1,
         Page_Last + 1,
         Titles[context.pageIndex]
@@ -136,7 +143,8 @@ inline static void drawSchedulerPage()
     uint8_t minutes = (uint8_t)(minutesSinceMidnightForSegment - hours * 60);
 
     char s[6];
-    snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
+//    snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
+    sprintf(s, "%02u:%02u", hours, minutes);
 
     Text_draw7Seg(
         s,
@@ -152,16 +160,23 @@ inline static void drawSchedulerPage()
 inline static void drawBrightnessPage()
 {
     char s[4];
-    snprintf(s, sizeof(s), "%3u", context.modifiedSettings.output.brightness);
+//    snprintf(s, sizeof(s), "%3u", context.modifiedSettings.output.brightness);
+    sprintf(s, "%3u", context.modifiedSettings.output.brightness);
     Text_draw7Seg(s, 3, 64 - Text_calculateWidth7Seg(s) / 2, false);
 }
 
 inline static void drawClockPage()
 {
     char s[6];
-    snprintf(
+//    snprintf(
+//        s,
+//        sizeof(s),
+//        "%2u:%02u",
+//        context.clockPage.hours,
+//        context.clockPage.minutes
+//    );
+    sprintf(
         s,
-        sizeof(s),
         "%2u:%02u",
         context.clockPage.hours,
         context.clockPage.minutes
@@ -172,7 +187,8 @@ inline static void drawClockPage()
 inline static void drawDisplayBrightnessPage()
 {
     char s[4];
-    snprintf(s, sizeof(s), "%u", context.modifiedSettings.display.brightness);
+//    snprintf(s, sizeof(s), "%u", context.modifiedSettings.display.brightness);
+    sprintf(s, "%u", context.modifiedSettings.display.brightness);
     Text_draw7Seg(s, 3, 64 - Text_calculateWidth7Seg(s) / 2, false);
 }
 
