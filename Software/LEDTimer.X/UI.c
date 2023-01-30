@@ -87,6 +87,25 @@
  *      [ setting details   ]
  *      [ setting details   ]
  *
+ *
+ *      New scheduling settings
+ *
+ *      [K 1]   [K 2]   [K 3]
+ *     [123456789012345678901]
+ *
+ *      BACK  | SELECT |  ADJ
+ *      SETTING NAME      n/m
+ *      TYPE: [ SIMPLE ]        [ SIMPLE ] [ SEGMENT ] [ OFF ]
+ *
+ *      ON: [ SUNSET ]          [ TIME ] [ SUNSET ] [ SUNRISE ]
+ *      <SUNSET>: +/- XX MIN    [ max. +/- 60 min, 15 min step ]
+ *      OFF: [ TIME ]           [ TIME ] [ SUNSET ] [ SUNRISE ]
+ *      <TIME>: XX:XX
+ *
+ *
+ *
+ *
+ *
  */
 
 typedef enum {

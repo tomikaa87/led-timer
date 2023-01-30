@@ -105,7 +105,7 @@
         <platform>4</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.15.191"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.16.323"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>

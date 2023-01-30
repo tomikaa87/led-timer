@@ -30,6 +30,9 @@
 
 #include <stdio.h>
 
+#pragma warning push
+#pragma warning disable 763
+
 static struct MainScreenContext {
     uint8_t scheduleSegmentIndex;
 } context = {
@@ -141,7 +144,7 @@ inline static void drawClock()
 
 static inline void drawScheduleBar()
 {
-    Graphics_drawScheduleBar(Settings_data.scheduler.data, false);
+    Graphics_drawScheduleBar(Settings_data.scheduler.segmentData, false);
 }
 
 static inline void drawScheduleSegmentIndicator(const bool redraw)
@@ -293,3 +296,5 @@ inline bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
 
     return false;
 }
+
+#pragma warning pop

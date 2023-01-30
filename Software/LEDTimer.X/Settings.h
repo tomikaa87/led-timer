@@ -25,14 +25,36 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef enum
+{
+    Settings_SchedulerType_Segment,
+    Settings_SchedulerType_Simple,
+    Settings_SchedulerType_Off
+} Settings_SchedulerType;
+
+typedef enum
+{
+    Settings_ScheduleType_Time,
+    Settings_ScheduleType_Sunrise,
+    Settings_ScheduleType_Sunset
+} Settings_ScheduleType;
+
 typedef struct
 {
     uint8_t _checksum;
 
-    struct Schedule
+    struct Scheduler
     {
-        ScheduleSegmentData data;
-        bool enabled;
+        Settings_SchedulerType type;
+
+        ScheduleSegmentData segmentData;
+
+        struct Schedule
+        {
+            Settings_ScheduleType type;
+            int8_t sunOffset;
+            uint16_t timeMinutesFromMidnight;
+        } simpleOnSchedule, simpleOffSchedule;
     } scheduler;
 
     struct Output

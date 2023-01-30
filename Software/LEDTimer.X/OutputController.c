@@ -55,7 +55,7 @@ static inline bool getStateFromSchedule()
     );
 
     return Types_getScheduleSegmentBit(
-        Settings_data.scheduler.data,
+        Settings_data.scheduler.segmentData,
         segmentIndex
     );
 }
