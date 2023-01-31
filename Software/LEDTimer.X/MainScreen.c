@@ -99,7 +99,7 @@ inline static void drawOutputToggleKeyHelp()
         sizeof(MiniBulbIcon)
         + sizeof(SwitchOffStateIcon);
 
-    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - width / 2, 0, false);
+    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - width / 2, 7, false);
 
     Graphics_drawBitmap(
         OutputController_outputEnableTargetState()
@@ -107,14 +107,16 @@ inline static void drawOutputToggleKeyHelp()
             : SwitchOnStateIcon,
         sizeof(SwitchOnStateIcon),
         64 - width / 2 + 7,
-        0,
+        7,
         false
     );
 }
 
 inline static void drawKeypadHelpBar()
 {
-    SSD1306_fillArea(0, 0, 128, 1, SSD1306_COLOR_BLACK);
+    SSD1306_fillArea(0, 7, 128, 1, SSD1306_COLOR_BLACK);
+
+    Graphics_DrawKeypadHelpBarSeparators();
 
     static const uint8_t SettingsIcon[] = {
         0b01001001,
@@ -125,7 +127,7 @@ inline static void drawKeypadHelpBar()
         0b01001001,
     };
 
-    Graphics_drawBitmap(SettingsIcon, 6, 1, 0, false);
+    Graphics_drawBitmap(SettingsIcon, 6, 1, 7, false);
 
     drawOutputToggleKeyHelp();
 }
@@ -139,12 +141,12 @@ inline static void drawClock()
 //    snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
     sprintf(s, "%02u:%02u", hours, minutes);
 
-    Text_draw7Seg(s, 2, 15, false);
+    Text_draw7Seg(s, 3, 15, false);
 }
 
 static inline void drawScheduleBar()
 {
-    Graphics_drawScheduleBar(Settings_data.scheduler.segmentData, false);
+    Graphics_drawScheduleBar(0, Settings_data.scheduler.segmentData, false, true);
 }
 
 static inline void drawScheduleSegmentIndicator(const bool redraw)
@@ -155,7 +157,7 @@ static inline void drawScheduleSegmentIndicator(const bool redraw)
 
     if (context.scheduleSegmentIndex != segmentIndex || redraw) {
         context.scheduleSegmentIndex = segmentIndex;
-        Graphics_drawScheduleSegmentIndicator(segmentIndex, false);
+        Graphics_drawScheduleSegmentIndicator(2, segmentIndex, false, true);
     }
 }
 
@@ -169,13 +171,13 @@ inline static void drawBulbIcon(const bool visible)
             Graphics_BulbIconWidth,
             Graphics_BulbIconPages,
             X,
-            2,
+            3,
             false
         );
     } else {
         SSD1306_fillArea(
             X,
-            2,
+            3,
             Graphics_BulbIconWidth,
             Graphics_BulbIconPages,
             SSD1306_COLOR_BLACK
@@ -201,7 +203,7 @@ inline static void drawPowerIndicator()
                 ? BatteryIndicatorWidth
                 : Graphics_ExternalPowerIndicatorWidth;
 
-        SSD1306_fillArea(127 - ClearWidth, 0, ClearWidth, 1, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(127 - ClearWidth, 7, ClearWidth, 1, SSD1306_COLOR_BLACK);
     }
 
     if (System_isRunningFromBackupBattery()) {
@@ -211,7 +213,7 @@ inline static void drawPowerIndicator()
             (uint8_t*)Graphics_BatteryIndicatorCap,
             Graphics_BatteryIndicatorCapWidth,
             x,
-            0,
+            7,
             false
         );
 
@@ -222,7 +224,7 @@ inline static void drawPowerIndicator()
                 (uint8_t*)Graphics_BatteryIndicatorBodyEmpty,
                 Graphics_BatteryIndicatorBodyEmptyWidth,
                 x,
-                0,
+                7,
                 false
             );
 
@@ -234,7 +236,7 @@ inline static void drawPowerIndicator()
                 (uint8_t*)Graphics_BatteryIndicatorBodyFull,
                 Graphics_BatteryIndicatorBodyFullWidth,
                 x,
-                0,
+                7,
                 false
             );
 
@@ -245,7 +247,7 @@ inline static void drawPowerIndicator()
             (uint8_t*)Graphics_BatteryIndicatorEndCap,
             Graphics_BatteryIndicatorEndCapWidth,
             x,
-            0,
+            7,
             false
         );
     } else {
@@ -255,7 +257,7 @@ inline static void drawPowerIndicator()
             (uint8_t*)Graphics_ExternalPowerIndicator,
             Graphics_ExternalPowerIndicatorWidth,
             X,
-            0,
+            7,
             false
         );
     }

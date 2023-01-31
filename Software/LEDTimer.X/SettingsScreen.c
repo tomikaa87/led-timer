@@ -158,8 +158,8 @@ inline static void drawSchedulerPage()
         false
     );
 
-    Graphics_drawScheduleSegmentIndicator(context.schedulerPage.segmentIndex, false);
-    Graphics_drawScheduleBar(context.modifiedSettings.scheduler.segmentData, false);
+    Graphics_drawScheduleSegmentIndicator(5, context.schedulerPage.segmentIndex, false, false);
+    Graphics_drawScheduleBar(6, context.modifiedSettings.scheduler.segmentData, false, false);
 }
 
 inline static void drawBrightnessPage()

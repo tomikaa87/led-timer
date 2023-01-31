@@ -222,17 +222,19 @@ void Graphics_drawMultipageBitmap(
 }
 
 void Graphics_drawScheduleBar(
+    const uint8_t line,
     const ScheduleSegmentData segmentData,
-    const bool invert
+    const bool invert,
+    const bool flip
 )
 {
-	static const uint8_t LongTick = 0b11110000;
-	static const uint8_t ShortTick = 0b01110000;
-	static const uint8_t SegmentActiveIndicator = 0b00010111;
-	static const uint8_t SegmentInactiveIndicator = 0b00010000;
+	uint8_t longTick = flip ? 0b00001111 : 0b11110000;
+	uint8_t shortTick = flip ? 0b00001110 : 0b01110000;
+	uint8_t segmentActiveIndicator = flip ? 0b11101000 : 0b00010111;
+	uint8_t segmentInactiveIndicator = flip ? 0b00001000 : 0b00010000;
 
 	SSD1306_enablePageAddressing();
-	SSD1306_setPage(6);
+	SSD1306_setPage(flip ? line + 1 : line);
 	SSD1306_setStartColumn(3);
 
 	uint8_t tickCounter = 0;
@@ -248,15 +250,15 @@ void Graphics_drawScheduleBar(
 		if (tickCounter == 0) {
 			// Draw ticks
 			if (longTickCounter == 0)
-				bitmap = LongTick;
+				bitmap = longTick;
 			else
-				bitmap = ShortTick;
+				bitmap = shortTick;
 		} else {
 			// Draw rest of the bar with or without the indicators
 			if (indicatorCounter < 2 && segmentActive)
-				bitmap = SegmentActiveIndicator;
+				bitmap = segmentActiveIndicator;
 			else
-				bitmap = SegmentInactiveIndicator;
+				bitmap = segmentInactiveIndicator;
 		}
 
 		SSD1306_sendData(&bitmap, 1, 0, invert);
@@ -279,16 +281,20 @@ void Graphics_drawScheduleBar(
 		}
 	}
 
-	Text_draw("0", 7, 1, 1, invert);
-	Text_draw("6", 7, 31, 1, invert);
-	Text_draw("12", 7, 58, 1, invert);
-	Text_draw("18", 7, 88, 1, invert);
-	Text_draw("24", 7, 115, 1, invert);
+    uint8_t textLine = flip ? line : line + 1;
+
+	Text_draw("0", textLine, 1, 1, invert);
+	Text_draw("6", textLine, 31, 1, invert);
+	Text_draw("12", textLine, 58, 1, invert);
+	Text_draw("18", textLine, 88, 1, invert);
+	Text_draw("24", textLine, 115, 1, invert);
 }
 
 void Graphics_drawScheduleSegmentIndicator(
+    const uint8_t line,
     const uint8_t segmentIndex,
-    const bool invert
+    const bool invert,
+    const bool flip
 )
 {
 	static const uint8_t SegmentIndicatorBitmap[] = {
@@ -297,6 +303,14 @@ void Graphics_drawScheduleSegmentIndicator(
 		0b01111100,
 		0b00100000,
 		0b00010000
+	};
+
+    static const uint8_t SegmentIndicatorBitmapFlipped[] = {
+		0b00001000,
+		0b00000100,
+		0b00111110,
+		0b00000100,
+		0b00001000
 	};
 
 	uint8_t x = 2; // initial offset from left
@@ -322,13 +336,13 @@ void Graphics_drawScheduleSegmentIndicator(
 	 */
 
     // Clear the background
-	SSD1306_fillArea(0, 5, 128, 1, 0);
+	SSD1306_fillArea(0, line, 128, 1, 0);
 
     Graphics_drawBitmap(
-        SegmentIndicatorBitmap,
+        flip ? SegmentIndicatorBitmapFlipped : SegmentIndicatorBitmap,
         sizeof(SegmentIndicatorBitmap),
         x,
-        5,
+        line,
         invert
     );
 }

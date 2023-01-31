@@ -82,13 +82,17 @@ void Graphics_drawMultipageBitmap(
 );
 
 void Graphics_drawScheduleBar(
+    uint8_t line,
     const ScheduleSegmentData segmentData,
-    bool invert
+    bool invert,
+    bool flip
 );
 
 void Graphics_drawScheduleSegmentIndicator(
+    uint8_t line,
     uint8_t segmentIndex,
-    bool invert
+    bool invert,
+    bool flip
 );
 
 #define Graphics_DrawIcon(_Column, _Line, _Icon) \
@@ -116,6 +120,14 @@ void Graphics_drawScheduleSegmentIndicator(
     SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false); \
     SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
     SSD1306_sendData((_Icon3), sizeof((_Icon3)), 0, false)
+
+#define Graphics_DrawKeypadHelpBarSeparators() \
+    SSD1306_enablePageAddressing(); \
+    SSD1306_setPage(7); \
+    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false); \
+    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false)
 
 #define Graphics_DrawScreenTitle(_Text) {\
     SSD1306_enablePageAddressing(); \
