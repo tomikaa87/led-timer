@@ -60,7 +60,7 @@ static struct SettingsScreenContext {
         Page_DisplayBrightness,
         Page_NewScheduler,
 
-        Page_Last = Page_DisplayBrightness
+        Page_Last = Page_NewScheduler
     } page;
 
     uint8_t pageIndex;
@@ -103,7 +103,7 @@ inline static void drawKeypadHelpBar()
                 RightHelpText("MINUTE");
             } else if (context.pageIndex == Page_NewScheduler) {
                 CenterHelpText("SELECT");
-                RightHelpText("CLEAR");
+                RightHelpText("ADJUST");
             }
             // Regular number setting
             else {
@@ -119,10 +119,11 @@ inline static void drawPageTitle()
     char s[22];
 
     static const char* Titles[Page_Last + 1] = {
-        "Schedule",
+        "Sgmt. Schdeduler",
         "LED Brightness",
         "Clock",
-        "Disp. Brightness"
+        "Disp. Brightness",
+        "Scheduler"
     };
 
     // If this needs to be optimized to spare program space,
@@ -222,19 +223,76 @@ inline static void drawNewSchedulerPage(const bool redraw)
 
     // Draw the fixed labels
     if (redraw) {
+        SSD1306_fillArea(0, 2, 128, 6, SSD1306_COLOR_BLACK);
+
         Text_draw("TYPE:", 2, 0, 0, false);
 
         switch (context.modifiedSettings.scheduler.type) {
             case Settings_SchedulerType_Segment:
+                Text_draw(
+                    "Change settings",
+                    4,
+                    64 - CalculateTextWidth("Change settings") / 2,
+                    0,
+                    false
+                );
+                Text_draw(
+                    "on Sgmt. Schd. screen",
+                    5,
+                    64 - CalculateTextWidth("on Sgmt. Schd. screen") / 2,
+                    0,
+                    false
+                );
                 break;
 
             case Settings_SchedulerType_Simple:
                 Text_draw("ON:", 4, 0, 0, false);
                 Text_draw("OFF:", 6, 0, 0, false);
+
+                switch (context.modifiedSettings.scheduler.simpleOnSchedule.type) {
+                    case Settings_ScheduleType_Sunrise:
+                    case Settings_ScheduleType_Sunset:
+                        // Switch on schedule setting label
+                        Text_draw("OFFSET:", 5, 0, 0, false);
+                        break;
+
+                    case Settings_ScheduleType_Time:
+                        // Switch on time setting label
+                        Text_draw("TIME:", 5, 0, 0, false);
+                        // Time hour-minute separator
+                        Text_draw(
+                            ":",
+                            5,
+                            PositionAfterFixedLabel("TIME: xx"),
+                            0,
+                            false
+                        );
+                        break;
+                }
+
+                switch (context.modifiedSettings.scheduler.simpleOffSchedule.type) {
+                    case Settings_ScheduleType_Sunrise:
+                    case Settings_ScheduleType_Sunset:
+                        // Switch off schedule setting label
+                        Text_draw("OFFSET:", 7, 0, 0, false);
+                        break;
+
+                    case Settings_ScheduleType_Time:
+                        // Switch off time setting label
+                        Text_draw("TIME:", 7, 0, 0, false);
+                        // Time hour-minute separator
+                        Text_draw(
+                            ":",
+                            7,
+                            PositionAfterFixedLabel("TIME: xx"),
+                            0,
+                            false
+                        );
+                        break;
+                }
                 break;
 
             case Settings_SchedulerType_Off:
-                SSD1306_fillArea(0, 4, 128, 4, SSD1306_COLOR_BLACK);
                 break;
         }
     }
@@ -249,8 +307,9 @@ inline static void drawNewSchedulerPage(const bool redraw)
     );
 
     switch (context.modifiedSettings.scheduler.type) {
-        case Settings_SchedulerType_Segment:
+        case Settings_SchedulerType_Segment: {
             break;
+        }
 
         case Settings_SchedulerType_Simple:
             // Switch on schedule type
@@ -267,8 +326,6 @@ inline static void drawNewSchedulerPage(const bool redraw)
             switch (context.modifiedSettings.scheduler.simpleOnSchedule.type) {
                 case Settings_ScheduleType_Sunrise:
                 case Settings_ScheduleType_Sunset: {
-                    // Switch on schedule setting label
-                    Text_draw("OFFSET:", 5, 0, 0, false);
                     // Offset value label
                     char s[10];
                     sprintf(s, "%+3.2d MIN", context.modifiedSettings.scheduler.simpleOnSchedule.sunOffset);
@@ -283,17 +340,32 @@ inline static void drawNewSchedulerPage(const bool redraw)
                 }
 
                 case Settings_ScheduleType_Time: {
-                    // Switch on time setting label
-                    Text_draw("TIME:", 5, 0, 0, false);
-                    // Time value label
-                    char s[6];
-                    sprintf(s, "%2d:%02d", context.modifiedSettings.scheduler.simpleOnSchedule.timeMinutesFromMidnight);
+                    char s[3];
+
+                    // Time hour value label
+                    sprintf(
+                        s, "%2d",
+                        context.modifiedSettings.scheduler.simpleOnSchedule.timeHour
+                    );
                     Text_draw(
                         s,
                         5,
                         PositionAfterFixedLabel("TIME:"),
                         0,
                         InvertForSelectionIndex(2)
+                    );
+
+                    // Time minute value label
+                    sprintf(
+                        s, "%02d",
+                        context.modifiedSettings.scheduler.simpleOnSchedule.timeMinute
+                    );
+                    Text_draw(
+                        s,
+                        5,
+                        PositionAfterFixedLabel("TIME: xx:"),
+                        0,
+                        InvertForSelectionIndex(3)
                     );
                     break;
                 }
@@ -313,8 +385,6 @@ inline static void drawNewSchedulerPage(const bool redraw)
             switch (context.modifiedSettings.scheduler.simpleOffSchedule.type) {
                 case Settings_ScheduleType_Sunrise:
                 case Settings_ScheduleType_Sunset: {
-                    // Switch off schedule setting label
-                    Text_draw("OFFSET:", 7, 0, 0, false);
                     // Offset value label
                     char s[10];
                     sprintf(s, "%+3.2d MIN", context.modifiedSettings.scheduler.simpleOffSchedule.sunOffset);
@@ -323,23 +393,38 @@ inline static void drawNewSchedulerPage(const bool redraw)
                         7,
                         PositionAfterFixedLabel("OFFSET:"),
                         0,
-                        InvertForSelectionIndex(2)
+                        InvertForSelectionIndex(5)
                     );
                     break;
                 }
 
                 case Settings_ScheduleType_Time: {
-                    // Switch on time setting label
-                    Text_draw("TIME:", 7, 0, 0, false);
-                    // Time value label
-                    char s[6];
-                    sprintf(s, "%2d:%02d", context.modifiedSettings.scheduler.simpleOffSchedule.timeMinutesFromMidnight);
+                    char s[3];
+
+                    // Time hour value label
+                    sprintf(
+                        s, "%2d",
+                        context.modifiedSettings.scheduler.simpleOnSchedule.timeHour
+                    );
                     Text_draw(
                         s,
-                        7,
+                        5,
                         PositionAfterFixedLabel("TIME:"),
                         0,
-                        InvertForSelectionIndex(2)
+                        InvertForSelectionIndex(5)
+                    );
+
+                    // Time minute value label
+                    sprintf(
+                        s, "%02d",
+                        context.modifiedSettings.scheduler.simpleOnSchedule.timeMinute
+                    );
+                    Text_draw(
+                        s,
+                        5,
+                        PositionAfterFixedLabel("TIME: xx:"),
+                        0,
+                        InvertForSelectionIndex(6)
                     );
                     break;
                 }
@@ -465,6 +550,64 @@ static void adjustDisplayBrightness(const bool increase)
     drawCurrentPage(false);
 }
 
+static void adjustNewSchedulerSetting()
+{
+    // Scheduler type
+    if (context.newSchedulerPage.selection == 0) {
+        if (++context.modifiedSettings.scheduler.type > Settings_SchedulerType_Off) {
+            context.modifiedSettings.scheduler.type = Settings_SchedulerType_Segment;
+        }
+    } else {
+        switch (context.modifiedSettings.scheduler.type) {
+            case Settings_SchedulerType_Simple:
+                // On/Off schedule type selection
+                if (
+                    context.newSchedulerPage.selection == 1
+                    || context.newSchedulerPage.selection == 3
+                ) {
+                    Settings_ScheduleType* t =
+                        context.newSchedulerPage.selection == 1
+                            ? &context.modifiedSettings.scheduler.simpleOnSchedule.type
+                            : &context.modifiedSettings.scheduler.simpleOffSchedule.type;
+
+                    if (++(*t) >= Settings_ScheduleType_Sunset) {
+                        *t = Settings_ScheduleType_Time;
+                    }
+                }
+                // On/Off schedule details adjustment
+                else if (
+                    context.newSchedulerPage.selection == 2
+                    || context.newSchedulerPage.selection == 4
+                ) {
+                    struct Schedule* s =
+                        context.newSchedulerPage.selection == 2
+                            ? &context.modifiedSettings.scheduler.simpleOnSchedule
+                            : &context.modifiedSettings.scheduler.simpleOffSchedule;
+
+                    switch (s->type) {
+                        case Settings_ScheduleType_Sunrise:
+                        case Settings_ScheduleType_Sunset:
+                            s->sunOffset += 15;
+                            if (s->sunOffset >= 60) {
+                                s->sunOffset = -60;
+                            }
+                            break;
+
+                        case Settings_ScheduleType_Time:
+
+                            break;
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    drawCurrentPage(false);
+}
+
 void SettingsScreen_init()
 {
     memset(&context, 0, sizeof(struct SettingsScreenContext));
@@ -499,8 +642,9 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
                 case State_Configuration:
                     context.state = State_Navigation;
 
-                    // For convenience, reset the scheduler segment index
+                    // Reset intermediate values on leaving Configuration mode
                     context.schedulerPage.segmentIndex = 0;
+                    context.newSchedulerPage.selection = 0;
 
                     // Update the system clock
                     if (context.pageIndex == Page_Clock) {
@@ -545,6 +689,17 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
                     else if (context.pageIndex == Page_DisplayBrightness) {
                         adjustDisplayBrightness(true);
                     }
+                    // New scheduler: SELECT
+                    else if (context.pageIndex == Page_NewScheduler) {
+                        uint8_t limit =
+                            context.modifiedSettings.scheduler.type == Settings_SchedulerType_Simple
+                                ? 4
+                                : 0;
+
+                        if (++context.newSchedulerPage.selection >= limit) {
+                            context.newSchedulerPage.selection = 0;
+                        }
+                    }
                     break;
 
                 default:
@@ -574,6 +729,10 @@ inline bool SettingsScreen_handleKeyPress(const uint8_t keyCode, const bool hold
                     // Display brightness: -
                     else if (context.pageIndex == Page_DisplayBrightness) {
                         adjustDisplayBrightness(false);
+                    }
+                    // New scheduler: ADJUST
+                    else if (context.pageIndex == Page_NewScheduler) {
+                        adjustNewSchedulerSetting();
                     }
                     break;
 

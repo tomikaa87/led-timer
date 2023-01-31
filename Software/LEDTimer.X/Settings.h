@@ -53,7 +53,8 @@ typedef struct
         {
             Settings_ScheduleType type;
             int8_t sunOffset;
-            uint16_t timeMinutesFromMidnight;
+            uint8_t timeHour;
+            uint8_t timeMinute;
         } simpleOnSchedule, simpleOffSchedule;
     } scheduler;
 
