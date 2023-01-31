@@ -23,6 +23,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef enum {
+    Settings_MenuScreen_KeyHandled,
+    Settings_MenuScreen_Exited,
+    Settings_MenuScreen_ItemSelected
+} Settings_MenuScreen_KeyPressResult;
+
 void Settings_MenuScreen_init(void);
 void Settings_MenuScreen_update(bool redraw);
-bool Settings_MenuScreen_handleKeyPress(uint8_t keyCode, bool hold);
+Settings_MenuScreen_KeyPressResult Settings_MenuScreen_handleKeyPress(uint8_t keyCode, bool hold);
+uint8_t Settings_MenuScreen_lastSelectionIndex(void);

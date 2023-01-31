@@ -18,6 +18,7 @@
     Created on 2023-01-31
 */
 
+#include "Graphics.h"
 #include "Keypad.h"
 #include "Settings_MenuScreen.h"
 #include "SSD1306.h"
@@ -35,62 +36,6 @@ static const char* MenuItems[MenuItemCount] = {
     "Date",
     "Time",
     "Location"
-};
-
-static const uint8_t HeaderLeftCap[] = {
-    0b01000000,
-    0b00100000,
-    0b01010000,
-    0b00101000,
-    0b01010100,
-    0b00101010,
-    0b01010101
-};
-
-static const uint8_t HeaderRightCap[] = {
-    0b01010101,
-    0b00101010,
-    0b00010101,
-    0b00001010,
-    0b00000101,
-    0b00000010,
-    0b00000001
-};
-
-static const uint8_t ExitIcon[] = {
-    0b11111111,
-    0b00000001,
-    0b00000001,
-    0b00010001,
-    0b11111111,
-    0b00000000,
-    0b00010000,
-    0b00111000,
-    0b01111100,
-    0b00010000,
-    0b00010000,
-    0b00010000
-};
-
-static const uint8_t NextIcon[] = {
-    0b00010000,
-    0b00110000,
-    0b01110000,
-    0b11111111,
-    0b01110000,
-    0b00110000,
-    0b00010000
-};
-
-static const uint8_t SelectIcon[] = {
-    0b00010000,
-    0b00111000,
-    0b01111100,
-    0b11111110,
-    0b00010000,
-    0b00010000,
-    0b00010000,
-    0b00011111
 };
 
 static const uint8_t SelectedItemIcon[] = {
@@ -115,18 +60,6 @@ static const uint8_t PositionIndicatorFull[] = {
     0b11111111
 };
 
-#define DrawIcon(_Column, _Line, _Icon) \
-    SSD1306_enablePageAddressing(); \
-    SSD1306_setStartColumn((_Column)); \
-    SSD1306_setPage((_Line)); \
-    SSD1306_sendData((_Icon), sizeof((_Icon)), 0, false)
-
-#define DrawCenterIcon(_Line, _Icon) \
-    DrawIcon(64 - sizeof((_Icon)) / 2, _Line, _Icon)
-
-#define DrawRightIcon(_Line, _Icon) \
-    DrawIcon(128 - sizeof((_Icon)), _Line, _Icon)
-
 static struct Settings_MenuScreen_Context {
     uint8_t selectionIndex : 4;
     uint8_t viewPosition : 4;
@@ -139,7 +72,7 @@ static void drawMenuItems()
 
     while (itemIndex < MenuItemCount && line != 7) {
         if (itemIndex == context.selectionIndex) {
-            DrawIcon(0, line, SelectedItemIcon);
+            Graphics_DrawIcon(0, line, SelectedItemIcon);
         } else {
             SSD1306_fillArea(0, line, sizeof(SelectedItemIcon), 1, SSD1306_COLOR_BLACK);
         }
@@ -162,9 +95,9 @@ static void drawPositionIndicator()
 
     for (uint8_t i = 0; i <= MaxPosition; ++i) {
         if (i == position) {
-            DrawRightIcon(i + 1, PositionIndicatorFull);
+            Graphics_DrawRightIcon(i + 1, PositionIndicatorFull);
         } else {
-            DrawRightIcon(i + 1, PositionIndicatorEmpty);
+            Graphics_DrawRightIcon(i + 1, PositionIndicatorEmpty);
         }
     }
 }
@@ -177,34 +110,24 @@ void Settings_MenuScreen_init()
 void Settings_MenuScreen_update(const bool redraw)
 {
     if (redraw) {
-        // Header
-        const uint8_t tw = CalculateTextWidth("Settings");
-        uint8_t x = 64 - tw / 2 - sizeof(HeaderLeftCap) - 1;
-        DrawIcon(x, 0, HeaderLeftCap);
-        x = Text_draw("Settings", 0, x + sizeof(HeaderLeftCap) + 1, 0, false);
-        DrawIcon(x, 0, HeaderRightCap);
-
-        // Bottom help bar
-        DrawIcon(0, 7, ExitIcon);
-        DrawIcon(32 - sizeof(HeaderLeftCap), 7, HeaderLeftCap);
-        DrawIcon(32 - 1, 7, HeaderRightCap);
-        DrawCenterIcon(7, NextIcon);
-        DrawIcon(96 - sizeof(HeaderLeftCap), 7, HeaderLeftCap);
-        DrawIcon(96 - 1, 7, HeaderRightCap);
-        DrawRightIcon(7, SelectIcon);
+        Graphics_DrawScreenTitle("Settings");
+        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_SelectIcon);
 
         drawMenuItems();
         drawPositionIndicator();
     }
 }
 
-bool Settings_MenuScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
+Settings_MenuScreen_KeyPressResult Settings_MenuScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
 {
     switch (keyCode) {
         // Exit
         case Keypad_Key1: {
-            // Save settings
-            break;
+            if (hold) {
+                break;
+            }
+
+            return Settings_MenuScreen_Exited;
         }
 
         // Next
@@ -221,15 +144,23 @@ bool Settings_MenuScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
             drawMenuItems();
             drawPositionIndicator();
 
-            return true;
+            break;
         }
 
         // Select
         case Keypad_Key3: {
+            if (hold) {
+                break;
+            }
 
-            break;
+            return Settings_MenuScreen_ItemSelected;
         }
     }
 
-    return false;
+    return Settings_MenuScreen_KeyHandled;
+}
+
+uint8_t Settings_MenuScreen_lastSelectionIndex()
+{
+    return context.selectionIndex;
 }

@@ -113,6 +113,77 @@ const uint8_t Graphics_ExternalPowerIndicator[Graphics_ExternalPowerIndicatorWid
     0b01000000
 };
 
+const uint8_t Graphics_KeypadHelpBarSeparator[Graphics_KeypadHelpBarSeparatorWidth] = {
+    0b10000000,
+    0b01000000,
+    0b10100000,
+    0b01010000,
+    0b10101000,
+    0b01010100,
+    0b00101010,
+    0b00010101,
+    0b00001010,
+    0b00000101,
+    0b00000010,
+    0b00000001
+};
+
+const uint8_t Graphics_ExitIcon[Graphics_ExitIconWidth] = {
+    0b11111111,
+    0b00000001,
+    0b00000001,
+    0b00010001,
+    0b11111111,
+    0b00000000,
+    0b00010000,
+    0b00111000,
+    0b01111100,
+    0b00010000,
+    0b00010000,
+    0b00010000
+};
+
+const uint8_t Graphics_NextIcon[Graphics_NextIconWidth] = {
+    0b00010000,
+    0b00110000,
+    0b01110000,
+    0b11111111,
+    0b01110000,
+    0b00110000,
+    0b00010000
+};
+
+const uint8_t Graphics_SelectIcon[Graphics_SelectIconWidth] = {
+    0b00010000,
+    0b00111000,
+    0b01111100,
+    0b11111110,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00011111
+};
+
+const uint8_t Graphics_HeaderLeftCapIcon[Graphics_HeaderLeftCapIconWidth] = {
+    0b01000000,
+    0b00100000,
+    0b01010000,
+    0b00101000,
+    0b01010100,
+    0b00101010,
+    0b01010101
+};
+
+const uint8_t Graphics_HeaderRightCapIcon[Graphics_HeaderRightCapIconWidth] = {
+    0b01010101,
+    0b00101010,
+    0b00010101,
+    0b00001010,
+    0b00000101,
+    0b00000010,
+    0b00000001
+};
+
 void Graphics_drawBitmap(
     const uint8_t* const bitmap,
     const uint8_t width,

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "SSD1306.h"
+#include "Text.h"
 #include "Types.h"
 
 #include <stdbool.h>
@@ -43,6 +45,24 @@ extern const uint8_t Graphics_BatteryIndicatorEndCap[Graphics_BatteryIndicatorEn
 
 #define Graphics_ExternalPowerIndicatorWidth        15
 extern const uint8_t Graphics_ExternalPowerIndicator[Graphics_ExternalPowerIndicatorWidth];
+
+#define Graphics_KeypadHelpBarSeparatorWidth        12
+extern const uint8_t Graphics_KeypadHelpBarSeparator[Graphics_KeypadHelpBarSeparatorWidth];
+
+#define Graphics_ExitIconWidth                      12
+extern const uint8_t Graphics_ExitIcon[Graphics_ExitIconWidth];
+
+#define Graphics_NextIconWidth                      7
+extern const uint8_t Graphics_NextIcon[Graphics_NextIconWidth];
+
+#define Graphics_SelectIconWidth                    8
+extern const uint8_t Graphics_SelectIcon[Graphics_SelectIconWidth];
+
+#define Graphics_HeaderLeftCapIconWidth             7
+extern const uint8_t Graphics_HeaderLeftCapIcon[Graphics_HeaderLeftCapIconWidth];
+
+#define Graphics_HeaderRightCapIconWidth            7
+extern const uint8_t Graphics_HeaderRightCapIcon[Graphics_HeaderRightCapIconWidth];
 
 void Graphics_drawBitmap(
     const uint8_t* bitmap,
@@ -70,3 +90,40 @@ void Graphics_drawScheduleSegmentIndicator(
     uint8_t segmentIndex,
     bool invert
 );
+
+#define Graphics_DrawIcon(_Column, _Line, _Icon) \
+    SSD1306_enablePageAddressing(); \
+    SSD1306_setStartColumn((_Column)); \
+    SSD1306_setPage((_Line)); \
+    SSD1306_sendData((_Icon), sizeof((_Icon)), 0, false)
+
+#define Graphics_DrawCenterIcon(_Line, _Icon) \
+    Graphics_DrawIcon(64 - sizeof((_Icon)) / 2, _Line, _Icon)
+
+#define Graphics_DrawRightIcon(_Line, _Icon) \
+    Graphics_DrawIcon(128 - sizeof((_Icon)), _Line, _Icon)
+
+#define Graphics_DrawKeypadHelpBar(_Icon1, _Icon2, _Icon3) \
+    SSD1306_enablePageAddressing(); \
+    SSD1306_setPage(7); \
+    SSD1306_setStartColumn(0); \
+    SSD1306_sendData((_Icon1), sizeof((_Icon1)), 0, false); \
+    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false); \
+    SSD1306_setStartColumn(64 - sizeof((_Icon2)) / 2); \
+    SSD1306_sendData((_Icon2), sizeof((_Icon2)), 0, false); \
+    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false); \
+    SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
+    SSD1306_sendData((_Icon3), sizeof((_Icon3)), 0, false)
+
+#define Graphics_DrawScreenTitle(_Text) {\
+    SSD1306_enablePageAddressing(); \
+    SSD1306_setPage(0); \
+    uint8_t _Pos = 64 - CalculateTextWidth(_Text) / 2 - sizeof(Graphics_HeaderLeftCapIcon) - 2; \
+    SSD1306_setStartColumn(_Pos); \
+    SSD1306_sendData(Graphics_HeaderLeftCapIcon, sizeof(Graphics_HeaderLeftCapIcon), 0, false); \
+    _Pos = Text_draw(_Text, 0, _Pos + sizeof(Graphics_HeaderLeftCapIcon) + 2, 0, false); \
+    SSD1306_setStartColumn(_Pos + 1); \
+    SSD1306_sendData(Graphics_HeaderRightCapIcon, sizeof(Graphics_HeaderRightCapIcon), 0, false); \
+}

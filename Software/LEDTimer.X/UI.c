@@ -345,18 +345,25 @@ void UI_keyEvent(uint8_t keyCode)
             }
             break;
 
-        case UI_Screen_Settings:
-            if (!Settings_MenuScreen_handleKeyPress(keyCode, hold)) {
-            // if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
-                // Key1 -> Back to Main
-                if (keyCode == Keypad_Key1) {
+        case UI_Screen_Settings: {
+            switch (Settings_MenuScreen_handleKeyPress(keyCode, hold)) {
+                case Settings_MenuScreen_KeyHandled:
+                    break;
+
+                case Settings_MenuScreen_Exited:
+                    // Save settings
 #if DEBUG_ENABLE_PRINT
                     puts("UI:BackToMain");
 #endif
                     switchToScreen(UI_Screen_Main);
-                }
+                    break;
+
+                case Settings_MenuScreen_ItemSelected:
+                    // Switch to the selected settings screen
+                    break;
             }
             break;
+        }
 
         default:
             break;
