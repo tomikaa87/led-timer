@@ -27,6 +27,7 @@
 
 #include "MainScreen.h"
 #include "SettingsScreen.h"
+#include "Settings_MenuScreen.h"
 
 #include "stdbool.h"
 #include "stdio.h"
@@ -188,7 +189,8 @@ static void updateScreen(const bool redraw)
             break;
 
         case UI_Screen_Settings:
-            SettingsScreen_update(redraw);
+            // SettingsScreen_update(redraw);
+            Settings_MenuScreen_update(redraw);
             break;
 
         default:
@@ -336,14 +338,16 @@ void UI_keyEvent(uint8_t keyCode)
 #if DEBUG_ENABLE_PRINT
                     puts("UI:ShowSettings");
 #endif
-                    SettingsScreen_init();
+                    // SettingsScreen_init();
+                    Settings_MenuScreen_init();
                     switchToScreen(UI_Screen_Settings);
                 }
             }
             break;
 
         case UI_Screen_Settings:
-            if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
+            if (!Settings_MenuScreen_handleKeyPress(keyCode, hold)) {
+            // if (!SettingsScreen_handleKeyPress(keyCode, hold)) {
                 // Key1 -> Back to Main
                 if (keyCode == Keypad_Key1) {
 #if DEBUG_ENABLE_PRINT
