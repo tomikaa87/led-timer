@@ -64,6 +64,15 @@ extern const uint8_t Graphics_HeaderLeftCapIcon[Graphics_HeaderLeftCapIconWidth]
 #define Graphics_HeaderRightCapIconWidth            7
 extern const uint8_t Graphics_HeaderRightCapIcon[Graphics_HeaderRightCapIconWidth];
 
+#define Graphics_AdjustIconWidth                    12
+extern const uint8_t Graphics_AdjustIcon[Graphics_AdjustIconWidth];
+
+#define Graphics_SetIconWidth                       8
+extern const uint8_t Graphics_SetIcon[Graphics_SetIconWidth];
+
+#define Graphics_ClearIconWidth                     8
+extern const uint8_t Graphics_ClearIcon[Graphics_ClearIconWidth];
+
 void Graphics_drawBitmap(
     const uint8_t* bitmap,
     uint8_t width,

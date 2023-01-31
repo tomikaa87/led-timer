@@ -15,14 +15,13 @@
     along with LEDTimer.  If not, see <http://www.gnu.org/licenses/>.
 
     Author: Tamas Karpati
-    Created on 2022-12-05
+    Created on 2023-01-31
 */
 
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "Settings.h"
 
-void SettingsScreen_init(void);
-void SettingsScreen_update(bool redraw);
-inline bool SettingsScreen_handleKeyPress(uint8_t keyCode, const bool hold);
+void SettingsScreen_SegmentScheduler_init(struct Scheduler* settings);
+void SettingsScreen_SegmentScheduler_update(bool redraw);
+bool SettingsScreen_SegmentScheduler_handleKeyPress(uint8_t keyCode, bool hold);

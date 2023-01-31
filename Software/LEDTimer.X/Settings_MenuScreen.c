@@ -30,7 +30,7 @@
 
 static const char* MenuItems[MenuItemCount] = {
     "Scheduler",
-    "Segment sch.",
+    "Segment scheduler",
     "LED brightness",
     "Disp. brightness",
     "Date",

@@ -26,8 +26,12 @@
 #include "UI.h"
 
 #include "MainScreen.h"
-#include "SettingsScreen.h"
 #include "Settings_MenuScreen.h"
+#include "SettingsScreen_DisplayBrightness.h"
+#include "SettingsScreen_LEDBrightness.h"
+#include "SettingsScreen_Scheduler.h"
+#include "SettingsScreen_SegmentScheduler.h"
+#include "SettingsScreen_Time.h"
 
 #include "stdbool.h"
 #include "stdio.h"
@@ -111,22 +115,31 @@
 
 typedef enum {
     UI_Screen_Main,
-    UI_Screen_Settings
+    UI_Screen_Settings,
+    UI_Screen_Settings_Scheduler,
+    UI_Screen_Settings_SegmentScheduler,
+    UI_Screen_Settings_LEDBrightness,
+    UI_Screen_Settings_DisplayBrightness,
+    UI_Screen_Settings_Date,
+    UI_Screen_Settings_Time,
+    UI_Screen_Settings_Location
 } UI_Screen;
 
 static struct UIContext {
     UI_Screen screen;
-    bool displayOn;
     Clock_Ticks displayTimer;
     Clock_Ticks updateTimer;
-    bool forceUpdate;
     volatile uint8_t externalEvents;
+    uint8_t displayOn : 1;
+    uint8_t forceUpdate : 1;
+    uint8_t _reserved : 5;
+    SettingsData modifiedSettings;
 } context = {
     .screen = UI_Screen_Main,
-    .displayOn = true,
     .updateTimer = 0,
-    .forceUpdate = true,
-    .externalEvents = 0
+    .externalEvents = 0,
+    .displayOn = true,
+    .forceUpdate = true
 };
 
 #if DEBUG_ENABLE
@@ -191,6 +204,26 @@ static void updateScreen(const bool redraw)
         case UI_Screen_Settings:
             // SettingsScreen_update(redraw);
             Settings_MenuScreen_update(redraw);
+            break;
+
+        case UI_Screen_Settings_Scheduler:
+            SettingsScreen_Scheduler_update(redraw);
+            break;
+
+        case UI_Screen_Settings_SegmentScheduler:
+            SettingsScreen_SegmentScheduler_update(redraw);
+            break;
+
+        case UI_Screen_Settings_LEDBrightness:
+            SettingsScreen_LEDBrightness_update(redraw);
+            break;
+
+        case UI_Screen_Settings_DisplayBrightness:
+            SettingsScreen_DisplayBrightness_update(redraw);
+            break;
+
+        case UI_Screen_Settings_Time:
+            SettingsScreen_Time_update(redraw);
             break;
 
         default:
@@ -340,6 +373,7 @@ void UI_keyEvent(uint8_t keyCode)
 #endif
                     // SettingsScreen_init();
                     Settings_MenuScreen_init();
+                    memcpy(&context.modifiedSettings, &Settings_data, sizeof(SettingsData));
                     switchToScreen(UI_Screen_Settings);
                 }
             }
@@ -352,6 +386,10 @@ void UI_keyEvent(uint8_t keyCode)
 
                 case Settings_MenuScreen_Exited:
                     // Save settings
+                    memcpy(&Settings_data, &context.modifiedSettings, sizeof(SettingsData));
+                    SSD1306_setContrastLevel(Settings_data.display.brightness);
+                    Settings_save();
+
 #if DEBUG_ENABLE_PRINT
                     puts("UI:BackToMain");
 #endif
@@ -360,10 +398,84 @@ void UI_keyEvent(uint8_t keyCode)
 
                 case Settings_MenuScreen_ItemSelected:
                     // Switch to the selected settings screen
+                    switch (Settings_MenuScreen_lastSelectionIndex()) {
+                        case 0:
+                            SettingsScreen_Scheduler_init(&context.modifiedSettings.scheduler);
+                            switchToScreen(UI_Screen_Settings_Scheduler);
+                            break;
+                        case 1:
+                            SettingsScreen_SegmentScheduler_init(&context.modifiedSettings.scheduler);
+                            switchToScreen(UI_Screen_Settings_SegmentScheduler);
+                            break;
+                        case 2:
+                            SettingsScreen_LEDBrightness_init(&context.modifiedSettings.output);
+                            switchToScreen(UI_Screen_Settings_LEDBrightness);
+                            break;
+                        case 3:
+                            SettingsScreen_DisplayBrightness_init(&context.modifiedSettings.display);
+                            switchToScreen(UI_Screen_Settings_DisplayBrightness);
+                            break;
+                        case 4:
+                            SettingsScreen_Time_init();
+                            switchToScreen(UI_Screen_Settings_Date);
+                            break;
+                        case 5:
+                            switchToScreen(UI_Screen_Settings_Time);
+                            break;
+                        case 6:
+                            switchToScreen(UI_Screen_Settings_Location);
+                            break;
+                        default:
+                            break;
+                    }
                     break;
             }
             break;
         }
+
+        case UI_Screen_Settings_Scheduler:
+            if (!SettingsScreen_Scheduler_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_SegmentScheduler:
+            if (!SettingsScreen_SegmentScheduler_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_LEDBrightness:
+            if (!SettingsScreen_LEDBrightness_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_DisplayBrightness:
+            if (!SettingsScreen_DisplayBrightness_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_Time:
+            if (!SettingsScreen_Time_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+#if 0
+        case UI_Screen_Settings_:
+            break;
+        case UI_Screen_Settings_:
+            break;
+        case UI_Screen_Settings_:
+            break;
+        case UI_Screen_Settings_:
+            break;
+        case UI_Screen_Settings_:
+            break;
+        case UI_Screen_Settings_:
+            break;
+#endif
 
         default:
             break;

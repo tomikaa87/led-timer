@@ -22,6 +22,6 @@
 
 #include "Settings.h"
 
-void SettingsScreen_Scheduler_init(struct Scheduler* settings);
-void SettingsScreen_Scheduler_update(bool redraw);
-bool SettingsScreen_Scheduler_handleKeyPress(uint8_t keyCode, bool hold);
+void SettingsScreen_DisplayBrightness_init(struct Display* settings);
+void SettingsScreen_DisplayBrightness_update(bool redraw);
+bool SettingsScreen_DisplayBrightness_handleKeyPress(uint8_t keyCode, bool hold);

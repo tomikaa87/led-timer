@@ -184,6 +184,43 @@ const uint8_t Graphics_HeaderRightCapIcon[Graphics_HeaderRightCapIconWidth] = {
     0b00000001
 };
 
+const uint8_t Graphics_AdjustIcon[Graphics_AdjustIconWidth] = {
+    0b00111000,
+    0b01000100,
+    0b01000100,
+    0b01011111,
+    0b01001110,
+    0b00000100,
+    0b00100000,
+    0b01110010,
+    0b11111010,
+    0b00100010,
+    0b00100010,
+    0b00011100
+};
+
+const uint8_t Graphics_SetIcon[Graphics_SetIconWidth] = {
+    0b11111111,
+    0b10000001,
+    0b10111101,
+    0b10111101,
+    0b10111101,
+    0b10111101,
+    0b10000001,
+    0b11111111
+};
+
+const uint8_t Graphics_ClearIcon[Graphics_ClearIconWidth] = {
+    0b11111111,
+    0b10000001,
+    0b10000001,
+    0b10000001,
+    0b10000001,
+    0b10000001,
+    0b10000001,
+    0b11111111
+};
+
 void Graphics_drawBitmap(
     const uint8_t* const bitmap,
     const uint8_t width,
