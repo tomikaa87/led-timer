@@ -97,6 +97,8 @@
       <itemPath>Makefile</itemPath>
       <itemPath>LEDTimer.mc3</itemPath>
     </logicalFolder>
+    <itemPath>SettingsScreen_Date.c</itemPath>
+    <itemPath>SettingsScreen_Date.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>

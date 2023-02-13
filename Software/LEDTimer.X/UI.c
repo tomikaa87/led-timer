@@ -27,6 +27,7 @@
 
 #include "MainScreen.h"
 #include "Settings_MenuScreen.h"
+#include "SettingsScreen_Date.h"
 #include "SettingsScreen_DisplayBrightness.h"
 #include "SettingsScreen_LEDBrightness.h"
 #include "SettingsScreen_Scheduler.h"
@@ -220,6 +221,10 @@ static void updateScreen(const bool redraw)
 
         case UI_Screen_Settings_DisplayBrightness:
             SettingsScreen_DisplayBrightness_update(redraw);
+            break;
+
+        case UI_Screen_Settings_Date:
+            SettingsScreen_Date_update(redraw);
             break;
 
         case UI_Screen_Settings_Time:
@@ -416,10 +421,11 @@ void UI_keyEvent(uint8_t keyCode)
                             switchToScreen(UI_Screen_Settings_DisplayBrightness);
                             break;
                         case 4:
-                            SettingsScreen_Time_init();
+                            SettingsScreen_Date_init();
                             switchToScreen(UI_Screen_Settings_Date);
                             break;
                         case 5:
+                            SettingsScreen_Time_init();
                             switchToScreen(UI_Screen_Settings_Time);
                             break;
                         case 6:
@@ -453,6 +459,12 @@ void UI_keyEvent(uint8_t keyCode)
 
         case UI_Screen_Settings_DisplayBrightness:
             if (!SettingsScreen_DisplayBrightness_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_Date:
+            if (!SettingsScreen_Date_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
             break;
