@@ -55,7 +55,7 @@ typedef enum
     SSD1306_CMD_DISPLAYON = 0xAFu,
     SSD1306_CMD_SETDISPLAYOFFSET = 0xD3u,
     SSD1306_CMD_SETCOMPINS = 0xDAu,
-    SSD1306_CMD_SETVCOMDETECT = 0xDBu,
+    SSD1306_CMD_SETVCOMDESELECT = 0xDBu,
     SSD1306_CMD_SETDISPLAYCLOCKDIV = 0xD5u,
     SSD1306_CMD_SETPRECHARGE = 0xD9u,
     SSD1306_CMD_SETMULTIPLEX = 0xA8u,
@@ -134,3 +134,12 @@ void SSD1306_setStartColumn(uint8_t address);
 
 void SSD1306_setDisplayEnabled(bool enabled);
 bool SSD1306_isDisplayEnabled(void);
+
+/**
+ * Defaults: (2, 2) SSD1306, (2, 2) SSD1309
+ * Increase the period values for larger screens to avoid brightness
+ * inconsistencies between lines.
+ * @param phase1 Phase-1 period, max 15 DCLK
+ * @param phase2 Phase-2 period, max 15 DCLK
+ */
+void SSD1306_setPreChargePeriod(uint8_t phase1, uint8_t phase2);

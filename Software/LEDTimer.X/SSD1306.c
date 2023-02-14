@@ -30,6 +30,8 @@ enum
 //#define SSD1306_DEBUG
 //#define SSD1306_VERBOSE_ERRORS
 
+#define SSD1309 0
+
 #include <xc.h>
 #include <stdio.h>
 
@@ -70,22 +72,18 @@ void SSD1306_init()
 {
     SSD1306_sendCommand(SSD1306_CMD_DISPLAYOFF);
 
-    SSD1306_sendCommand(SSD1306_CMD_SETDISPLAYCLOCKDIV);
-    SSD1306_sendCommand(0x80);
-
     SSD1306_sendCommand(SSD1306_CMD_SETMULTIPLEX);
     SSD1306_sendCommand(SSD1306_LCDHEIGHT - 1);
 
-    SSD1306_sendCommand(SSD1306_CMD_SETDISPLAYOFFSET);
-    SSD1306_sendCommand(0x0);
-
-    SSD1306_sendCommand(SSD1306_CMD_SETSTARTLINE | 0x0);
-
+#if SSD1309
+    SSD1306_setPreChargePeriod(4, 10);
+#else
     SSD1306_sendCommand(SSD1306_CMD_CHARGEPUMP);
     SSD1306_sendCommand(0x14);
 
-    SSD1306_sendCommand(SSD1306_CMD_MEMORYMODE);
-    SSD1306_sendCommand(SSD1306_MEM_MODE_HORIZONTAL_ADDRESSING);
+    SSD1306_sendCommand(SSD1306_CMD_SETVCOMDESELECT);
+    SSD1306_sendCommand(0x10);
+#endif
 
     SSD1306_sendCommand(SSD1306_CMD_SEGREMAP | 0x1);
     SSD1306_sendCommand(SSD1306_CMD_COMSCANDEC);
@@ -94,9 +92,6 @@ void SSD1306_init()
     SSD1306_sendCommand(0x12);
 
     SSD1306_setContrastLevel(SSD1306_CONTRAST_NORMAL);
-
-    SSD1306_sendCommand(SSD1306_CMD_SETVCOMDETECT);
-    SSD1306_sendCommand(0x10);
 
     SSD1306_sendCommand(SSD1306_CMD_DISPLAYALLON_RESUME);
     SSD1306_sendCommand(SSD1306_CMD_NORMALDISPLAY);
@@ -419,4 +414,10 @@ void SSD1306_setDisplayEnabled(const bool enabled)
 bool SSD1306_isDisplayEnabled()
 {
     return SSD1306_displayOn;
+}
+
+void SSD1306_setPreChargePeriod(const uint8_t phase1, const uint8_t phase2)
+{
+    SSD1306_sendCommand(0xD9);
+    SSD1306_sendCommand(((phase2 & 0b1111u) << 4) | (phase1 & 0b1111u));
 }

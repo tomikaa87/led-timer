@@ -43,6 +43,7 @@
       <itemPath>SettingsScreen_LEDBrightness.h</itemPath>
       <itemPath>SettingsScreen_DisplayBrightness.h</itemPath>
       <itemPath>SettingsScreen_Time.h</itemPath>
+      <itemPath>SettingsScreen_Date.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -90,6 +91,7 @@
       <itemPath>SettingsScreen_LEDBrightness.c</itemPath>
       <itemPath>SettingsScreen_DisplayBrightness.c</itemPath>
       <itemPath>SettingsScreen_Time.c</itemPath>
+      <itemPath>SettingsScreen_Date.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -97,8 +99,6 @@
       <itemPath>Makefile</itemPath>
       <itemPath>LEDTimer.mc3</itemPath>
     </logicalFolder>
-    <itemPath>SettingsScreen_Date.c</itemPath>
-    <itemPath>SettingsScreen_Date.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
