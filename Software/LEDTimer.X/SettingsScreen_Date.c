@@ -29,15 +29,43 @@
 #include <string.h>
 
 static struct SettingScreen_Date_Context {
-    uint8_t yearFrom2022;
+    uint8_t yearsFrom2023;
     uint8_t month;
     uint8_t day;
     uint8_t selectionIndex;
+    uint8_t lastDayOfMonth;
 } context;
+
+static bool isLeapYear()
+{
+    uint16_t year = context.yearsFrom2023 + 2023;
+    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+static uint8_t lastDayOfMonth()
+{
+    if (context.month == 2) {
+        if (isLeapYear()) {
+            return 29;
+        }
+
+        return 28;
+    }
+
+    if (context.month == 4 || context.month == 6 || context.month == 9 || context.month == 11) {
+        return 30;
+    }
+
+    return 31;
+}
 
 void SettingsScreen_Date_init()
 {
     memset(&context, 0, sizeof(struct SettingScreen_Date_Context));
+    context.yearsFrom2023 = Clock_getYearsFrom2023();
+    context.month = Clock_getMonth();
+    context.day = Clock_getDay();
+    context.lastDayOfMonth = lastDayOfMonth();
 }
 
 void SettingsScreen_Date_update(const bool redraw)
@@ -59,20 +87,20 @@ void SettingsScreen_Date_update(const bool redraw)
     uint8_t xPrev = x;
 
     // Year
-    sprintf(s, "%04u", (uint16_t)context.yearFrom2022 + 2022);
+    sprintf(s, "%04u", (uint16_t)context.yearsFrom2023 + 2023);
     x = Text_draw7Seg(s, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
     x += ExtraSpacing;
 
     // Month
-    sprintf(s, "%02u", context.month + 1);
+    sprintf(s, "%02u", context.month);
     xPrev = x;
     x = Text_draw7Seg(s, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 1 ? LinePattern : 0);
     x += ExtraSpacing - 1 /* to fit the last 2 numbers on the screen */;
 
     // Day
-    sprintf(s, "%02u", context.day + 1);
+    sprintf(s, "%02u", context.day);
     xPrev = x;
     x = Text_draw7Seg(s, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 2 ? LinePattern : 0);
@@ -87,7 +115,12 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
                 break;
             }
 
-            // TODO save the date
+            Clock_setDate(
+                context.yearsFrom2023,
+                context.month,
+                context.day,
+                0 // TODO add weekday
+            );
 
             return false;
         }
@@ -106,21 +139,28 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
             switch (context.selectionIndex) {
                 case 0:
                     // Max year = 2050
-                    if (++context.yearFrom2022 > 28) {
-                        context.yearFrom2022 = 0;
+                    if (++context.yearsFrom2023 > 28) {
+                        context.yearsFrom2023 = 0;
+                    }
+                    context.lastDayOfMonth = lastDayOfMonth();
+                    if (context.day > context.lastDayOfMonth) {
+                        context.day = context.lastDayOfMonth;
                     }
                     break;
 
                 case 1:
                     if (++context.month > 11) {
-                        context.month = 0;
+                        context.month = 1;
+                    }
+                    context.lastDayOfMonth = lastDayOfMonth();
+                    if (context.day > context.lastDayOfMonth) {
+                        context.day = context.lastDayOfMonth;
                     }
                     break;
 
                 case 2:
-                    // TODO use the correct month length
-                    if (++context.day > 30) {
-                        context.day = 0;
+                    if (++context.day > context.lastDayOfMonth) {
+                        context.day = 1;
                     }
                     break;
 

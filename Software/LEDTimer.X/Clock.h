@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef uint16_t Clock_Ticks;
@@ -30,6 +31,7 @@ typedef volatile struct
     volatile Clock_Ticks fastTicks;
     volatile uint16_t minutesSinceMidnight;
     volatile uint8_t seconds;
+    volatile bool updateCalendar;
 } Clock_InterruptContext;
 
 #define Clock_handleRTCTimerInterrupt() {\
@@ -40,6 +42,7 @@ typedef volatile struct
         Clock_interruptContext.seconds = 0; \
         if (++Clock_interruptContext.minutesSinceMidnight >= 1440) { \
             Clock_interruptContext.minutesSinceMidnight = 0; \
+            Clock_interruptContext.updateCalendar = true; \
         } \
     } \
 }
@@ -56,3 +59,9 @@ inline Clock_Ticks Clock_getTicks(void);
 inline Clock_Ticks Clock_getFastTicks(void);
 inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);
 inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since);
+void Clock_task(void);
+void Clock_setDate(uint8_t yearsFrom2023, uint8_t month, uint8_t day, uint8_t weekday);
+inline uint8_t Clock_getYearsFrom2023();
+inline uint8_t Clock_getMonth();
+inline uint8_t Clock_getDay();
+inline uint8_t Clock_getWeekday();

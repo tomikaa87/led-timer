@@ -33,6 +33,18 @@ Clock_InterruptContext Clock_interruptContext = {
     .seconds = 0
 };
 
+static struct Clock_Context {
+    uint8_t day : 5;
+    uint8_t weekday : 3;
+    uint8_t month;
+    uint8_t yearsFrom2023;
+} context = {
+    .day = 1,
+    .weekday = 0,
+    .month = 1,
+    .yearsFrom2023 = 0
+};
+
 inline uint8_t Clock_getSeconds()
 {
     return Clock_interruptContext.seconds;
@@ -68,4 +80,83 @@ inline Clock_Ticks Clock_getElapsedTicks(const Clock_Ticks since)
 inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
 {
     return (Clock_Ticks)abs((int16_t)Clock_interruptContext.fastTicks - (int16_t)since);
+}
+
+static bool isLeapYear()
+{
+    uint16_t year = context.yearsFrom2023 + 2023;
+    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+static uint8_t lastDayOfMonth()
+{
+    if (context.month == 2) {
+        if (isLeapYear()) {
+            return 29;
+        }
+
+        return 28;
+    }
+
+    if (context.month == 4 || context.month == 6 || context.month == 9 || context.month == 11) {
+        return 30;
+    }
+
+    return 31;
+}
+
+void Clock_task()
+{
+    if (Clock_interruptContext.updateCalendar) {
+        Clock_interruptContext.updateCalendar = false;
+
+        if (++context.weekday > 6) {
+            context.weekday = 0;
+        }
+
+        if (++context.day > lastDayOfMonth()) {
+            context.day = 1;
+
+            if (++context.month > 11) {
+                context.month = 1;
+                ++context.yearsFrom2023;
+            }
+        }
+    }
+}
+
+void Clock_setDate(
+    const uint8_t yearsFrom2023,
+    const uint8_t month,
+    const uint8_t day,
+    const uint8_t weekday
+) {
+    if (month > 11 || day > 31 || weekday > 6) {
+        return;
+    }
+
+    context.yearsFrom2023 = yearsFrom2023;
+    context.month = month;
+    context.day = day;
+    context.weekday = weekday;
+}
+
+inline uint8_t Clock_getYearsFrom2023()
+{
+    return context.yearsFrom2023;
+}
+
+inline uint8_t Clock_getMonth()
+{
+    return context.month;
+}
+
+inline uint8_t Clock_getDay()
+{
+    return context.day;
+}
+
+inline uint8_t Clock_getWeekday()
+{
+    return context.weekday;
 }

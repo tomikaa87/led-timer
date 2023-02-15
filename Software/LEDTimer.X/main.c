@@ -266,6 +266,8 @@ void main(void)
         }
 #endif
 
+        Clock_task();
+
         if (runHeavyTasks) {
             uint8_t keyCode = Keypad_task();
     #if DEBUG_ENABLE_PRINT
