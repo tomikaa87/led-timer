@@ -50,25 +50,32 @@ void SettingsScreen_Date_update(const bool redraw)
 
     #define CharWidth 12u
     #define CharSpacing 2u
-    #define DashWidth 10u
-    #define TotalWidth (8u * CharWidth + 13u * CharSpacing)
+    #define TotalWidth (8u * CharWidth + 15u * CharSpacing)
+    #define ExtraSpacing (CharSpacing * 4)
+    #define LinePattern 0b00000110
 
-    char s[5];
+    char s[8];
     uint8_t x = 64 - TotalWidth / 2;
+    uint8_t xPrev = x;
 
     // Year
     sprintf(s, "%04u", (uint16_t)context.yearFrom2022 + 2022);
-    Text_draw7Seg(s, 2, x, context.selectionIndex == 0);
-    x += CharWidth * 4 + CharSpacing * 7;
+    x = Text_draw7Seg(s, 2, x, false);
+    SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
+    x += ExtraSpacing;
 
     // Month
     sprintf(s, "%02u", context.month + 1);
-    Text_draw7Seg(s, 2, x, context.selectionIndex == 1);
-    x += CharWidth * 2 + CharSpacing * 5;
+    xPrev = x;
+    x = Text_draw7Seg(s, 2, x, false);
+    SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 1 ? LinePattern : 0);
+    x += ExtraSpacing - 1 /* to fit the last 2 numbers on the screen */;
 
     // Day
     sprintf(s, "%02u", context.day + 1);
-    Text_draw7Seg(s, 2, x, context.selectionIndex == 2);
+    xPrev = x;
+    x = Text_draw7Seg(s, 2, x, false);
+    SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 2 ? LinePattern : 0);
 }
 
 bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)

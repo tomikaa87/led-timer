@@ -1067,7 +1067,7 @@ uint8_t Text_draw(
     return x;
 }
 
-void Text_draw7Seg(
+uint8_t Text_draw7Seg(
     const char* const number,
     const uint8_t line,
     uint8_t x,
@@ -1076,7 +1076,7 @@ void Text_draw7Seg(
     uint8_t length = (uint8_t)strlen(number);
 
     if (length == 0 || line > (7 - Numbers7Seg_Pages) || x > 127) {
-        return;
+        return x;
     }
 
     SSD1306_enablePageAddressing();
@@ -1084,7 +1084,7 @@ void Text_draw7Seg(
     for (uint8_t i = 0; i < length; ++i) {
         // Stop if the next character won't fit
         if (x + Numbers7Seg_CharWidth + 1 > SSD1306_LCDWIDTH - 1) {
-            return;
+            return x;
         }
 
         char c = number[i];
@@ -1119,7 +1119,11 @@ void Text_draw7Seg(
                     SSD1306_sendData(charData, width, 0, invert);
                 }
 
-                x += width + 2;
+                x += width;
+
+                if (i < length - 1) {
+                    x += Numbers7Seg_CharSpacing;
+                }
             }
         } else {
             for (uint8_t page = 0; page < Numbers7Seg_Pages; ++page) {
@@ -1130,9 +1134,15 @@ void Text_draw7Seg(
                 SSD1306_sendData(charData, sizeof(charData), 0, invert);
             }
 
-            x += Numbers7Seg_CharWidth + Numbers7Seg_CharSpacing;
+            x += Numbers7Seg_CharWidth;
+
+            if (i < length - 1) {
+                x += Numbers7Seg_CharSpacing;
+            }
         }
     }
+
+    return x;
 }
 
 uint8_t Text_calculateWidth(const char* s)

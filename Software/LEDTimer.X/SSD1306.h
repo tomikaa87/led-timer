@@ -114,6 +114,7 @@ void SSD1306_setContrastLevel(SSD1306_ContrastLevel level);
 void SSD1306_clear(void);
 
 void SSD1306_fillArea(uint8_t x, uint8_t startPage, uint8_t width, uint8_t pages, uint8_t color);
+void SSD1306_fillAreaPattern(uint8_t x, uint8_t startPage, uint8_t width, uint8_t pages, uint8_t pattern);
 
 // Low level API
 void SSD1306_sendCommand(SSD1306_Command cmd);

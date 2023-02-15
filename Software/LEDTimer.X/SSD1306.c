@@ -375,6 +375,16 @@ void SSD1306_fillArea(
     const uint8_t color
 )
 {
+    SSD1306_fillAreaPattern(x, startPage, width, pages, color > 0 ? 0xFF : 0);
+}
+
+void SSD1306_fillAreaPattern(
+    const uint8_t x,
+    const uint8_t startPage,
+    const uint8_t width,
+    const uint8_t pages,
+    const uint8_t pattern
+) {
     if (width == 0 || x >= SSD1306_LCDWIDTH) {
         return;
     }
@@ -383,7 +393,7 @@ void SSD1306_fillArea(
 
     uint8_t data[2];
     data[0] = SSD1306_I2C_DC_FLAG;
-    data[1] = color > 0 ? 0xFF : 0;
+    data[1] = pattern;
 
     for (uint8_t i = 0; i < pages; ++i) {
         uint8_t page = startPage + i;

@@ -47,7 +47,7 @@ uint8_t Text_draw(
  * @param x Position of the text from the left
  * @param invert Set to True to draw the text inverted
  */
-void Text_draw7Seg(
+uint8_t Text_draw7Seg(
     const char* number,
     uint8_t line,
     uint8_t x,
