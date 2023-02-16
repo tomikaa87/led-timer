@@ -134,7 +134,7 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
             break;
         }
 
-        // Minutes
+        // Adjust the selected value
         case Keypad_Key3: {
             switch (context.selectionIndex) {
                 case 0:

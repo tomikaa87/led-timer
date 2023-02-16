@@ -30,6 +30,7 @@
 #include "SettingsScreen_Date.h"
 #include "SettingsScreen_DisplayBrightness.h"
 #include "SettingsScreen_LEDBrightness.h"
+#include "SettingsScreen_Location.h"
 #include "SettingsScreen_Scheduler.h"
 #include "SettingsScreen_SegmentScheduler.h"
 #include "SettingsScreen_Time.h"
@@ -231,6 +232,10 @@ static void updateScreen(const bool redraw)
             SettingsScreen_Time_update(redraw);
             break;
 
+        case UI_Screen_Settings_Location:
+            SettingsScreen_Location_update(redraw);
+            break;
+
         default:
             break;
     }
@@ -429,6 +434,7 @@ void UI_keyEvent(uint8_t keyCode)
                             switchToScreen(UI_Screen_Settings_Time);
                             break;
                         case 6:
+                            SettingsScreen_Location_init(&context.modifiedSettings.location);
                             switchToScreen(UI_Screen_Settings_Location);
                             break;
                         default:
@@ -471,6 +477,12 @@ void UI_keyEvent(uint8_t keyCode)
 
         case UI_Screen_Settings_Time:
             if (!SettingsScreen_Time_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_Location:
+            if (!SettingsScreen_Location_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
             break;

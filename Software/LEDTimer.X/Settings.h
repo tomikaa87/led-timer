@@ -67,6 +67,12 @@ typedef struct
     {
         uint8_t brightness;
     } display;
+
+    struct Location
+    {
+        double latitude;
+        double longitude;
+    } location;
 } SettingsData;
 
 extern SettingsData Settings_data;
