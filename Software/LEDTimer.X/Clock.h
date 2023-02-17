@@ -65,3 +65,4 @@ inline uint8_t Clock_getYearsFrom2023();
 inline uint8_t Clock_getMonth();
 inline uint8_t Clock_getDay();
 inline uint8_t Clock_getWeekday();
+inline uint8_t Clock_isLeapYear();

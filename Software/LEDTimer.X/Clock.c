@@ -36,7 +36,8 @@ Clock_InterruptContext Clock_interruptContext = {
 static struct Clock_Context {
     uint8_t day : 5;
     uint8_t weekday : 3;
-    uint8_t month;
+    uint8_t leapYear : 1;
+    uint8_t month : 7;
     uint8_t yearsFrom2023;
 } context = {
     .day = 1,
@@ -120,6 +121,8 @@ void Clock_task()
             if (++context.month > 11) {
                 context.month = 1;
                 ++context.yearsFrom2023;
+
+                context.leapYear = isLeapYear();
             }
         }
     }
@@ -139,6 +142,7 @@ void Clock_setDate(
     context.month = month;
     context.day = day;
     context.weekday = weekday;
+    context.leapYear = isLeapYear();
 }
 
 inline uint8_t Clock_getYearsFrom2023()
@@ -159,4 +163,9 @@ inline uint8_t Clock_getDay()
 inline uint8_t Clock_getWeekday()
 {
     return context.weekday;
+}
+
+inline uint8_t Clock_isLeapYear()
+{
+    return context.leapYear;
 }
