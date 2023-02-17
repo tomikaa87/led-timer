@@ -45,3 +45,5 @@ void Types_setScheduleSegmentBit(
     uint8_t segmentIndex,
     bool value
 );
+
+double Types_bcdToDouble(uint32_t bcd, bool negative);

@@ -228,7 +228,19 @@ void main(void)
 #if 1
     SunriseSunsetData data;
 
-    SunriseSunset_setPosition(&data, 19.046867, 47.467442);
+    SunriseSunset_setPosition(
+        &data,
+        Types_bcdToDouble(
+            Settings_data.location.latitudeBcd,
+            Settings_data.location.latitudeSign
+        ),
+        Types_bcdToDouble(
+            Settings_data.location.longitudeBcd,
+            Settings_data.location.longitudeSign
+        )
+//        19.046867,
+//        47.467442
+    );
     SunriseSunset_setTimeZone(&data, 1, false);
 
     SunriseSunset_Time sunrise = SunriseSunset_calculate(&data, false, 28);

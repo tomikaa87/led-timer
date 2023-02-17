@@ -54,3 +54,22 @@ void Types_setScheduleSegmentBit(
         data[byteIndex] &= ~mask;
     }
 }
+
+double Types_bcdToDouble(const uint32_t bcd, const bool negative)
+{
+    double result = 0;
+    double multiplier = 100; // First 3 digits are the integer part
+
+    for (uint8_t i = 0; i < 8; ++i) {
+        uint8_t offset = (7 - i) * 4;
+        uint32_t mask = (uint32_t)(0b1111u) << offset;
+        result += (double)((bcd & mask) >> offset) * multiplier;
+        multiplier /= 10;
+    }
+
+    if (negative) {
+        result *= -1;
+    }
+
+    return result;
+}

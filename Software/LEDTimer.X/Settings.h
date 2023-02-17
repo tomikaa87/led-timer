@@ -70,8 +70,10 @@ typedef struct
 
     struct Location
     {
-        double latitude;
-        double longitude;
+        uint32_t latitudeBcd;
+        uint32_t longitudeBcd;
+        uint8_t latitudeSign : 1;
+        uint8_t longitudeSign : 1;
     } location;
 } SettingsData;
 

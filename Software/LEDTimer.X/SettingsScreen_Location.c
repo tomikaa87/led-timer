@@ -27,7 +27,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 static struct SettingScreen_Location_Context {
     struct Location* settings;
@@ -40,9 +39,10 @@ static struct SettingScreen_Location_Context {
 
 void SettingsScreen_Location_init(struct Location* const settings)
 {
-    memset(&context, 0, sizeof(struct SettingScreen_Location_Context));
-    context.latitudeSign = 1;
-    context.longitudeSign = 1;
+    context.latitudeBcd = settings->latitudeBcd;
+    context.longitudeBcd = settings->longitudeBcd;
+    context.latitudeSign = 0;
+    context.longitudeSign = 0;
     context.settings = settings;
 }
 
@@ -59,7 +59,7 @@ static void drawBcdNumber(
         }
 
         char s[2] = { 0, };
-        s[0] = ((bcdNumber & 0xF) >> 28) + '0';
+        s[0] = ((bcdNumber & 0xF0000000) >> 28) + '0';
 
         x = Text_draw(s, line, x, 0, context.selectionIndex == i + startIndex);
 
@@ -92,30 +92,23 @@ void SettingsScreen_Location_update(const bool redraw)
 static void adjustBcdNumber(uint32_t* const bcd, const uint8_t digit)
 {
     uint8_t offset = (7 - digit) * 4;
-    uint32_t mask = 0b1111u << offset;
+    uint32_t mask = (uint32_t)0b1111u << offset;
     uint8_t value = (uint8_t)((*bcd & mask) >> offset);
-    ++value;
+
+    if (++value >= 10) {
+        value = 0;
+    };
+
     *bcd &= ~mask;
-    *bcd |= (uint32_t) value << offset;
-}
+    *bcd |= (uint32_t)value << offset;
 
-static double bcdToDouble(const uint32_t bcd, const bool negative)
-{
-    double result = 0;
-    double multiplier = 100; // First 3 digits are the integer part
-
-    for (int i = 0; i < 8; ++i) {
-        uint8_t offset = (7 - i) * 4;
-        uint32_t mask = 0b1111 << offset;
-        result += (double)((bcd & mask) >> offset) * multiplier;
-        multiplier /= 10;
-    }
-
-    if (negative) {
-        result *= -1;
-    }
-
-    return result;
+#if 0
+    char s[30];
+    sprintf(s, "o=%02d,m=%08lx", offset, mask);
+    Text_draw(s, 5, 0, 0, false);
+    sprintf(s, "v=%02x,b=%08lx", value, *bcd);
+    Text_draw(s, 6, 0, 0, false);
+#endif
 }
 
 bool SettingsScreen_Location_handleKeyPress(const uint8_t keyCode, const bool hold)
@@ -127,15 +120,10 @@ bool SettingsScreen_Location_handleKeyPress(const uint8_t keyCode, const bool ho
                 break;
             }
 
-            context.settings->latitude = bcdToDouble(
-                context.latitudeBcd,
-                context.latitudeSign
-            );
-
-            context.settings->longitude = bcdToDouble(
-                context.longitudeBcd,
-                context.longitudeSign
-            );
+            context.settings->latitudeBcd = context.latitudeBcd;
+            context.settings->longitudeBcd = context.longitudeBcd;
+            context.settings->latitudeSign = context.latitudeSign;
+            context.settings->longitudeSign = context.longitudeSign;
 
             return false;
         }
