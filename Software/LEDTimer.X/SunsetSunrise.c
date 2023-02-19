@@ -32,16 +32,18 @@ static struct SunriseSunsetContext {
     SunriseSunset_Time sunset;
 } context;
 
-#define COS_SUN_ANGLE_BELOW_HORIZON (-0.014538080502497) // cos(rad(90.833))
+#define COS_SUN_ANGLE_BELOW_HORIZON (-0.014538080502497)    // cos(rad(90.833))
+#define DEG_TO_RAD_FACTOR           (0.017453292519943)     // Pi / 180
+#define RAD_TO_DEG_FACTOR           (57.295779513082321)    // 180 / Pi
 
 static double rad(const double deg)
 {
-    return deg * M_PI / 180;
+    return deg * DEG_TO_RAD_FACTOR;
 }
 
 static double deg(const double rad)
 {
-    return rad * 180 / M_PI;
+    return rad * RAD_TO_DEG_FACTOR;
 }
 
 static double quadrant(const double deg)
@@ -111,8 +113,8 @@ SunriseSunset_Time SunriseSunset_calculate(
     adjustedTime = (adjustedTime - 24 * floor(adjustedTime / 24));
 
     SunriseSunset_Time time;
-    time.hour = (int)(floor(adjustedTime));
-    time.minute = (int)(round((adjustedTime - time.hour) * 60.0));
+    time.hour = (uint8_t)(floor(adjustedTime));
+    time.minute = (uint8_t)(round((adjustedTime - time.hour) * 60.0));
 
     return time;
 }
@@ -133,6 +135,7 @@ void SunriseSunset_update()
         )
     );
 
+    // TODO get time zone data from settings
     SunriseSunset_setTimeZone(&data, 1, false);
 
     uint16_t dayOfYear = Clock_calculateDayOfYear();
