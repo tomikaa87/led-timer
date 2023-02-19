@@ -232,11 +232,12 @@ void SSD1306_clear()
     SSD1306_sendCommand(1);
 #endif
 
-    for (uint16_t i = 0; i < SSD1306_SCREEN_BUFFER_SIZE; i += 16) {
+    for (uint16_t i = SSD1306_SCREEN_BUFFER_SIZE; i > 0; i -= 16) {
 #ifdef SSD1306_DEBUG
         printf("SSD1306_clear: sending data chunk. i = %u, i, buffer);
 #endif
 
+        // TODO optimize this, use a static const array
         uint8_t data[17];
         data[0] = SSD1306_I2C_DC_FLAG;
 
@@ -379,7 +380,7 @@ void SSD1306_fillArea(
 }
 
 void SSD1306_fillAreaPattern(
-    const uint8_t x,
+    uint8_t x,
     const uint8_t startPage,
     const uint8_t width,
     const uint8_t pages,
@@ -395,8 +396,7 @@ void SSD1306_fillAreaPattern(
     data[0] = SSD1306_I2C_DC_FLAG;
     data[1] = pattern;
 
-    for (uint8_t i = 0; i < pages; ++i) {
-        uint8_t page = startPage + i;
+    for (uint8_t i = pages, page = startPage; i > 0; --i, ++page) {
         if (page >= 8) {
             return;
         }
@@ -404,7 +404,7 @@ void SSD1306_fillAreaPattern(
         SSD1306_setPage(page);
         SSD1306_setStartColumn(x);
 
-        for (uint8_t j = 0; j < width && x + j < SSD1306_LCDWIDTH; ++j) {
+        for (uint8_t j = width; j > 0 && x < SSD1306_LCDWIDTH; --j, ++x) {
             i2cTransmit(data, sizeof(data));
         }
     }

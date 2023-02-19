@@ -54,7 +54,7 @@ static uint8_t scanKeys()
 {
     uint8_t scanCode = 0;
 
-    for (uint8_t i = 0; i < Config_Keypad_ScanSampleCount; ++i) {
+    for (uint8_t i = Config_Keypad_ScanSampleCount; i > 0; --i) {
         scanCode |=
             (IO_SW1_GetValue() ? 0 : (1 << 0))
             | (IO_SW2_GetValue() ? 0 : (1 << 1))

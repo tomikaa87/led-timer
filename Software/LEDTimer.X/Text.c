@@ -1007,7 +1007,7 @@ static const uint8_t Colon7Seg[Colon7Seg_Pages][Colon7Seg_CharWidth] = {
 };
 
 uint8_t Text_draw(
-    const char* const s,
+    const char* s,
     const uint8_t line,
     uint8_t x,
     const uint8_t yOffset,
@@ -1023,7 +1023,7 @@ uint8_t Text_draw(
     SSD1306_enablePageAddressing();
     SSD1306_setPage(line);
 
-    for (uint8_t i = 0; i < length; ++i) {
+    for (uint8_t i = length; i > 0; --i) {
         // Stop if the next character won't fit
         if (x > SSD1306_LCDWIDTH - 1) {
             return x;
@@ -1031,10 +1031,10 @@ uint8_t Text_draw(
 
         SSD1306_setStartColumn(x);
 
-        char c = (char)toupper(s[i]);
+        char c = (char)toupper(*s++);
 
         if (c == ' ') {
-            for (uint8_t i = 0; i < ASCIIReduced_SpaceWidth; ++i) {
+            for (uint8_t j = ASCIIReduced_SpaceWidth; j > 0; --j) {
                 const uint8_t data = 0;
                 SSD1306_sendData(&data, 1, yOffset, invert);
             }
@@ -1057,7 +1057,7 @@ uint8_t Text_draw(
         x += ASCIIReduced_CharWidth;
 
         // Clear the pixels between the characters
-        for (uint8_t j = 0; j < ASCIIReduced_CharSpacing; ++j) {
+        for (uint8_t j = ASCIIReduced_CharSpacing; j > 0; --j) {
             static const uint8_t data = 0;
             SSD1306_sendData(&data, 1, yOffset, invert);
             ++x;
@@ -1068,7 +1068,7 @@ uint8_t Text_draw(
 }
 
 uint8_t Text_draw7Seg(
-    const char* const number,
+    const char* number,
     const uint8_t line,
     uint8_t x,
     const bool invert
@@ -1081,13 +1081,13 @@ uint8_t Text_draw7Seg(
 
     SSD1306_enablePageAddressing();
 
-    for (uint8_t i = 0; i < length; ++i) {
+    for (uint8_t i = length; i > 0; --i) {
         // Stop if the next character won't fit
         if (x + Numbers7Seg_CharWidth + 1 > SSD1306_LCDWIDTH - 1) {
             return x;
         }
 
-        char c = number[i];
+        char c = *number++;
 
         if (c != ' ') {
             if (c == '-') {
@@ -1096,7 +1096,7 @@ uint8_t Text_draw7Seg(
 
                 // Cost-efficient dash symbol
                 uint8_t charData = 0b00011100;
-                for (uint8_t j = 2; j < Numbers7Seg_CharWidth - 2; ++j) {
+                for (uint8_t j = Numbers7Seg_CharWidth - 5; j > 0; --j) {
                     SSD1306_sendData(&charData, 1, 0, invert);
                 }
             } else {
@@ -1121,7 +1121,7 @@ uint8_t Text_draw7Seg(
 
                 x += width;
 
-                if (i < length - 1) {
+                if (i > 1) {
                     x += Numbers7Seg_CharSpacing;
                 }
             }
@@ -1136,7 +1136,7 @@ uint8_t Text_draw7Seg(
 
             x += Numbers7Seg_CharWidth;
 
-            if (i < length - 1) {
+            if (i > 1) {
                 x += Numbers7Seg_CharSpacing;
             }
         }

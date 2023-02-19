@@ -244,7 +244,7 @@ void Graphics_drawMultipageBitmap(
     const uint8_t width,
     const uint8_t pageCount,
     const uint8_t x,
-    const uint8_t startPage,
+    uint8_t startPage,
     const bool invert
 )
 {
@@ -252,8 +252,8 @@ void Graphics_drawMultipageBitmap(
         return;
     }
 
-    for (uint8_t page = startPage; page < startPage + pageCount; ++page) {
-        Graphics_drawBitmap(bitmap, width, x, page, invert);
+    for (uint8_t i = pageCount; i > 0; --i) {
+        Graphics_drawBitmap(bitmap, width, x, startPage++, invert);
         bitmap += width;
     }
 }
@@ -281,7 +281,7 @@ void Graphics_drawScheduleBar(
 	uint8_t indicatorCounter = 0;
 	uint8_t segmentActive = 0;
 
-	for (uint8_t x = 0; x < 121; ++x) {
+	for (uint8_t i = 121; i > 0; --i) {
 		uint8_t bitmap;
 
 		if (tickCounter == 0) {

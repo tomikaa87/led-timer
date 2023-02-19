@@ -59,7 +59,7 @@ static uint8_t calculateCRC8(const uint8_t* data, uint8_t length)
     while (length--) {
         crc ^= *data++;
 
-        for (uint8_t i = 0; i < 8; ++i) {
+        for (uint8_t i = 8; i > 0; --i) {
             if (crc & 0x80) {
                 crc = (uint8_t)(crc << 1) ^ Generator;
             } else {
