@@ -41,8 +41,6 @@ typedef enum
 
 typedef struct
 {
-    uint8_t _checksum;
-
     struct Scheduler
     {
         Settings_SchedulerType type;
@@ -75,6 +73,9 @@ typedef struct
         uint8_t latitudeSign : 1;
         uint8_t longitudeSign : 1;
     } location;
+
+    // This must be the last member
+    uint8_t crc8;
 } SettingsData;
 
 extern SettingsData Settings_data;

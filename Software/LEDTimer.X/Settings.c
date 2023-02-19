@@ -87,23 +87,21 @@ void Settings_load()
     puts("STNGS:load");
 #endif
 
+    // TODO potential optimization: calculate CRC8 while loading
     loadData(
         Config_Settings_DataBaseAddress,
         (uint8_t*)&Settings_data,
         sizeof(SettingsData)
     );
 
-    uint8_t loadedChecksum = Settings_data._checksum;
-
-    Settings_data._checksum = 0;
-    uint8_t calculatedChecksum = calculateCRC8(
+    uint8_t crc8 = calculateCRC8(
         (uint8_t*)&Settings_data,
         sizeof(SettingsData)
     );
 
-    if (loadedChecksum != calculatedChecksum) {
+    if (crc8 != 0) {
 #if DEBUG_ENABLE_PRINT
-        puts("STNGS:checksumError");
+        puts("STNGS:crcCheckFailed");
 #endif
         Settings_loadDefaults();
     }
@@ -115,14 +113,10 @@ void Settings_save()
     puts("STNGS:load");
 #endif
 
-    Settings_data._checksum = 0;
-
-    uint8_t checksum = calculateCRC8(
+    Settings_data.crc8 = calculateCRC8(
         (uint8_t*)&Settings_data,
-        sizeof(SettingsData)
+        sizeof(SettingsData) - 1
     );
-
-    Settings_data._checksum = checksum;
 
     saveData(
         Config_Settings_DataBaseAddress,
