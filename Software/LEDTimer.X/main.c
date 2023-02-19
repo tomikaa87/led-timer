@@ -225,7 +225,7 @@ void main(void)
 
     // Sunrise/Sunset calculation test code
 
-#if 1
+#if 0
     SunriseSunsetData data;
 
     SunriseSunset_setPosition(

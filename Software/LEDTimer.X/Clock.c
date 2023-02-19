@@ -19,6 +19,7 @@
 */
 
 #include "Clock.h"
+#include "SunsetSunrise.h"
 
 #include "mcc_generated_files/tmr1.h"
 #include "mcc_generated_files/tmr4.h"
@@ -89,9 +90,9 @@ static bool isLeapYear()
     return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
 }
 
-static uint8_t lastDayOfMonth()
+static uint8_t lastDayOfMonth(const uint8_t month)
 {
-    if (context.month == 2) {
+    if (month == 2) {
         if (isLeapYear()) {
             return 29;
         }
@@ -99,7 +100,7 @@ static uint8_t lastDayOfMonth()
         return 28;
     }
 
-    if (context.month == 4 || context.month == 6 || context.month == 9 || context.month == 11) {
+    if (month == 4 || month == 6 || month == 9 || month == 11) {
         return 30;
     }
 
@@ -115,7 +116,7 @@ void Clock_task()
             context.weekday = 0;
         }
 
-        if (++context.day > lastDayOfMonth()) {
+        if (++context.day > lastDayOfMonth(context.month)) {
             context.day = 1;
 
             if (++context.month > 11) {
@@ -124,6 +125,8 @@ void Clock_task()
 
                 context.leapYear = isLeapYear();
             }
+
+            SunriseSunset_update();
         }
     }
 }
@@ -143,6 +146,8 @@ void Clock_setDate(
     context.day = day;
     context.weekday = weekday;
     context.leapYear = isLeapYear();
+
+    SunriseSunset_update();
 }
 
 inline uint8_t Clock_getYearsFrom2023()
@@ -168,4 +173,17 @@ inline uint8_t Clock_getWeekday()
 inline uint8_t Clock_isLeapYear()
 {
     return context.leapYear;
+}
+
+inline uint16_t Clock_calculateDayOfYear()
+{
+    uint16_t day = 0;
+
+    for (uint8_t i = 1; i < context.month - 1; ++i) {
+        day += lastDayOfMonth(i);
+    }
+
+    day += context.day;
+
+    return day;
 }

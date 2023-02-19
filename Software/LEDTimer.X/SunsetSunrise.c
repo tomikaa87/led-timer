@@ -21,9 +21,16 @@
     https://www.omnicalculator.com/physics/sunrise-sunset
 */
 
+#include "Clock.h"
+#include "Settings.h"
 #include "SunsetSunrise.h"
 
 #include <math.h>
+
+static struct SunriseSunsetContext {
+    SunriseSunset_Time sunrise;
+    SunriseSunset_Time sunset;
+} context;
 
 #define COS_SUN_ANGLE_BELOW_HORIZON (-0.014538080502497) // cos(rad(90.833))
 
@@ -69,7 +76,7 @@ void SunriseSunset_setTimeZone(
 SunriseSunset_Time SunriseSunset_calculate(
     SunriseSunsetData* const data,
     const bool sunset,
-    const int dayOfYear
+    const uint16_t dayOfYear
 ) {
     double t = dayOfYear + ((sunset ? 18 : 6) - data->longitudeHour) / 24;
 
@@ -108,4 +115,28 @@ SunriseSunset_Time SunriseSunset_calculate(
     time.minute = (int)(round((adjustedTime - time.hour) * 60.0));
 
     return time;
+}
+
+void SunriseSunset_update()
+{
+    SunriseSunsetData data;
+
+    SunriseSunset_setPosition(
+        &data,
+        Types_bcdToDouble(
+            Settings_data.location.latitudeBcd,
+            Settings_data.location.latitudeSign
+        ),
+        Types_bcdToDouble(
+            Settings_data.location.longitudeBcd,
+            Settings_data.location.longitudeSign
+        )
+    );
+
+    SunriseSunset_setTimeZone(&data, 1, false);
+
+    uint16_t dayOfYear = Clock_calculateDayOfYear();
+
+    context.sunrise = SunriseSunset_calculate(&data, false, dayOfYear);
+    context.sunset = SunriseSunset_calculate(&data, true, dayOfYear);
 }

@@ -31,8 +31,8 @@ typedef struct {
 } SunriseSunsetData;
 
 typedef struct {
-    int hour;
-    int minute;
+    uint8_t hour;
+    uint8_t minute;
 } SunriseSunset_Time;
 
 void SunriseSunset_setPosition(
@@ -50,6 +50,7 @@ void SunriseSunset_setTimeZone(
 SunriseSunset_Time SunriseSunset_calculate(
     SunriseSunsetData* data,
     bool sunset,
-    const int dayOfYear
+    uint16_t dayOfYear
 );
 
+void SunriseSunset_update(void);
