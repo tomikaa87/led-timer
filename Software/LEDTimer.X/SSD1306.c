@@ -237,12 +237,8 @@ void SSD1306_clear()
         printf("SSD1306_clear: sending data chunk. i = %u, i, buffer);
 #endif
 
-        // TODO optimize this, use a static const array
-        uint8_t data[17];
+        uint8_t data[17] = { 0 };
         data[0] = SSD1306_I2C_DC_FLAG;
-
-        for (uint8_t j = 1; j < 17; ++j)
-            data[j] = 0;
 
         i2cTransmit(data, sizeof(data));
 
@@ -258,8 +254,7 @@ void SSD1306_clear()
 
 void SSD1306_sendCommand(const SSD1306_Command cmd)
 {
-    uint8_t data[2] = {0};
-    data[1] = (uint8_t) cmd;
+    uint8_t data[2] = { 0, cmd };
 
     i2cTransmit(data, sizeof(data));
 
@@ -270,48 +265,21 @@ void SSD1306_sendCommand(const SSD1306_Command cmd)
 
 void SSD1306_setColumnAddress(const uint8_t start, const uint8_t end)
 {
-    if (start > 127 || end > 127) {
-#ifdef SSD1306_VERBOSE_ERRORS
-        printf("SSD1306_setColumnAddress: invalid range: %u-%u\r\n", start, end);
-#endif
-        return;
-    }
-
-    uint8_t data[3];
-    data[0] = SSD1306_CMD_COLUMNADDR;
-    data[1] = start;
-    data[2] = end;
+    uint8_t data[3] = { SSD1306_CMD_COLUMNADDR, start & 0x7F, end & 0x7F };
 
     i2cTransmit(data, sizeof(data));
 }
 
 void SSD1306_setPageAddress(const uint8_t start, const uint8_t end)
 {
-    if (start > 7 || end > 7) {
-#ifdef SSD1306_VERBOSE_ERRORS
-        printf("SSD1306_setPageAddress: invalid range: %u-%u\r\n", start, end);
-#endif
-        return;
-    }
-
-    uint8_t data[3];
-    data[0] = SSD1306_CMD_PAGEADDR;
-    data[1] = start;
-    data[2] = end;
+    uint8_t data[3] = { SSD1306_CMD_PAGEADDR, start & 0b111, end & 0b111 };
 
     i2cTransmit(data, sizeof(data));
 }
 
-void SSD1306_setPage(uint8_t page)
+void SSD1306_setPage(const uint8_t page)
 {
-    if (page > 7) {
-#ifdef SSD1306_VERBOSE_ERRORS
-        printf("SSD1306_setPage: invalid page: %u\r\n", page);
-#endif
-        return;
-    }
-
-    SSD1306_sendCommand(SSD1306_CMD_PAGESTARTADDR | page);
+    SSD1306_sendCommand(SSD1306_CMD_PAGESTARTADDR | (page & 0b111));
 }
 
 void SSD1306_setStartColumn(const uint8_t address)
@@ -332,14 +300,11 @@ void SSD1306_setStartColumn(const uint8_t address)
 void SSD1306_sendData(
     const uint8_t* const data,
     const uint8_t length,
-    const uint8_t bitShift,
+    uint8_t bitShift,
     const bool invert
 )
 {
-    if (bitShift > 7)
-        return;
-
-    uint8_t buffer[17];
+    bitShift &= 0b111;
     uint8_t bytesRemaining = length;
     uint8_t dataIndex = 0;
     static const uint8_t chunk_size = 16;
@@ -348,6 +313,7 @@ void SSD1306_sendData(
         uint8_t count = bytesRemaining >= chunk_size ? chunk_size : bytesRemaining;
         bytesRemaining -= count;
 
+        uint8_t buffer[17];
         buffer[0] = SSD1306_I2C_DC_FLAG;
 
         for (uint8_t i = 1; i <= count; ++i) {
@@ -386,10 +352,6 @@ void SSD1306_fillAreaPattern(
     const uint8_t pages,
     const uint8_t pattern
 ) {
-    if (width == 0 || x >= SSD1306_LCDWIDTH) {
-        return;
-    }
-
     SSD1306_enablePageAddressing();
 
     uint8_t data[2];
@@ -404,7 +366,7 @@ void SSD1306_fillAreaPattern(
         SSD1306_setPage(page);
         SSD1306_setStartColumn(x);
 
-        for (uint8_t j = width; j > 0 && x < SSD1306_LCDWIDTH; --j, ++x) {
+        for (uint8_t j = width; j > 0 && x + j < SSD1306_LCDWIDTH; --j) {
             i2cTransmit(data, sizeof(data));
         }
     }
