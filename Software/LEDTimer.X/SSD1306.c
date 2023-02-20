@@ -284,17 +284,10 @@ void SSD1306_setPage(const uint8_t page)
 
 void SSD1306_setStartColumn(const uint8_t address)
 {
-    if (address > 127) {
-#ifdef SSD1306_VERBOSE_ERRORS
-        printf("SSD1306_setStartColumn: invalid address: %u\r\n", address);
-#endif
-        return;
-    }
-
     // Set lower nibble
     SSD1306_sendCommand(SSD1306_CMD_SETLOWCOLUMN | (address & 0xF));
     // Set upper nibble
-    SSD1306_sendCommand(SSD1306_CMD_SETHIGHCOLUMN | ((address >> 4) & 0xF));
+    SSD1306_sendCommand(SSD1306_CMD_SETHIGHCOLUMN | ((address >> 4) & 0x7));
 }
 
 void SSD1306_sendData(

@@ -45,6 +45,7 @@
       <itemPath>SettingsScreen_Time.h</itemPath>
       <itemPath>SettingsScreen_Date.h</itemPath>
       <itemPath>SettingsScreen_Location.h</itemPath>
+      <itemPath>SettingsScreen_TimeZone.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -94,6 +95,7 @@
       <itemPath>SettingsScreen_Time.c</itemPath>
       <itemPath>SettingsScreen_Date.c</itemPath>
       <itemPath>SettingsScreen_Location.c</itemPath>
+      <itemPath>SettingsScreen_TimeZone.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -101,8 +103,6 @@
       <itemPath>Makefile</itemPath>
       <itemPath>LEDTimer.mc3</itemPath>
     </logicalFolder>
-    <itemPath>SettingsScreen_TimeZone.c</itemPath>
-    <itemPath>SettingsScreen_TimeZone.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
