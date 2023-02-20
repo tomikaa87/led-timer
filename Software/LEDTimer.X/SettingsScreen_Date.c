@@ -71,7 +71,7 @@ void SettingsScreen_Date_init()
 void SettingsScreen_Date_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("Date");
+        Graphics_DrawScreenTitle("DATE");
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_ArrowRightIcon, Graphics_AdjustIcon);
     }
 

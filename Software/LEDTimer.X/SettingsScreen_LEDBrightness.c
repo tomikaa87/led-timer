@@ -40,7 +40,7 @@ void SettingsScreen_LEDBrightness_init(struct Output* settings)
 void SettingsScreen_LEDBrightness_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("LED brightness");
+        Graphics_DrawScreenTitle("LED BRIGHTNESS");
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_SetIcon, Graphics_ClearIcon);
     }
 

@@ -42,7 +42,7 @@ void SettingsScreen_TimeZone_init(struct Time* settings)
 void SettingsScreen_TimeZone_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("Time zone");
+        Graphics_DrawScreenTitle("TIME ZONE");
         Graphics_DrawKeypadHelpBarLeftRight(Graphics_ExitIcon, Graphics_AdjustIcon);
     }
 
@@ -60,7 +60,7 @@ void SettingsScreen_TimeZone_update(const bool redraw)
     // Time zone
     sprintf(
         s,
-        "%c%02d:%02u",
+        "%c%02u:%02u",
         context.settings->timeZoneOffsetHalfHours >= 0 ? '+' : '-',
         abs(context.settings->timeZoneOffsetHalfHours / 2),
         abs(context.settings->timeZoneOffsetHalfHours % 2) * 30

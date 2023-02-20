@@ -70,14 +70,14 @@ static void drawBcdNumber(
 void SettingsScreen_Location_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("Location");
+        Graphics_DrawScreenTitle("LOCATION");
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_ArrowRightIcon, Graphics_AdjustIcon);
 
-        LeftText("Lat.:", 3);
-        LeftText("Lon.:", 4);
+        LeftText("LAT.:", 3);
+        LeftText("LON.:", 4);
     }
 
-    uint8_t x = CalculateTextWidth("Lat.: ");
+    uint8_t x = CalculateTextWidth("LAT.: ");
 
     // Latitude: -90..90, longitude: -180..180
 

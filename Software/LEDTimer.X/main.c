@@ -139,7 +139,7 @@ inline static void showStartupScreen()
     Graphics_drawBitmap(MiniBulbIcon, 5, iconPos, 1, false);
     Text_draw(Title, 1, iconPos + 10, 0, false);
 
-    static const char FirmwareVersion[] = "v" Config_FirmwareVersion;
+    static const char FirmwareVersion[] = "V" Config_FirmwareVersion;
 
     Text_draw(
         FirmwareVersion,

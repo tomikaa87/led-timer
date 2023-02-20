@@ -45,7 +45,7 @@ void SettingsScreen_Time_init()
 void SettingsScreen_Time_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("Time");
+        Graphics_DrawScreenTitle("TIME");
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_ArrowRightIcon, Graphics_AdjustIcon);
     }
 

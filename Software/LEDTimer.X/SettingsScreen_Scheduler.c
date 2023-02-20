@@ -44,7 +44,7 @@ void SettingsScreen_Scheduler_init(struct Scheduler* settings)
 void SettingsScreen_Scheduler_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("Scheduler");
+        Graphics_DrawScreenTitle("SCHEDULER");
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_AdjustIcon);
     }
 
@@ -62,7 +62,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
     // Debug: selection index
     {
         char s[3];
-        sprintf(s, "%02d", context.selection);
+        sprintf(s, "%02u", context.selection);
         Text_draw(s, 1, 128 - CalculateTextWidth("00"), 0, false);
     }
 
@@ -102,8 +102,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         // Draw the fixed labels for the current scheduler type
         switch (context.settings->type) {
             case Settings_SchedulerType_Segment:
-                CenterText("Change settings", 4);
-                CenterText("on Sgmt. Schd. screen", 5);
+                CenterText("CHANGE SETTINGS", 4);
+                CenterText("ON SGMT. SCHD. SCREEN", 5);
                 break;
 
             case Settings_SchedulerType_Simple:

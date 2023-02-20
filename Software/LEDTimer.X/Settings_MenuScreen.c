@@ -29,14 +29,14 @@
 #define MenuItemCount   8
 
 static const char* MenuItems[MenuItemCount] = {
-    "Scheduler",
-    "Segment scheduler",
-    "LED brightness",
-    "Disp. brightness",
-    "Date",
-    "Time",
-    "Time zone",
-    "Location"
+    "SCHEDULER",
+    "SEGMENT SCHEDULER",
+    "LED BRIGHTNES",
+    "DISP. BRIGHTNESS",
+    "DATE",
+    "TIME",
+    "TIME ZONE",
+    "LOCATION"
 };
 
 static const uint8_t PositionIndicatorEmpty[] = {
@@ -101,7 +101,7 @@ void Settings_MenuScreen_init()
 void Settings_MenuScreen_update(const bool redraw)
 {
     if (redraw) {
-        Graphics_DrawScreenTitle("Settings");
+        Graphics_DrawScreenTitle("SETTINGS");
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_SelectIcon);
 
         drawMenuItems();
