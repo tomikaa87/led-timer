@@ -131,26 +131,25 @@ inline static void showStartupScreen()
         0b00011110
     };
 
-    static const char* Title = "LED TIMER";
-    static const char* GitHub = "GITHUB.COM/TOMIKAA87";
+    static const char Title[] = "LED TIMER";
+    static const char GitHub[] = "GITHUB.COM/TOMIKAA87";
 
-    uint8_t titleWidth = Text_calculateWidth(Title);
-    uint8_t iconPos = 64 - (titleWidth + 5 + 5) / 2;
+    uint8_t iconPos = 64 - (CalculateTextWidth(Title) + 5 + 5) / 2;
 
     Graphics_drawBitmap(MiniBulbIcon, 5, iconPos, 1, false);
     Text_draw(Title, 1, iconPos + 10, 0, false);
 
-    const char* firmwareVersion = "v" Config_FirmwareVersion;
+    static const char FirmwareVersion[] = "v" Config_FirmwareVersion;
 
     Text_draw(
-        firmwareVersion,
+        FirmwareVersion,
         3,
-        64 - Text_calculateWidth(firmwareVersion) / 2,
+        64 - CalculateTextWidth(FirmwareVersion) / 2,
         0,
         false
     );
 
-    Text_draw(GitHub, 6, 64 - Text_calculateWidth(GitHub) / 2, 0, false);
+    Text_draw(GitHub, 6, 64 - CalculateTextWidth(GitHub) / 2, 0, false);
 
     if (PCON0bits.STKOVF) {
         Text_draw("O", 0, 0, 0, false);
