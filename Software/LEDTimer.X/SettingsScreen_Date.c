@@ -72,8 +72,7 @@ void SettingsScreen_Date_update(const bool redraw)
 {
     if (redraw) {
         Graphics_DrawScreenTitle("Date");
-        // TODO use -> for selection change icon
-        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_AdjustIcon);
+        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_ArrowRightIcon, Graphics_AdjustIcon);
     }
 
     #define CharWidth 12u

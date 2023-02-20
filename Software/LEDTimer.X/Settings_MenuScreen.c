@@ -39,16 +39,6 @@ static const char* MenuItems[MenuItemCount] = {
     "Location"
 };
 
-static const uint8_t SelectedItemIcon[] = {
-    0b00001000,
-    0b00001000,
-    0b00001000,
-    0b01111111,
-    0b00111110,
-    0b00011100,
-    0b00001000
-};
-
 static const uint8_t PositionIndicatorEmpty[] = {
     0b10101010,
     0b01010101,
@@ -73,12 +63,12 @@ static void drawMenuItems()
 
     while (itemIndex < MenuItemCount && line != 7) {
         if (itemIndex == context.selectionIndex) {
-            Graphics_DrawIcon(0, line, SelectedItemIcon);
+            Graphics_DrawIcon(0, line, Graphics_ArrowRightIcon);
         } else {
-            SSD1306_fillArea(0, line, sizeof(SelectedItemIcon), 1, SSD1306_COLOR_BLACK);
+            SSD1306_fillArea(0, line, sizeof(Graphics_ArrowRightIcon), 1, SSD1306_COLOR_BLACK);
         }
 
-        uint8_t x = Text_draw(MenuItems[itemIndex], line, sizeof(SelectedItemIcon) + 2, 0, false);
+        uint8_t x = Text_draw(MenuItems[itemIndex], line, sizeof(Graphics_ArrowRightIcon) + 2, 0, false);
         if (x < (127 - sizeof(PositionIndicatorEmpty))) {
             SSD1306_fillArea(x, line, 127 - x - sizeof(PositionIndicatorEmpty), 1, SSD1306_COLOR_BLACK);
         }

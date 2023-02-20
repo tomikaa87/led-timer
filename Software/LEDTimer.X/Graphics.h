@@ -55,6 +55,12 @@ extern const uint8_t Graphics_ExitIcon[Graphics_ExitIconWidth];
 #define Graphics_NextIconWidth                      7
 extern const uint8_t Graphics_NextIcon[Graphics_NextIconWidth];
 
+#define Graphics_NextIconWidth                      7
+extern const uint8_t Graphics_NextIcon[Graphics_NextIconWidth];
+
+#define Graphics_ArrowRightIconWidth                7
+extern const uint8_t Graphics_ArrowRightIcon[Graphics_ArrowRightIconWidth];
+
 #define Graphics_SelectIconWidth                    8
 extern const uint8_t Graphics_SelectIcon[Graphics_SelectIconWidth];
 

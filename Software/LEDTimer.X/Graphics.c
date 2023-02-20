@@ -153,6 +153,16 @@ const uint8_t Graphics_NextIcon[Graphics_NextIconWidth] = {
     0b00010000
 };
 
+const uint8_t Graphics_ArrowRightIcon[Graphics_ArrowRightIconWidth] = {
+    0b00001000,
+    0b00001000,
+    0b00001000,
+    0b01111111,
+    0b00111110,
+    0b00011100,
+    0b00001000
+};
+
 const uint8_t Graphics_SelectIcon[Graphics_SelectIconWidth] = {
     0b00010000,
     0b00111000,
