@@ -34,6 +34,7 @@
 #include "SettingsScreen_Scheduler.h"
 #include "SettingsScreen_SegmentScheduler.h"
 #include "SettingsScreen_Time.h"
+#include "SettingsScreen_TimeZone.h"
 
 #include "stdbool.h"
 #include "stdio.h"
@@ -124,6 +125,7 @@ typedef enum {
     UI_Screen_Settings_DisplayBrightness,
     UI_Screen_Settings_Date,
     UI_Screen_Settings_Time,
+    UI_Screen_Settings_TimeZone,
     UI_Screen_Settings_Location
 } UI_Screen;
 
@@ -230,6 +232,10 @@ static void updateScreen(const bool redraw)
 
         case UI_Screen_Settings_Time:
             SettingsScreen_Time_update(redraw);
+            break;
+
+        case UI_Screen_Settings_TimeZone:
+            SettingsScreen_TimeZone_update(redraw);
             break;
 
         case UI_Screen_Settings_Location:
@@ -434,6 +440,10 @@ void UI_keyEvent(uint8_t keyCode)
                             switchToScreen(UI_Screen_Settings_Time);
                             break;
                         case 6:
+                            SettingsScreen_TimeZone_init(&context.modifiedSettings.time);
+                            switchToScreen(UI_Screen_Settings_TimeZone);
+                            break;
+                        case 7:
                             SettingsScreen_Location_init(&context.modifiedSettings.location);
                             switchToScreen(UI_Screen_Settings_Location);
                             break;
@@ -477,6 +487,12 @@ void UI_keyEvent(uint8_t keyCode)
 
         case UI_Screen_Settings_Time:
             if (!SettingsScreen_Time_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_TimeZone:
+            if (!SettingsScreen_TimeZone_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
             break;

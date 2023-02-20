@@ -32,7 +32,7 @@ static struct SettingScreen_Time_Context {
     uint8_t minutes;
     uint8_t hours : 5;
     uint8_t clockAdjusted : 1;
-    uint8_t _reserved : 2;
+    uint8_t selectionIndex : 1;
 } context;
 
 void SettingsScreen_Time_init()
@@ -46,19 +46,35 @@ void SettingsScreen_Time_update(const bool redraw)
 {
     if (redraw) {
         Graphics_DrawScreenTitle("Time");
-        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_SetIcon, Graphics_ClearIcon);
+        // TODO use -> for selection change icon
+        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_AdjustIcon);
     }
 
+    #define CharWidth 12u
+    #define CharSpacing 2u
+    #define ColonWidth 4u
+    #define TotalWidth (4u * CharWidth + 1u * ColonWidth + 4u * CharSpacing)
+    #define LinePattern 0b00000110
+
     char s[6];
+    uint8_t x = 64u - TotalWidth / 2u;
+    uint8_t xPrev = x;
 
-    sprintf(
-        s,
-        "%2u:%02u",
-        context.hours,
-        context.minutes
-    );
+    // Hour
+    sprintf(s, "%02u", context.hours);
+    x = Text_draw7Seg(s, 2, x, false);
+    SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
+    x += CharSpacing;
 
-    Text_draw7Seg(s, 2, 64 - Text_calculateWidth7Seg(s) / 2, false);
+    // Separator
+    x = Text_draw7Seg(":", 2, x, false);
+    x += CharSpacing;
+
+    // Minute
+    sprintf(s, "%02u", context.minutes);
+    xPrev = x;
+    x = Text_draw7Seg(s, 2, x, false);
+    SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 1 ? LinePattern : 0);
 }
 
 bool SettingsScreen_Time_handleKeyPress(const uint8_t keyCode, const bool hold)
@@ -75,20 +91,30 @@ bool SettingsScreen_Time_handleKeyPress(const uint8_t keyCode, const bool hold)
             return false;
         }
 
-        // Hours
+        // Change selection
         case Keypad_Key2: {
-            if (++context.hours >= 24) {
-                context.hours = 0;
-            }
-            context.clockAdjusted = true;
+            ++context.selectionIndex;
             SettingsScreen_Time_update(false);
             break;
         }
 
         // Minutes
         case Keypad_Key3: {
-            if (++context.minutes >= 60) {
-                context.minutes = 0;
+            switch (context.selectionIndex) {
+                case 0:
+                    if (++context.hours >= 24) {
+                        context.hours = 0;
+                    }
+                    break;
+
+                case 1:
+                    if (++context.minutes >= 60) {
+                        context.minutes = 0;
+                    }
+                    break;
+
+                default:
+                    break;
             }
             context.clockAdjusted = true;
             SettingsScreen_Time_update(false);

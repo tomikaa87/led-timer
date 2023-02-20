@@ -82,7 +82,7 @@ void SettingsScreen_Date_update(const bool redraw)
     #define ExtraSpacing (CharSpacing * 4)
     #define LinePattern 0b00000110
 
-    char s[8];
+    char s[5];
     uint8_t x = 64 - TotalWidth / 2;
     uint8_t xPrev = x;
 

@@ -130,6 +130,18 @@ void Graphics_drawScheduleSegmentIndicator(
     SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
     SSD1306_sendData((_Icon3), sizeof((_Icon3)), 0, false)
 
+#define Graphics_DrawKeypadHelpBarLeftRight(_Icon1, _Icon3) \
+    SSD1306_enablePageAddressing(); \
+    SSD1306_setPage(7); \
+    SSD1306_setStartColumn(0); \
+    SSD1306_sendData((_Icon1), sizeof((_Icon1)), 0, false); \
+    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false); \
+    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator), 0, false); \
+    SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
+    SSD1306_sendData((_Icon3), sizeof((_Icon3)), 0, false)
+
 #define Graphics_DrawKeypadHelpBarSeparators() \
     SSD1306_enablePageAddressing(); \
     SSD1306_setPage(7); \

@@ -26,7 +26,7 @@
 
 #include <string.h>
 
-#define MenuItemCount   7
+#define MenuItemCount   8
 
 static const char* MenuItems[MenuItemCount] = {
     "Scheduler",
@@ -35,6 +35,7 @@ static const char* MenuItems[MenuItemCount] = {
     "Disp. brightness",
     "Date",
     "Time",
+    "Time zone",
     "Location"
 };
 

@@ -1006,6 +1006,17 @@ static const uint8_t Colon7Seg[Colon7Seg_Pages][Colon7Seg_CharWidth] = {
     }
 };
 
+#define Plus7Seg_CharWidth                  7
+static const uint8_t Plus7Seg[Plus7Seg_CharWidth] = {
+    0b00011100,
+    0b00011100,
+    0b01111111,
+    0b01111111,
+    0b01111111,
+    0b00011100,
+    0b00011100
+};
+
 uint8_t Text_draw(
     const char* s,
     const uint8_t line,
@@ -1099,6 +1110,14 @@ uint8_t Text_draw7Seg(
                 for (uint8_t j = Numbers7Seg_CharWidth - 5; j > 0; --j) {
                     SSD1306_sendData(&charData, 1, 0, invert);
                 }
+
+                x += Numbers7Seg_CharWidth - 5 + Numbers7Seg_CharSpacing;
+            } else if (c == '+') {
+                SSD1306_setStartColumn(x);
+                SSD1306_setPage(line + 1);
+                SSD1306_sendData(Plus7Seg, sizeof(Plus7Seg), 0, invert);
+
+                x += Plus7Seg_CharWidth + Numbers7Seg_CharSpacing;
             } else {
                 uint8_t width = Numbers7Seg_CharWidth;
 
@@ -1176,9 +1195,11 @@ uint8_t Text_calculateWidth7Seg(const char* s)
         if ((c >= '0' && c <= '9') || c == ' ') {
             width += Numbers7Seg_CharWidth;
         } else if (c == ':') {
-            width += 4;
+            width += Colon7Seg_CharWidth;
         } else if (c == '-') {
             width += Numbers7Seg_CharWidth - 2;
+        } else if (c == '+') {
+            width += Plus7Seg_CharWidth;
         }
 
         if (*s != 0) {

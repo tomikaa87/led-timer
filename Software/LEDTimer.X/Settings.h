@@ -74,6 +74,11 @@ typedef struct
         uint8_t longitudeSign : 1;
     } location;
 
+    struct Time
+    {
+        int8_t timeZoneOffsetHalfHours;
+    } time;
+
     // This must be the last member
     uint8_t crc8;
 } SettingsData;
