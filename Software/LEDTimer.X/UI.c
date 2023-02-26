@@ -239,7 +239,9 @@ static void updateScreen(const bool redraw)
             break;
 
         case UI_Screen_Settings_Location:
+#if !SUNRISE_SUNSET_USE_LUT
             SettingsScreen_Location_update(redraw);
+#endif
             break;
 
         default:
@@ -443,10 +445,12 @@ void UI_keyEvent(uint8_t keyCode)
                             SettingsScreen_TimeZone_init(&context.modifiedSettings.time);
                             switchToScreen(UI_Screen_Settings_TimeZone);
                             break;
+#if !SUNRISE_SUNSET_USE_LUT
                         case 7:
                             SettingsScreen_Location_init(&context.modifiedSettings.location);
                             switchToScreen(UI_Screen_Settings_Location);
                             break;
+#endif
                         default:
                             break;
                     }
@@ -497,23 +501,11 @@ void UI_keyEvent(uint8_t keyCode)
             }
             break;
 
+#if !SUNRISE_SUNSET_USE_LUT
         case UI_Screen_Settings_Location:
             if (!SettingsScreen_Location_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
-            break;
-#if 0
-        case UI_Screen_Settings_:
-            break;
-        case UI_Screen_Settings_:
-            break;
-        case UI_Screen_Settings_:
-            break;
-        case UI_Screen_Settings_:
-            break;
-        case UI_Screen_Settings_:
-            break;
-        case UI_Screen_Settings_:
             break;
 #endif
 

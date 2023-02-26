@@ -25,12 +25,13 @@
 #include "Settings.h"
 #include "SunsetSunrise.h"
 
-#include <math.h>
-
 static struct SunriseSunsetContext {
-    SunriseSunset_Time sunrise;
-    SunriseSunset_Time sunset;
+    uint16_t sunrise;
+    uint16_t sunset;
 } context;
+
+#if !SUNRISE_SUNSET_USE_LUT
+#include <math.h>
 
 #define COS_SUN_ANGLE_BELOW_HORIZON (-0.014538080502497)    // cos(rad(90.833))
 #define DEG_TO_RAD_FACTOR           (0.017453292519943)     // Pi / 180
@@ -75,7 +76,7 @@ void SunriseSunset_setTimeZone(
     data->timeOffset = timeZoneOffset + (dst ? 1 : 0);
 }
 
-SunriseSunset_Time SunriseSunset_calculate(
+uint16_t SunriseSunset_calculate(
     SunriseSunsetData* const data,
     const bool sunset,
     const uint16_t dayOfYear
@@ -112,15 +113,30 @@ SunriseSunset_Time SunriseSunset_calculate(
     double adjustedTime = localTime + data->timeOffset;
     adjustedTime = (adjustedTime - 24 * floor(adjustedTime / 24));
 
-    SunriseSunset_Time time;
-    time.hour = (uint8_t)(floor(adjustedTime));
-    time.minute = (uint8_t)(round((adjustedTime - time.hour) * 60.0));
+    uint8_t hour = (uint8_t)(floor(adjustedTime));
+    uint8_t minute = (uint8_t)(round((adjustedTime - hour) * 60.0));
 
-    return time;
+    // Convert to minutes since midnight
+    return (uint16_t)hour * 60 + minute;
 }
+#else
+extern const uint16_t SunriseSunsetLUT[2][365];
+
+uint16_t SunriseSunset_calculate(
+    const bool sunset,
+    const uint16_t dayOfYear
+) {
+    if (dayOfYear >= 365) {
+        return 0;
+    }
+
+    return SunriseSunsetLUT[sunset ? 1 : 0][dayOfYear];
+}
+#endif
 
 void SunriseSunset_update()
 {
+#if !SUNRISE_SUNSET_USE_LUT
     SunriseSunsetData data;
 
     SunriseSunset_setPosition(
@@ -137,9 +153,30 @@ void SunriseSunset_update()
 
     // TODO get time zone data from settings
     SunriseSunset_setTimeZone(&data, 1, false);
+#endif
 
     uint16_t dayOfYear = Clock_calculateDayOfYear();
 
-    context.sunrise = SunriseSunset_calculate(&data, false, dayOfYear);
-    context.sunset = SunriseSunset_calculate(&data, true, dayOfYear);
+#if SUNRISE_SUNSET_USE_LUT
+    // Adjust the index for non-leap years after February 29th
+    if (!Clock_isLeapYear() && dayOfYear > 59) {
+        dayOfYear += 1;
+    }
+#endif
+
+    context.sunrise = SunriseSunset_calculate(
+#if !SUNRISE_SUNSET_USE_LUT
+        &data,
+#endif
+        false,
+        dayOfYear
+    );
+
+    context.sunset = SunriseSunset_calculate(
+#if !SUNRISE_SUNSET_USE_LUT
+        &data,
+#endif
+        true,
+        dayOfYear
+    );
 }

@@ -30,7 +30,7 @@ enum
 //#define SSD1306_DEBUG
 //#define SSD1306_VERBOSE_ERRORS
 
-#define SSD1309 0
+#define SSD1309 1
 
 #include <xc.h>
 #include <stdio.h>

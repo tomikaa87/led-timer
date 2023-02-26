@@ -23,12 +23,11 @@
 #include "Settings_MenuScreen.h"
 #include "SSD1306.h"
 #include "Text.h"
+#include "Config.h"
 
 #include <string.h>
 
-#define MenuItemCount   8
-
-static const char* MenuItems[MenuItemCount] = {
+static const char* MenuItems[] = {
     "SCHEDULER",
     "SEGMENT SCHEDULER",
     "LED BRIGHTNES",
@@ -36,8 +35,12 @@ static const char* MenuItems[MenuItemCount] = {
     "DATE",
     "TIME",
     "TIME ZONE",
+#if !SUNRISE_SUNSET_USE_LUT
     "LOCATION"
+#endif
 };
+
+#define MenuItemCount   (sizeof(MenuItems) / sizeof(char*))
 
 static const uint8_t PositionIndicatorEmpty[] = {
     0b10101010,

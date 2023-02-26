@@ -50,11 +50,12 @@ def make_lut(latitude: float, longitude: float):
         column += 1
         delimiter = ',' if doy < 365 else ''
         print(delimiter, end='')
-        if column == 4:
-            column = 0
-            print('\n    ', end='')
-        else:
-            print(' ', end='')
+        if doy < 365:
+            if column == 2:
+                column = 0
+                print('\n    ', end='')
+            else:
+                print(' ', end='')
         # print(f'DoY={doy:3d}, Sunrise={sunrise}, Sunset={sunset}')
     print('\n};')
 

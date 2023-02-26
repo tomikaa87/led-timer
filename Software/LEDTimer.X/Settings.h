@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "Config.h"
 #include "Types.h"
 
 #include <stdbool.h>
@@ -47,13 +48,13 @@ typedef struct
 
         ScheduleSegmentData segmentData;
 
-        struct Schedule
+        struct ScheduleTrigger
         {
             Settings_ScheduleType type;
             int8_t sunOffset;
             uint8_t timeHour;
             uint8_t timeMinute;
-        } simpleOnSchedule, simpleOffSchedule;
+        } onTrigger, offTrigger;
     } scheduler;
 
     struct Output
@@ -66,6 +67,7 @@ typedef struct
         uint8_t brightness;
     } display;
 
+#if !SUNRISE_SUNSET_USE_LUT
     struct Location
     {
         uint32_t latitudeBcd;
@@ -73,6 +75,7 @@ typedef struct
         uint8_t latitudeSign : 1;
         uint8_t longitudeSign : 1;
     } location;
+#endif
 
     struct Time
     {

@@ -18,11 +18,14 @@
     Created on 2023-02-16
 */
 
+#include "SettingsScreen_Location.h"
+
+#if !SUNRISE_SUNSET_USE_LUT
+
 #include "Clock.h"
 #include "Graphics.h"
 #include "Keypad.h"
 #include "Settings.h"
-#include "SettingsScreen_Location.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -161,3 +164,5 @@ bool SettingsScreen_Location_handleKeyPress(const uint8_t keyCode, const bool ho
 
     return true;
 }
+
+#endif

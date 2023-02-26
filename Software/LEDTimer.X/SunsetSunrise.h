@@ -20,8 +20,17 @@
 
 #pragma once
 
+#include "Config.h"
+
 #include <stdbool.h>
 #include <stdint.h>
+
+#if !SUNRISE_SUNSET_USE_LUT
+
+typedef struct {
+    uint8_t hour;
+    uint8_t minute;
+} SunriseSunset_Time;
 
 typedef struct {
     double latitudeCos;
@@ -29,11 +38,6 @@ typedef struct {
     double longitudeHour;
     int8_t timeOffset;
 } SunriseSunsetData;
-
-typedef struct {
-    uint8_t hour;
-    uint8_t minute;
-} SunriseSunset_Time;
 
 void SunriseSunset_setPosition(
     SunriseSunsetData* data,
@@ -47,10 +51,16 @@ void SunriseSunset_setTimeZone(
     bool dst
 );
 
-SunriseSunset_Time SunriseSunset_calculate(
+uint16_t SunriseSunset_calculate(
     SunriseSunsetData* data,
     bool sunset,
     uint16_t dayOfYear
 );
+#else
+uint16_t SunriseSunset_calculate(
+    bool sunset,
+    uint16_t dayOfYear
+);
+#endif
 
 void SunriseSunset_update(void);

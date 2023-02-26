@@ -112,7 +112,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 // Switch off schedule label
                 LeftText("OFF:", 5);
 
-                switch (context.settings->simpleOnSchedule.type) {
+                switch (context.settings->onTrigger.type) {
                     case Settings_ScheduleType_Sunrise:
                     case Settings_ScheduleType_Sunset:
                         // Switch on schedule setting label
@@ -127,7 +127,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         break;
                 }
 
-                switch (context.settings->simpleOffSchedule.type) {
+                switch (context.settings->offTrigger.type) {
                     case Settings_ScheduleType_Sunrise:
                     case Settings_ScheduleType_Sunset:
                         // Switch off schedule setting label
@@ -164,7 +164,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             ) {
                 uint8_t x = Text_draw(
                     ScheduleTypes[
-                        context.settings->simpleOnSchedule.type
+                        context.settings->onTrigger.type
                     ],
                     3, PositionAfter("ON:"), 0, InvertForSelectionIndex(1)
                 );
@@ -180,7 +180,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             ) {
                 uint8_t x = Text_draw(
                     ScheduleTypes[
-                        context.settings->simpleOffSchedule.type
+                        context.settings->offTrigger.type
                     ],
                     5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(4)
                 );
@@ -189,12 +189,12 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             }
 
 #if 0
-            switch (context.settings->simpleOnSchedule.type) {
+            switch (context.settings->onTrigger.type) {
                 case Settings_ScheduleType_Sunrise:
                 case Settings_ScheduleType_Sunset: {
                     // Offset value label
                     char s[10];
-                    sprintf(s, "%+3.2d MIN", context.settings->simpleOnSchedule.sunOffset);
+                    sprintf(s, "%+3.2d MIN", context.settings->onTrigger.sunOffset);
                     Text_draw(s, 5, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(2));
                     break;
                 }
@@ -205,7 +205,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Time hour value label
                     sprintf(
                         s, "%2d",
-                        context.settings->simpleOnSchedule.timeHour
+                        context.settings->onTrigger.timeHour
                     );
                     Text_draw(
                         s,
@@ -218,7 +218,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Time minute value label
                     sprintf(
                         s, "%02d",
-                        context.settings->simpleOnSchedule.timeMinute
+                        context.settings->onTrigger.timeMinute
                     );
                     Text_draw(
                         s,
@@ -231,12 +231,12 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 }
             }
 
-            switch (context.settings->simpleOffSchedule.type) {
+            switch (context.settings->offTrigger.type) {
                 case Settings_ScheduleType_Sunrise:
                 case Settings_ScheduleType_Sunset: {
                     // Offset value label
                     char s[10];
-                    sprintf(s, "%+3.2d MIN", context.settings->simpleOffSchedule.sunOffset);
+                    sprintf(s, "%+3.2d MIN", context.settings->offTrigger.sunOffset);
                     Text_draw(
                         s,
                         7,
@@ -253,7 +253,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Time hour value label
                     sprintf(
                         s, "%2d",
-                        context.settings->simpleOnSchedule.timeHour
+                        context.settings->onTrigger.timeHour
                     );
                     Text_draw(
                         s,
@@ -266,7 +266,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Time minute value label
                     sprintf(
                         s, "%02d",
-                        context.settings->simpleOnSchedule.timeMinute
+                        context.settings->onTrigger.timeMinute
                     );
                     Text_draw(
                         s,
@@ -335,12 +335,12 @@ bool SettingsScreen_Scheduler_handleKeyPress(const uint8_t keyCode, const bool h
                     case Settings_SchedulerType_Simple:
                         // On schedule type selection
                         if (context.selection == 1) {
-                            RotateScheduleType(context.settings->simpleOnSchedule.type)
+                            RotateScheduleType(context.settings->onTrigger.type)
                             context.onScheduleTypeChanged = true;
                         }
                         // Off schedule type selection
                         else if (context.selection == 4) {
-                            RotateScheduleType(context.settings->simpleOffSchedule.type)
+                            RotateScheduleType(context.settings->offTrigger.type)
                             context.offScheduleTypeChanged = true;
                         }
 
@@ -350,10 +350,10 @@ bool SettingsScreen_Scheduler_handleKeyPress(const uint8_t keyCode, const bool h
                             context.selection == 2
                             || context.selection == 4
                         ) {
-                            struct Schedule* s =
+                            struct ScheduleTrigger* s =
                                 context.selection == 2
-                                    ? &context.settings->simpleOnSchedule
-                                    : &context.settings->simpleOffSchedule;
+                                    ? &context.settings->onTrigger
+                                    : &context.settings->offTrigger;
 
                             switch (s->type) {
                                 case Settings_ScheduleType_Sunrise:

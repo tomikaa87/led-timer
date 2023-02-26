@@ -22,6 +22,10 @@
 
 #include "Settings.h"
 
+#if !SUNRISE_SUNSET_USE_LUT
+
 void SettingsScreen_Location_init(struct Location* settings);
 void SettingsScreen_Location_update(bool redraw);
 bool SettingsScreen_Location_handleKeyPress(uint8_t keyCode, bool hold);
+
+#endif
