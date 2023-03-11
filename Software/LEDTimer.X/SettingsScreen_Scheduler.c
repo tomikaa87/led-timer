@@ -50,7 +50,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
     }
 
     static const char* SchedulerTypes[] = { "SEGMENT", "SIMPLE", "OFF" };
-    static const char* ScheduleTypes[] = { "TIME", "SUNRISE", "SUNSET" };
+    static const char* TriggerTypes[] = { "TIME", "SUNRISE", "SUNSET" };
 
     #define InvertForSelectionIndex(_Index) (\
         context.selection == _Index \
@@ -64,12 +64,12 @@ void SettingsScreen_Scheduler_update(const bool redraw)
     {
         char s[3];
         sprintf(s, "%02u", context.selection);
-        Text_draw(s, 1, 128 - CalculateTextWidth("00"), 0, false);
+        Text_draw(s, 1, 127 - CalculateTextWidth("00"), 0, false);
     }
 
     // Draw the fixed labels
     if (redraw) {
-        SSD1306_fillArea(0, 1, 128, 6, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(0, 1, 127, 6, SSD1306_COLOR_BLACK);
 
         Text_draw("TYPE:", 1, 0, 0, false);
     }
@@ -78,7 +78,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         // Size the background fill for the longest text (+1 because of the inverted text)
         SSD1306_fillArea(PositionAfter("TYPE:"), 1, CalculateTextWidth("SEGMENT") + 1, 1, SSD1306_COLOR_BLACK);
         // Clear the background of the contents
-        SSD1306_fillArea(0, 2, 128, 5, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(0, 2, 127, 5, SSD1306_COLOR_BLACK);
     }
 
     if (
@@ -96,7 +96,12 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         );
     }
 
-    if (redraw || context.schedulerTypeChanged) {
+    if (
+        redraw
+        || context.schedulerTypeChanged
+        || context.onTriggerChanged
+        || context.offTriggerChanged
+    ) {
         // Draw the fixed labels for the current scheduler type
         switch (context.settings->type) {
             case Settings_SchedulerType_Segment:
@@ -112,32 +117,40 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
                 switch (context.settings->onTrigger.type) {
                     case Settings_TriggerType_Sunrise:
-                    case Settings_TriggerType_Sunset:
+                    case Settings_TriggerType_Sunset: {
                         // Switch on schedule setting label
-                        LeftText("OFFSET:", 4);
+                        uint8_t x = LeftText("OFFSET:", 4);
+                        SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
                         break;
+                    }
 
-                    case Settings_TriggerType_Time:
+                    case Settings_TriggerType_Time: {
                         // Switch on time setting label
-                        LeftText("TIME:", 4);
+                        uint8_t x = LeftText("TIME:", 4);
+                        SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
                         // Time hour-minute separator
                         Text_draw(":", 4, PositionAfter("TIME: xx"), 0, false);
                         break;
+                    }
                 }
 
                 switch (context.settings->offTrigger.type) {
                     case Settings_TriggerType_Sunrise:
-                    case Settings_TriggerType_Sunset:
+                    case Settings_TriggerType_Sunset: {
                         // Switch off schedule setting label
-                        LeftText("OFFSET:", 6);
+                        uint8_t x = LeftText("OFFSET:", 6);
+                        SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
                         break;
+                    }
 
-                    case Settings_TriggerType_Time:
+                    case Settings_TriggerType_Time: {
                         // Switch off time setting label
-                        LeftText("TIME:", 6);
+                        uint8_t x = LeftText("TIME:", 6);
+                        SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
                         // Time hour-minute separator
                         Text_draw(":", 6, PositionAfter("TIME: xx"), 0, false);
                         break;
+                    }
                 }
                 break;
 
@@ -156,34 +169,32 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         case Settings_SchedulerType_Simple: {
             // Switch on schedule type
             if (
-                context.onTriggerChanged
+                redraw
+                || context.onTriggerChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
             ) {
                 uint8_t x = Text_draw(
-                    ScheduleTypes[
-                        context.settings->onTrigger.type
-                    ],
+                    TriggerTypes[context.settings->onTrigger.type],
                     3, PositionAfter("ON:"), 0, InvertForSelectionIndex(1)
                 );
                 // Clean the background after the text
-                SSD1306_fillArea(x, 3, 20, 1, SSD1306_COLOR_BLACK);
+                SSD1306_fillArea(x, 3, 127 - x, 1, SSD1306_COLOR_BLACK);
             }
 
             // Switch off schedule type
             if (
-                context.offTriggerChanged
+                redraw
+                || context.offTriggerChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
             ) {
                 uint8_t x = Text_draw(
-                    ScheduleTypes[
-                        context.settings->offTrigger.type
-                    ],
+                    TriggerTypes[context.settings->offTrigger.type],
                     5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(4)
                 );
                 // Clean the background after the text
-                SSD1306_fillArea(x, 5, 20, 1, SSD1306_COLOR_BLACK);
+                SSD1306_fillArea(x, 5, 127 - x, 1, SSD1306_COLOR_BLACK);
             }
 
 #if 0
@@ -304,6 +315,10 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
 static void selectNextItem()
 {
+    if (context.settings->type != Settings_SchedulerType_Simple) {
+        context.selection = 0;
+        return;
+    }
 
     ++context.selection;
     context.selectionChanged = true;
@@ -324,7 +339,7 @@ static void selectNextItem()
 static void adjustSelectedItem()
 {
     #define RotateTriggerType(_Type) { \
-        if ((_Type) >= Settings_TriggerType_Sunset) {\
+        if (++(_Type) > Settings_TriggerType_Sunset) {\
             (_Type) = Settings_TriggerType_Time; \
         } \
     }
