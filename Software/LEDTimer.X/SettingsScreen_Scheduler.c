@@ -28,11 +28,12 @@
 
 static struct SettingScreen_Scheduler_Context {
     struct Scheduler* settings;
-    uint8_t selection : 4;
+    uint8_t selection : 3;
     uint8_t schedulerTypeChanged : 1;
-    uint8_t onScheduleTypeChanged : 1;
-    uint8_t offScheduleTypeChanged : 1;
+    uint8_t onTriggerChanged : 1;
+    uint8_t offTriggerChanged : 1;
     uint8_t selectionChanged : 1;
+    uint8_t reserved : 1;
 } context;
 
 void SettingsScreen_Scheduler_init(struct Scheduler* settings)
@@ -68,16 +69,12 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
     // Draw the fixed labels
     if (redraw) {
-        context.schedulerTypeChanged = true;
-        context.onScheduleTypeChanged = true;
-        context.offScheduleTypeChanged = true;
-
         SSD1306_fillArea(0, 1, 128, 6, SSD1306_COLOR_BLACK);
 
         Text_draw("TYPE:", 1, 0, 0, false);
     }
 
-    if (!redraw && context.schedulerTypeChanged) {
+    if (redraw || context.schedulerTypeChanged) {
         // Size the background fill for the longest text (+1 because of the inverted text)
         SSD1306_fillArea(PositionAfter("TYPE:"), 1, CalculateTextWidth("SEGMENT") + 1, 1, SSD1306_COLOR_BLACK);
         // Clear the background of the contents
@@ -85,7 +82,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
     }
 
     if (
-        context.schedulerTypeChanged
+        redraw
+        || context.schedulerTypeChanged
         || context.selectionChanged
     ) {
         // Scheduler type
@@ -98,7 +96,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         );
     }
 
-    if (context.schedulerTypeChanged) {
+    if (redraw || context.schedulerTypeChanged) {
         // Draw the fixed labels for the current scheduler type
         switch (context.settings->type) {
             case Settings_SchedulerType_Segment:
@@ -113,13 +111,13 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 LeftText("OFF:", 5);
 
                 switch (context.settings->onTrigger.type) {
-                    case Settings_ScheduleType_Sunrise:
-                    case Settings_ScheduleType_Sunset:
+                    case Settings_TriggerType_Sunrise:
+                    case Settings_TriggerType_Sunset:
                         // Switch on schedule setting label
                         LeftText("OFFSET:", 4);
                         break;
 
-                    case Settings_ScheduleType_Time:
+                    case Settings_TriggerType_Time:
                         // Switch on time setting label
                         LeftText("TIME:", 4);
                         // Time hour-minute separator
@@ -128,13 +126,13 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 }
 
                 switch (context.settings->offTrigger.type) {
-                    case Settings_ScheduleType_Sunrise:
-                    case Settings_ScheduleType_Sunset:
+                    case Settings_TriggerType_Sunrise:
+                    case Settings_TriggerType_Sunset:
                         // Switch off schedule setting label
                         LeftText("OFFSET:", 6);
                         break;
 
-                    case Settings_ScheduleType_Time:
+                    case Settings_TriggerType_Time:
                         // Switch off time setting label
                         LeftText("TIME:", 6);
                         // Time hour-minute separator
@@ -158,7 +156,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         case Settings_SchedulerType_Simple: {
             // Switch on schedule type
             if (
-                context.onScheduleTypeChanged
+                context.onTriggerChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
             ) {
@@ -174,7 +172,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
             // Switch off schedule type
             if (
-                context.offScheduleTypeChanged
+                context.offTriggerChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
             ) {
@@ -190,8 +188,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
 #if 0
             switch (context.settings->onTrigger.type) {
-                case Settings_ScheduleType_Sunrise:
-                case Settings_ScheduleType_Sunset: {
+                case Settings_TriggerType_Sunrise:
+                case Settings_TriggerType_Sunset: {
                     // Offset value label
                     char s[10];
                     sprintf(s, "%+3.2d MIN", context.settings->onTrigger.sunOffset);
@@ -199,7 +197,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     break;
                 }
 
-                case Settings_ScheduleType_Time: {
+                case Settings_TriggerType_Time: {
                     char s[3];
 
                     // Time hour value label
@@ -232,8 +230,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             }
 
             switch (context.settings->offTrigger.type) {
-                case Settings_ScheduleType_Sunrise:
-                case Settings_ScheduleType_Sunset: {
+                case Settings_TriggerType_Sunrise:
+                case Settings_TriggerType_Sunset: {
                     // Offset value label
                     char s[10];
                     sprintf(s, "%+3.2d MIN", context.settings->offTrigger.sunOffset);
@@ -247,7 +245,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     break;
                 }
 
-                case Settings_ScheduleType_Time: {
+                case Settings_TriggerType_Time: {
                     char s[3];
 
                     // Time hour value label
@@ -287,9 +285,145 @@ void SettingsScreen_Scheduler_update(const bool redraw)
     }
 
     context.schedulerTypeChanged = false;
-    context.onScheduleTypeChanged = false;
-    context.offScheduleTypeChanged = false;
+    context.onTriggerChanged = false;
+    context.offTriggerChanged = false;
     context.selectionChanged = false;
+}
+
+/*
+    Selection index table:
+
+        Index | 0        | 1       | 2           | 3      | 4        | 5            | 6
+    Mode      |          |         |             |        |          |              |
+    --------------------------------------------------------------------------------------------
+    Time/Time | Type sel | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
+    Sun /Time | Type sel | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
+    Time/Sun  | Type sel | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
+    Sun /Sun  | Type sel | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
+*/
+
+static void selectNextItem()
+{
+
+    ++context.selection;
+    context.selectionChanged = true;
+
+    if (context.selection == 3 && context.settings->onTrigger.type != Settings_TriggerType_Time) {
+        ++context.selection;
+    }
+
+    if (context.selection == 6 && context.settings->offTrigger.type != Settings_TriggerType_Time) {
+        ++context.selection;
+    }
+
+    if (context.selection > 6) {
+        context.selection = 0;
+    }
+}
+
+static void adjustSelectedItem()
+{
+    #define RotateTriggerType(_Type) { \
+        if ((_Type) >= Settings_TriggerType_Sunset) {\
+            (_Type) = Settings_TriggerType_Time; \
+        } \
+    }
+
+    #define RotateHour(_Value) { \
+        if (++(_Value) >= 24) { \
+            (_Value) = 0; \
+        } \
+    }
+
+    #define RotateMinute(_Value) { \
+        if (++(_Value) >= 60) { \
+            (_Value) = 0; \
+        } \
+    }
+
+    #define RotateSunOffset(_Value) { \
+        (_Value) += 15; \
+        if ((_Value) >= 60) { \
+            (_Value) = -60; \
+        } \
+    }
+
+    switch (context.selection) {
+        case 0: {
+            if (++(context.settings->type) > Settings_SchedulerType_Off) {
+                context.settings->type = Settings_SchedulerType_Segment;
+            }
+            context.schedulerTypeChanged = true;
+            break;
+        }
+
+        case 1: {
+            RotateTriggerType(context.settings->onTrigger.type)
+            context.onTriggerChanged = true;
+            break;
+        }
+
+        case 2: {
+            switch (context.settings->onTrigger.type) {
+                case Settings_TriggerType_Time: {
+                    RotateHour(context.settings->onTrigger.timeHour);
+                    break;
+                }
+
+                case Settings_TriggerType_Sunrise:
+                case Settings_TriggerType_Sunset: {
+                    RotateSunOffset(context.settings->onTrigger.sunOffset);
+                    break;
+                }
+
+                default:
+                    break;
+            }
+            break;
+        }
+
+        case 3: {
+            if (context.settings->onTrigger.type == Settings_TriggerType_Time) {
+                RotateMinute(context.settings->onTrigger.timeMinute);
+            }
+            break;
+        }
+
+        case 4: {
+            RotateTriggerType(context.settings->offTrigger.type)
+            context.offTriggerChanged = true;
+            break;
+        }
+
+        case 5: {
+            switch (context.settings->offTrigger.type) {
+                case Settings_TriggerType_Time: {
+                    RotateHour(context.settings->offTrigger.timeHour);
+                    break;
+                }
+
+                case Settings_TriggerType_Sunrise:
+                case Settings_TriggerType_Sunset: {
+                    RotateSunOffset(context.settings->offTrigger.sunOffset);
+                    break;
+                }
+
+                default:
+                    break;
+            }
+            break;
+        }
+
+        case 6: {
+            if (context.settings->offTrigger.type == Settings_TriggerType_Time) {
+                RotateMinute(context.settings->offTrigger.timeMinute);
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
 }
 
 bool SettingsScreen_Scheduler_handleKeyPress(const uint8_t keyCode, const bool hold)
@@ -306,79 +440,15 @@ bool SettingsScreen_Scheduler_handleKeyPress(const uint8_t keyCode, const bool h
 
         // Select
         case Keypad_Key2: {
-            uint8_t limit = 6;
-
-            if (++context.selection >= limit) {
-                context.selection = 0;
-            }
-
-            context.selectionChanged = true;
+            selectNextItem();
+            SettingsScreen_Scheduler_update(false);
             break;
         }
 
         // Adjust
         case Keypad_Key3: {
-            #define RotateScheduleType(_Type) { \
-                if ((_Type) >= Settings_ScheduleType_Sunset) {\
-                    (_Type) = Settings_ScheduleType_Time; \
-                } \
-            }
-
-            // Scheduler type
-            if (context.selection == 0) {
-                if (++(context.settings->type) > Settings_SchedulerType_Off) {
-                    context.settings->type = Settings_SchedulerType_Segment;
-                }
-                context.schedulerTypeChanged = true;
-            } else {
-                switch (context.settings->type) {
-                    case Settings_SchedulerType_Simple:
-                        // On schedule type selection
-                        if (context.selection == 1) {
-                            RotateScheduleType(context.settings->onTrigger.type)
-                            context.onScheduleTypeChanged = true;
-                        }
-                        // Off schedule type selection
-                        else if (context.selection == 4) {
-                            RotateScheduleType(context.settings->offTrigger.type)
-                            context.offScheduleTypeChanged = true;
-                        }
-
-                        #if 0
-                        // On/Off schedule details adjustment
-                        else if (
-                            context.selection == 2
-                            || context.selection == 4
-                        ) {
-                            struct ScheduleTrigger* s =
-                                context.selection == 2
-                                    ? &context.settings->onTrigger
-                                    : &context.settings->offTrigger;
-
-                            switch (s->type) {
-                                case Settings_ScheduleType_Sunrise:
-                                case Settings_ScheduleType_Sunset:
-                                    s->sunOffset += 15;
-                                    if (s->sunOffset >= 60) {
-                                        s->sunOffset = -60;
-                                    }
-                                    break;
-
-                                case Settings_ScheduleType_Time:
-
-                                    break;
-                            }
-                        }
-                        #endif
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
+            adjustSelectedItem();
             SettingsScreen_Scheduler_update(false);
-
             break;
         }
     }

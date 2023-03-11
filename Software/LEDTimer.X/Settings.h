@@ -35,10 +35,10 @@ typedef enum
 
 typedef enum
 {
-    Settings_ScheduleType_Time,
-    Settings_ScheduleType_Sunrise,
-    Settings_ScheduleType_Sunset
-} Settings_ScheduleType;
+    Settings_TriggerType_Time,
+    Settings_TriggerType_Sunrise,
+    Settings_TriggerType_Sunset
+} Settings_TriggerType;
 
 typedef struct
 {
@@ -50,7 +50,7 @@ typedef struct
 
         struct ScheduleTrigger
         {
-            Settings_ScheduleType type;
+            Settings_TriggerType type;
             int8_t sunOffset;
             uint8_t timeHour;
             uint8_t timeMinute;
