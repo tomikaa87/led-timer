@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include "Config.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 

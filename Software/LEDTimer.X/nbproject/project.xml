@@ -13,7 +13,7 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>default</name>
+                    <name>SunriseSunset_LUT</name>
                     <type>2</type>
                 </confElem>
             </confList>

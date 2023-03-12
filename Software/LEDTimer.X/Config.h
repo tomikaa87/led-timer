@@ -64,8 +64,3 @@
 #define Config_Keypad_RepeatTimeoutTicks                    (50)
 #define Config_Keypad_RepeatIntervalTicks                   (10)
 #define Config_Keypad_DeBounceCoolDownTicks                 (5)
-
-/**
- * Sunrise/Sunset calculation
- */
-#define SUNRISE_SUNSET_USE_LUT                              1
