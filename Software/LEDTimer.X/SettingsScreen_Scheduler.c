@@ -121,6 +121,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         // Switch on schedule setting label
                         uint8_t x = LeftText("OFFSET:", 4);
                         SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
+                        // Unit label
+                        Text_draw("MIN", 4, PositionAfter("OFFSET: xxx"), 0, false);
                         break;
                     }
 
@@ -129,7 +131,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         uint8_t x = LeftText("TIME:", 4);
                         SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
                         // Time hour-minute separator
-                        Text_draw(":", 4, PositionAfter("TIME: xx"), 0, false);
+                        Text_draw(":", 4, CalculateTextWidth("TIME: xx"), 0, false);
                         break;
                     }
                 }
@@ -140,6 +142,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         // Switch off schedule setting label
                         uint8_t x = LeftText("OFFSET:", 6);
                         SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
+                        // Unit label
+                        Text_draw("MIN", 6, PositionAfter("OFFSET: xxx"), 0, false);
                         break;
                     }
 
@@ -148,7 +152,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         uint8_t x = LeftText("TIME:", 6);
                         SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
                         // Time hour-minute separator
-                        Text_draw(":", 6, PositionAfter("TIME: xx"), 0, false);
+                        Text_draw(":", 6, CalculateTextWidth("TIME: xx"), 0, false);
                         break;
                     }
                 }
@@ -197,14 +201,13 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 SSD1306_fillArea(x, 5, 127 - x, 1, SSD1306_COLOR_BLACK);
             }
 
-#if 0
             switch (context.settings->onTrigger.type) {
                 case Settings_TriggerType_Sunrise:
                 case Settings_TriggerType_Sunset: {
                     // Offset value label
-                    char s[10];
-                    sprintf(s, "%+3.2d MIN", context.settings->onTrigger.sunOffset);
-                    Text_draw(s, 5, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(2));
+                    char s[4];
+                    sprintf(s, "%+3.2d", context.settings->onTrigger.sunOffset);
+                    Text_draw(s, 4, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(2));
                     break;
                 }
 
@@ -212,30 +215,12 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     char s[3];
 
                     // Time hour value label
-                    sprintf(
-                        s, "%2d",
-                        context.settings->onTrigger.timeHour
-                    );
-                    Text_draw(
-                        s,
-                        5,
-                        PositionAfter("TIME:"),
-                        0,
-                        InvertForSelectionIndex(2)
-                    );
+                    sprintf(s, "%2d", context.settings->onTrigger.timeHour);
+                    Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(2));
 
                     // Time minute value label
-                    sprintf(
-                        s, "%02d",
-                        context.settings->onTrigger.timeMinute
-                    );
-                    Text_draw(
-                        s,
-                        5,
-                        PositionAfter("TIME: xx:"),
-                        0,
-                        InvertForSelectionIndex(3)
-                    );
+                    sprintf(s, "%02d", context.settings->onTrigger.timeMinute);
+                    Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(3));
                     break;
                 }
             }
@@ -244,15 +229,9 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 case Settings_TriggerType_Sunrise:
                 case Settings_TriggerType_Sunset: {
                     // Offset value label
-                    char s[10];
-                    sprintf(s, "%+3.2d MIN", context.settings->offTrigger.sunOffset);
-                    Text_draw(
-                        s,
-                        7,
-                        PositionAfter("OFFSET:"),
-                        0,
-                        InvertForSelectionIndex(5)
-                    );
+                    char s[4];
+                    sprintf(s, "%+3.2d", context.settings->offTrigger.sunOffset);
+                    Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(5));
                     break;
                 }
 
@@ -260,34 +239,15 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     char s[3];
 
                     // Time hour value label
-                    sprintf(
-                        s, "%2d",
-                        context.settings->onTrigger.timeHour
-                    );
-                    Text_draw(
-                        s,
-                        5,
-                        PositionAfter("TIME:"),
-                        0,
-                        InvertForSelectionIndex(5)
-                    );
+                    sprintf(s, "%2d", context.settings->offTrigger.timeHour);
+                    Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(5));
 
                     // Time minute value label
-                    sprintf(
-                        s, "%02d",
-                        context.settings->onTrigger.timeMinute
-                    );
-                    Text_draw(
-                        s,
-                        5,
-                        PositionAfter("TIME: xx:"),
-                        0,
-                        InvertForSelectionIndex(6)
-                    );
+                    sprintf(s, "%02d", context.settings->offTrigger.timeMinute);
+                    Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(6));
                     break;
                 }
             }
-#endif
             break;
         }
 
