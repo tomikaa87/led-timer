@@ -134,6 +134,16 @@ uint16_t SunriseSunset_calculate(
 }
 #endif
 
+uint16_t SunriseSunset_getSunrise(void)
+{
+    return context.sunrise;
+}
+
+uint16_t SunriseSunset_getSunset(void)
+{
+    return context.sunset;
+}
+
 void SunriseSunset_update()
 {
 #if !SUNRISE_SUNSET_USE_LUT

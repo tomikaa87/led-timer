@@ -21,6 +21,7 @@
 #include "Clock.h"
 #include "OutputController.h"
 #include "Settings.h"
+#include "SunsetSunrise.h"
 #include "System.h"
 #include "Types.h"
 
@@ -38,30 +39,95 @@ static struct OutputControllerContext
     uint8_t outputOverride : 1;
     uint8_t prevOutputState : 1;
     uint8_t forceOutputStateUpdate : 1;
-    uint8_t stateFromSchedule : 1;
+    uint8_t switchedOnBySchedule : 1;
     uint8_t prevStateFromSchedule : 1;
 } context = {
     .outputOverride = 0,
     .prevOutputState = 0,
     .forceOutputStateUpdate = 0,
-    .stateFromSchedule = 0,
+    .switchedOnBySchedule = 0,
     .prevStateFromSchedule = 0
 };
 
-static inline bool getStateFromSchedule()
-{
-    uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
-        Clock_getMinutesSinceMidnight()
-    );
+uint16_t calculateSunEventTime(const uint16_t eventTime, const int8_t offset) {
+    int16_t t = (int16_t)(eventTime) + (int16_t)(offset);
 
-    return Types_getScheduleSegmentBit(
-        Settings_data.scheduler.segmentData,
-        segmentIndex
-    );
+    if (t < 0) {
+        return (uint16_t)(1440 + t);
+    }
+
+    if (t > 1440) {
+        return (uint16_t)(t - 1440);
+    }
+
+    return (uint16_t)t;
+}
+
+uint16_t calculateSwitchTime(struct IntervalSwitch* sw)
+{
+    switch (sw->type) {
+        case Settings_IntervalSwitchType_Time:
+            return sw->timeHour * 60 + sw->timeMinute;
+
+        case Settings_IntervalSwitchType_Sunrise:
+            return calculateSunEventTime(SunriseSunset_getSunrise(), sw->sunOffset);
+
+        case Settings_IntervaSwitchType_Sunset:
+            return calculateSunEventTime(SunriseSunset_getSunset(), sw->sunOffset);
+    }
+
+    return 0;
+}
+
+static inline bool isSwitchedOnBySchedule()
+{
+    switch (Settings_data.scheduler.type) {
+        case Settings_SchedulerType_Interval: {
+            uint16_t currentTime = Clock_getMinutesSinceMidnight();
+
+            for (uint8_t i = 0; i < Config_Settings_IntervalScheduleCount; ++i) {
+                uint16_t onTime = calculateSwitchTime(
+                    &Settings_data.scheduler.intervals[i].onSwitch
+                );
+
+                uint16_t offTime = calculateSwitchTime(
+                    &Settings_data.scheduler.intervals[i].offSwitch
+                );
+
+                if (onTime <= offTime) {
+                    if (currentTime >= onTime && currentTime < offTime) {
+                        return true;
+                    }
+                } else {
+                    if (currentTime >= onTime || currentTime < offTime) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        case Settings_SchedulerType_Segment: {
+            uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
+                Clock_getMinutesSinceMidnight()
+            );
+
+            return Types_getScheduleSegmentBit(
+                Settings_data.scheduler.segmentData,
+                segmentIndex
+            );
+        }
+
+        default:
+            break;
+    }
+
+    return false;
 }
 
 /*
-    A = stateFromSchedule
+    A = switchedOnBySchedule
     B = runningFromBattery
     C = outputOverride
     output: F = A'B'C + AB'C'
@@ -77,17 +143,17 @@ static inline bool getStateFromSchedule()
     1	1	1	0
  */
 static bool calculateOutputState(
-    const bool stateFromSchedule,
+    const bool switchedOnBySchedule,
     const bool runningFromBattery,
     const bool outputOverride
 ) {
     return
-        (!stateFromSchedule && !runningFromBattery && outputOverride)
-        || (stateFromSchedule && !runningFromBattery && !outputOverride);
+        (!switchedOnBySchedule && !runningFromBattery && outputOverride)
+        || (switchedOnBySchedule && !runningFromBattery && !outputOverride);
 }
 
 /*
-    A = stateFromSchedule
+    A = switchedOnBySchedule
     B = prevStateFromSchedule
     C = outputOverride
     newOverride: F = A'B'C + ABC
@@ -103,13 +169,13 @@ static bool calculateOutputState(
     1	1	1	1
  */
 static bool calculateOverrideState(
-    const bool stateFromSchedule,
+    const bool switchedOnBySchedule,
     const bool prevStateFromSchedule,
     const bool outputOverride
 ) {
     return
-        (!stateFromSchedule && !prevStateFromSchedule && outputOverride)
-        || (stateFromSchedule && prevStateFromSchedule && outputOverride);
+        (!switchedOnBySchedule && !prevStateFromSchedule && outputOverride)
+        || (switchedOnBySchedule && prevStateFromSchedule && outputOverride);
 }
 
 /*
@@ -151,16 +217,16 @@ void OutputController_toggle()
 
 OutputController_TaskResult OutputController_task()
 {
-    context.stateFromSchedule = getStateFromSchedule();
+    context.switchedOnBySchedule = isSwitchedOnBySchedule();
 
     context.outputOverride = calculateOverrideState(
-        context.stateFromSchedule,
+        context.switchedOnBySchedule,
         context.prevStateFromSchedule,
         context.outputOverride
     );
 
     bool outputState = calculateOutputState(
-        context.stateFromSchedule,
+        context.switchedOnBySchedule,
         System_isRunningFromBackupBattery(),
         context.outputOverride
     );
@@ -172,7 +238,7 @@ OutputController_TaskResult OutputController_task()
     );
 
 #if DEBUG_ENABLE
-    _DebugState.oc_stateFromSchedule = context.stateFromSchedule;
+    _DebugState.oc_switchedOnBySchedule = context.switchedOnBySchedule;
     _DebugState.oc_prevStateFromSchedule = context.prevStateFromSchedule;
     _DebugState.oc_outputOverride = context.outputOverride;
     _DebugState.oc_outputState = outputState;
@@ -181,7 +247,7 @@ OutputController_TaskResult OutputController_task()
 #endif
 
     context.prevOutputState = outputState;
-    context.prevStateFromSchedule = context.stateFromSchedule;
+    context.prevStateFromSchedule = context.switchedOnBySchedule;
     context.forceOutputStateUpdate = 0;
 
     if (updateOutput) {
@@ -201,7 +267,7 @@ OutputController_TaskResult OutputController_task()
 }
 
 /*
-    A = stateFromSchedule
+    A = switchedOnBySchedule
     B = outputOverride
     outputStateOnExtPwr: F = A'B + AB'
 
@@ -214,8 +280,8 @@ OutputController_TaskResult OutputController_task()
 inline bool OutputController_outputEnableTargetState()
 {
     return
-        (!context.stateFromSchedule && context.outputOverride)
-        || (context.stateFromSchedule && !context.outputOverride);
+        (!context.switchedOnBySchedule && context.outputOverride)
+        || (context.switchedOnBySchedule && !context.outputOverride);
 }
 
 inline bool OutputController_isOutputEnabled()

@@ -61,4 +61,7 @@ uint16_t SunriseSunset_calculate(
 );
 #endif
 
+uint16_t SunriseSunset_getSunrise(void);
+uint16_t SunriseSunset_getSunset(void);
+
 void SunriseSunset_update(void);

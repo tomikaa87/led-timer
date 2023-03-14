@@ -179,7 +179,7 @@ void UI_updateDebugDisplay()
         ;
 
     testData[1] =
-        (_DebugState.oc_stateFromSchedule           ? (1 << 0) : 0)
+        (_DebugState.oc_switchedOnBySchedule        ? (1 << 0) : 0)
         | (_DebugState.oc_prevStateFromSchedule     ? (1 << 1) : 0)
         | (_DebugState.oc_outputOverride            ? (1 << 2) : 0)
         | (_DebugState.oc_outputState               ? (1 << 3) : 0)

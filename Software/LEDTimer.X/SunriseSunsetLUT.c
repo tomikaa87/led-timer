@@ -3,7 +3,7 @@
 #include <stdint.h>
 // Sunrise-sunset LUT for latitude=47.497905004563854, longitude=19.04026815086008.
 // Made by SunriseSunsetLUTGenerator.py.
-// First value is the sunrise, second is the sunset, both measured in minute from midnight.
+// First value is the sunrise, second is the sunset, both measured in minutes from midnight.
 // During non-leap years, February 29th (index=59) must be skipped, all subsequent indices must be offset by 1.
 const uint16_t SunriseSunsetLUT[366][2] = {
     /* Day 001 */ { 0x0187, 0x0386 }, /* Day 002 */ { 0x0187, 0x0387 },

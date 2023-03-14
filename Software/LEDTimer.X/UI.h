@@ -32,7 +32,7 @@ typedef volatile struct
     uint8_t updateValue;
     uint8_t heavyTaskUpdateValue;
 
-    uint8_t oc_stateFromSchedule : 1;
+    uint8_t oc_switchedOnBySchedule : 1;
     uint8_t oc_prevStateFromSchedule : 1;
     uint8_t oc_outputOverride : 1;
     uint8_t oc_outputState : 1;
