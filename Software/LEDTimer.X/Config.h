@@ -31,6 +31,7 @@
  * Settings
  */
 #define Config_Settings_DataBaseAddress                     (0)
+#define Config_Settings_IntervalScheduleCount               (5)
 
 /**
  * System

@@ -1,3 +1,5 @@
+#if SUNRISE_SUNSET_USE_LUT
+
 #include <stdint.h>
 // Sunrise-sunset LUT for latitude=47.497905004563854, longitude=19.04026815086008.
 // Made by SunriseSunsetLUTGenerator.py.
@@ -188,3 +190,5 @@ const uint16_t SunriseSunsetLUT[366][2] = {
     /* Day 363 */ { 0x0187, 0x0383 }, /* Day 364 */ { 0x0187, 0x0384 },
     /* Day 365 */ { 0x0187, 0x0385 }, /* Day 366 */ { 0x0187, 0x0386 }
 };
+
+#endif

@@ -18,6 +18,7 @@
     Created on 2023-01-31
 */
 
+#include "Config.h"
 #include "Graphics.h"
 #include "Keypad.h"
 #include "SettingsScreen_Scheduler.h"
@@ -30,10 +31,12 @@ static struct SettingScreen_Scheduler_Context {
     struct Scheduler* settings;
     uint8_t selection : 3;
     uint8_t schedulerTypeChanged : 1;
-    uint8_t onTriggerChanged : 1;
-    uint8_t offTriggerChanged : 1;
+    uint8_t onSwitchChanged : 1;
+    uint8_t offSwitchChanged : 1;
     uint8_t selectionChanged : 1;
-    uint8_t reserved : 1;
+    uint8_t intervalIndexChanged : 1;
+    uint8_t intervalIndex : 3;
+    uint8_t reserved : 5;
 } context;
 
 void SettingsScreen_Scheduler_init(struct Scheduler* settings)
@@ -49,8 +52,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_AdjustIcon);
     }
 
-    static const char* SchedulerTypes[] = { "SEGMENT", "SIMPLE", "OFF" };
-    static const char* TriggerTypes[] = { "TIME", "SUNRISE", "SUNSET" };
+    static const char* SchedulerTypes[] = { "INTERVAL", "SEGMENT", "OFF" };
+    static const char* SwitchTypes[] = { "TIME", "SUNRISE", "SUNSET" };
 
     #define InvertForSelectionIndex(_Index) (\
         context.selection == _Index \
@@ -72,20 +75,24 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         SSD1306_fillArea(0, 1, 127, 6, SSD1306_COLOR_BLACK);
 
         Text_draw("TYPE:", 1, 0, 0, false);
+
+        // Trigger update of all fields
+        context.schedulerTypeChanged = true;
+        context.onSwitchChanged = true;
+        context.offSwitchChanged = true;
+        context.selectionChanged = true;
+        context.intervalIndexChanged = true;
     }
 
-    if (redraw || context.schedulerTypeChanged) {
+    if (context.schedulerTypeChanged) {
         // Size the background fill for the longest text (+1 because of the inverted text)
-        SSD1306_fillArea(PositionAfter("TYPE:"), 1, CalculateTextWidth("SEGMENT") + 1, 1, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(CalculateTextWidth("TYPE:"), 1, CalculateTextWidth("INTERVAL") + 1, 1, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(CalculateTextWidth("SCHEDULE:"), 2, 127 - CalculateTextWidth("SCHEDULE:"), 1, SSD1306_COLOR_BLACK);
         // Clear the background of the contents
-        SSD1306_fillArea(0, 2, 127, 5, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(0, 3, 127, 4, SSD1306_COLOR_BLACK);
     }
 
-    if (
-        redraw
-        || context.schedulerTypeChanged
-        || context.selectionChanged
-    ) {
+    if (context.schedulerTypeChanged || context.selectionChanged) {
         // Scheduler type
         Text_draw(
             SchedulerTypes[context.settings->type],
@@ -96,11 +103,25 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         );
     }
 
+    if (context.settings->type == Settings_SchedulerType_Interval) {
+        if (context.schedulerTypeChanged) {
+            // Interval scheduler program index name
+            LeftText("SCHEDULE:", 2);
+        }
+
+        if (context.intervalIndexChanged || context.selectionChanged) {
+            // Interval scheduler program index
+            char s[2];
+            sprintf(s, "%u", context.intervalIndex + 1);
+            Text_draw(s, 2, PositionAfter("SCHEDULE:"), 0, InvertForSelectionIndex(1));
+        }
+    }
+
     if (
-        redraw
-        || context.schedulerTypeChanged
-        || context.onTriggerChanged
-        || context.offTriggerChanged
+        context.schedulerTypeChanged
+        || context.onSwitchChanged
+        || context.offSwitchChanged
+        || context.intervalIndexChanged
     ) {
         // Draw the fixed labels for the current scheduler type
         switch (context.settings->type) {
@@ -109,15 +130,15 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 CenterText("ON SGMT. SCHD. SCREEN", 5);
                 break;
 
-            case Settings_SchedulerType_Simple:
+            case Settings_SchedulerType_Interval:
                 // Switch on schedule label
                 LeftText("ON:", 3);
                 // Switch off schedule label
                 LeftText("OFF:", 5);
 
-                switch (context.settings->onTrigger.type) {
-                    case Settings_TriggerType_Sunrise:
-                    case Settings_TriggerType_Sunset: {
+                switch (context.settings->intervals[context.intervalIndex].onSwitch.type) {
+                    case Settings_IntervalSwitchType_Sunrise:
+                    case Settings_IntervaSwitchType_Sunset: {
                         // Switch on schedule setting label
                         uint8_t x = LeftText("OFFSET:", 4);
                         SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -126,7 +147,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         break;
                     }
 
-                    case Settings_TriggerType_Time: {
+                    case Settings_IntervalSwitchType_Time: {
                         // Switch on time setting label
                         uint8_t x = LeftText("TIME:", 4);
                         SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -136,9 +157,9 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     }
                 }
 
-                switch (context.settings->offTrigger.type) {
-                    case Settings_TriggerType_Sunrise:
-                    case Settings_TriggerType_Sunset: {
+                switch (context.settings->intervals[context.intervalIndex].offSwitch.type) {
+                    case Settings_IntervalSwitchType_Sunrise:
+                    case Settings_IntervaSwitchType_Sunset: {
                         // Switch off schedule setting label
                         uint8_t x = LeftText("OFFSET:", 6);
                         SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -147,7 +168,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                         break;
                     }
 
-                    case Settings_TriggerType_Time: {
+                    case Settings_IntervalSwitchType_Time: {
                         // Switch off time setting label
                         uint8_t x = LeftText("TIME:", 6);
                         SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -170,17 +191,16 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             break;
         }
 
-        case Settings_SchedulerType_Simple: {
+        case Settings_SchedulerType_Interval: {
             // Switch on schedule type
             if (
-                redraw
-                || context.onTriggerChanged
+                context.onSwitchChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
             ) {
                 uint8_t x = Text_draw(
-                    TriggerTypes[context.settings->onTrigger.type],
-                    3, PositionAfter("ON:"), 0, InvertForSelectionIndex(1)
+                    SwitchTypes[context.settings->intervals[context.intervalIndex].onSwitch.type],
+                    3, PositionAfter("ON:"), 0, InvertForSelectionIndex(2)
                 );
                 // Clean the background after the text
                 SSD1306_fillArea(x, 3, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -188,63 +208,62 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
             // Switch off schedule type
             if (
-                redraw
-                || context.offTriggerChanged
+                context.offSwitchChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
             ) {
                 uint8_t x = Text_draw(
-                    TriggerTypes[context.settings->offTrigger.type],
-                    5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(4)
+                    SwitchTypes[context.settings->intervals[context.intervalIndex].offSwitch.type],
+                    5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(5)
                 );
                 // Clean the background after the text
                 SSD1306_fillArea(x, 5, 127 - x, 1, SSD1306_COLOR_BLACK);
             }
 
-            switch (context.settings->onTrigger.type) {
-                case Settings_TriggerType_Sunrise:
-                case Settings_TriggerType_Sunset: {
+            switch (context.settings->intervals[context.intervalIndex].onSwitch.type) {
+                case Settings_IntervalSwitchType_Sunrise:
+                case Settings_IntervaSwitchType_Sunset: {
                     // Offset value label
                     char s[4];
-                    sprintf(s, "%+3.2d", context.settings->onTrigger.sunOffset);
-                    Text_draw(s, 4, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(2));
+                    sprintf(s, "%+3.2d", context.settings->intervals[context.intervalIndex].onSwitch.sunOffset);
+                    Text_draw(s, 4, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(3));
                     break;
                 }
 
-                case Settings_TriggerType_Time: {
+                case Settings_IntervalSwitchType_Time: {
                     char s[3];
 
                     // Time hour value label
-                    sprintf(s, "%2d", context.settings->onTrigger.timeHour);
-                    Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(2));
+                    sprintf(s, "%2d", context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
+                    Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(3));
 
                     // Time minute value label
-                    sprintf(s, "%02d", context.settings->onTrigger.timeMinute);
-                    Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(3));
+                    sprintf(s, "%02d", context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
+                    Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(4));
                     break;
                 }
             }
 
-            switch (context.settings->offTrigger.type) {
-                case Settings_TriggerType_Sunrise:
-                case Settings_TriggerType_Sunset: {
+            switch (context.settings->intervals[context.intervalIndex].offSwitch.type) {
+                case Settings_IntervalSwitchType_Sunrise:
+                case Settings_IntervaSwitchType_Sunset: {
                     // Offset value label
                     char s[4];
-                    sprintf(s, "%+3.2d", context.settings->offTrigger.sunOffset);
-                    Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(5));
+                    sprintf(s, "%+3.2d", context.settings->intervals[context.intervalIndex].offSwitch.sunOffset);
+                    Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(6));
                     break;
                 }
 
-                case Settings_TriggerType_Time: {
+                case Settings_IntervalSwitchType_Time: {
                     char s[3];
 
                     // Time hour value label
-                    sprintf(s, "%2d", context.settings->offTrigger.timeHour);
-                    Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(5));
+                    sprintf(s, "%2d", context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
+                    Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(6));
 
                     // Time minute value label
-                    sprintf(s, "%02d", context.settings->offTrigger.timeMinute);
-                    Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(6));
+                    sprintf(s, "%02d", context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
+                    Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(7));
                     break;
                 }
             }
@@ -256,26 +275,27 @@ void SettingsScreen_Scheduler_update(const bool redraw)
     }
 
     context.schedulerTypeChanged = false;
-    context.onTriggerChanged = false;
-    context.offTriggerChanged = false;
+    context.onSwitchChanged = false;
+    context.offSwitchChanged = false;
     context.selectionChanged = false;
+    context.intervalIndexChanged = false;
 }
 
 /*
     Selection index table:
 
-        Index | 0        | 1       | 2           | 3      | 4        | 5            | 6
-    Mode      |          |         |             |        |          |              |
-    --------------------------------------------------------------------------------------------
-    Time/Time | Type sel | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
-    Sun /Time | Type sel | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
-    Time/Sun  | Type sel | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
-    Sun /Sun  | Type sel | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
+        Index | 0        | 1      | 2       | 3           | 4      | 5        | 6            | 7
+    Mode      |          |        |         |             |        |          |              |
+    ------------------------------------------------------------------------------------------------
+    Time/Time | Type sel | PgmIdx | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
+    Sun /Time | Type sel | PgmIdx | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
+    Time/Sun  | Type sel | PgmIdx | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
+    Sun /Sun  | Type sel | PgmIdx | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
 */
 
 static void selectNextItem()
 {
-    if (context.settings->type != Settings_SchedulerType_Simple) {
+    if (context.settings->type != Settings_SchedulerType_Interval) {
         context.selection = 0;
         return;
     }
@@ -283,24 +303,22 @@ static void selectNextItem()
     ++context.selection;
     context.selectionChanged = true;
 
-    if (context.selection == 3 && context.settings->onTrigger.type != Settings_TriggerType_Time) {
+    if (context.selection == 4 && context.settings->intervals[context.intervalIndex].onSwitch.type != Settings_IntervalSwitchType_Time) {
         ++context.selection;
     }
 
-    if (context.selection == 6 && context.settings->offTrigger.type != Settings_TriggerType_Time) {
+    if (context.selection == 7 && context.settings->intervals[context.intervalIndex].offSwitch.type != Settings_IntervalSwitchType_Time) {
         ++context.selection;
     }
 
-    if (context.selection > 6) {
-        context.selection = 0;
-    }
+    // Automatic roll-over for > 7
 }
 
 static void adjustSelectedItem()
 {
-    #define RotateTriggerType(_Type) { \
-        if (++(_Type) > Settings_TriggerType_Sunset) {\
-            (_Type) = Settings_TriggerType_Time; \
+    #define RotateSwitchType(_Type) { \
+        if (++(_Type) > Settings_IntervaSwitchType_Sunset) {\
+            (_Type) = Settings_IntervalSwitchType_Time; \
         } \
     }
 
@@ -318,7 +336,7 @@ static void adjustSelectedItem()
 
     #define RotateSunOffset(_Value) { \
         (_Value) += 15; \
-        if ((_Value) >= 60) { \
+        if ((_Value) > 60) { \
             (_Value) = -60; \
         } \
     }
@@ -326,60 +344,68 @@ static void adjustSelectedItem()
     switch (context.selection) {
         case 0: {
             if (++(context.settings->type) > Settings_SchedulerType_Off) {
-                context.settings->type = Settings_SchedulerType_Segment;
+                context.settings->type = Settings_SchedulerType_Interval;
             }
             context.schedulerTypeChanged = true;
             break;
         }
 
         case 1: {
-            RotateTriggerType(context.settings->onTrigger.type)
-            context.onTriggerChanged = true;
+            if (++context.intervalIndex >= Config_Settings_IntervalScheduleCount) {
+                context.intervalIndex = 0;
+            }
+            context.intervalIndexChanged = true;
             break;
         }
 
         case 2: {
-            switch (context.settings->onTrigger.type) {
-                case Settings_TriggerType_Time: {
-                    RotateHour(context.settings->onTrigger.timeHour);
+            RotateSwitchType(context.settings->intervals[context.intervalIndex].onSwitch.type);
+            context.onSwitchChanged = true;
+            break;
+        }
+
+        case 3: {
+            switch (context.settings->intervals[context.intervalIndex].onSwitch.type) {
+                case Settings_IntervalSwitchType_Time: {
+                    RotateHour(context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
                     break;
                 }
 
-                case Settings_TriggerType_Sunrise:
-                case Settings_TriggerType_Sunset: {
-                    RotateSunOffset(context.settings->onTrigger.sunOffset);
+                case Settings_IntervalSwitchType_Sunrise:
+                case Settings_IntervaSwitchType_Sunset: {
+                    RotateSunOffset(context.settings->intervals[context.intervalIndex].onSwitch.sunOffset);
                     break;
                 }
 
                 default:
                     break;
-            }
-            break;
-        }
-
-        case 3: {
-            if (context.settings->onTrigger.type == Settings_TriggerType_Time) {
-                RotateMinute(context.settings->onTrigger.timeMinute);
             }
             break;
         }
 
         case 4: {
-            RotateTriggerType(context.settings->offTrigger.type)
-            context.offTriggerChanged = true;
+            if (context.settings->intervals[context.intervalIndex].onSwitch.type == Settings_IntervalSwitchType_Time) {
+                RotateMinute(context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
+            }
             break;
         }
 
         case 5: {
-            switch (context.settings->offTrigger.type) {
-                case Settings_TriggerType_Time: {
-                    RotateHour(context.settings->offTrigger.timeHour);
+            RotateSwitchType(context.settings->intervals[context.intervalIndex].offSwitch.type);
+            context.offSwitchChanged = true;
+            break;
+        }
+
+        case 6: {
+            switch (context.settings->intervals[context.intervalIndex].offSwitch.type) {
+                case Settings_IntervalSwitchType_Time: {
+                    RotateHour(context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
                     break;
                 }
 
-                case Settings_TriggerType_Sunrise:
-                case Settings_TriggerType_Sunset: {
-                    RotateSunOffset(context.settings->offTrigger.sunOffset);
+                case Settings_IntervalSwitchType_Sunrise:
+                case Settings_IntervaSwitchType_Sunset: {
+                    RotateSunOffset(context.settings->intervals[context.intervalIndex].offSwitch.sunOffset);
                     break;
                 }
 
@@ -389,9 +415,9 @@ static void adjustSelectedItem()
             break;
         }
 
-        case 6: {
-            if (context.settings->offTrigger.type == Settings_TriggerType_Time) {
-                RotateMinute(context.settings->offTrigger.timeMinute);
+        case 7: {
+            if (context.settings->intervals[context.intervalIndex].offSwitch.type == Settings_IntervalSwitchType_Time) {
+                RotateMinute(context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
             }
             break;
         }

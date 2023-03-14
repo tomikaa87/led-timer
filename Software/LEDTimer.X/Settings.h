@@ -28,17 +28,17 @@
 
 typedef enum
 {
+    Settings_SchedulerType_Interval,
     Settings_SchedulerType_Segment,
-    Settings_SchedulerType_Simple,
     Settings_SchedulerType_Off
 } Settings_SchedulerType;
 
 typedef enum
 {
-    Settings_TriggerType_Time,
-    Settings_TriggerType_Sunrise,
-    Settings_TriggerType_Sunset
-} Settings_TriggerType;
+    Settings_IntervalSwitchType_Time,
+    Settings_IntervalSwitchType_Sunrise,
+    Settings_IntervaSwitchType_Sunset
+} Settings_IntervalSwitchType;
 
 typedef struct
 {
@@ -48,13 +48,16 @@ typedef struct
 
         ScheduleSegmentData segmentData;
 
-        struct ScheduleTrigger
+        struct IntervalScheduler
         {
-            Settings_TriggerType type;
-            int8_t sunOffset;
-            uint8_t timeHour;
-            uint8_t timeMinute;
-        } onTrigger, offTrigger;
+            struct IntervalSwitch
+            {
+                Settings_IntervalSwitchType type;
+                int8_t sunOffset;
+                uint8_t timeHour;
+                uint8_t timeMinute;
+            } onSwitch, offSwitch;
+        } intervals[Config_Settings_IntervalScheduleCount];
     } scheduler;
 
     struct Output
