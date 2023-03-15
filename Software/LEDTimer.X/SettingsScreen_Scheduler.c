@@ -64,16 +64,18 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         CalculateTextWidth(_Label) + 5 /* space */ \
     )
 
+#if 0
     // Debug: selection index
     {
         char s[3];
         sprintf(s, "%02u", context.selection);
-        Text_draw(s, 1, 127 - CalculateTextWidth("00"), 0, false);
+        Text_draw(s, 1, 128 - CalculateTextWidth("00"), 0, false);
     }
+#endif
 
     // Draw the fixed labels
     if (redraw) {
-        SSD1306_fillArea(0, 1, 127, 6, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(0, 1, 128, 6, SSD1306_COLOR_BLACK);
 
         Text_draw("TYPE:", 1, 0, 0, false);
 
@@ -88,10 +90,9 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
     if (context.schedulerTypeChanged) {
         // Size the background fill for the longest text (+1 because of the inverted text)
-        SSD1306_fillArea(CalculateTextWidth("TYPE:"), 1, CalculateTextWidth("INTERVAL") + 1, 1, SSD1306_COLOR_BLACK);
-        SSD1306_fillArea(CalculateTextWidth("SCHEDULE:"), 2, 127 - CalculateTextWidth("SCHEDULE:"), 1, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(PositionAfter("TYPE:"), 1, CalculateTextWidth("INTERVAL") + 1, 1, SSD1306_COLOR_BLACK);
         // Clear the background of the contents
-        SSD1306_fillArea(0, 3, 127, 4, SSD1306_COLOR_BLACK);
+        SSD1306_fillArea(0, 2, 128, 5, SSD1306_COLOR_BLACK);
     }
 
     if (context.schedulerTypeChanged || context.selectionChanged) {
@@ -113,14 +114,14 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             Text_draw("ACTIVE:", 2, PositionAfter("SCHEDULE: x"), 0, false);
         }
 
-        if (context.intervalIndexChanged || context.selectionChanged) {
+        if (context.schedulerTypeChanged || context.intervalIndexChanged || context.selectionChanged) {
             // Interval scheduler program index
             char s[2];
             sprintf(s, "%u", context.intervalIndex + 1);
             Text_draw(s, 2, PositionAfter("SCHEDULE:"), 0, InvertForSelectionIndex(1));
         }
 
-        if (context.activeStateChanged || context.selectionChanged) {
+        if (context.schedulerTypeChanged || context.activeStateChanged || context.selectionChanged) {
             // Interval active state value
             Text_draw(
                 context.settings->intervals[context.intervalIndex].active ? "1" : "0",
@@ -141,8 +142,8 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         // Draw the fixed labels for the current scheduler type
         switch (context.settings->type) {
             case Settings_SchedulerType_Segment:
-                CenterText("CHANGE SETTINGS", 4);
-                CenterText("ON SGMT. SCHD. SCREEN", 5);
+                CenterText("CHANGE SETTINGS", 3);
+                CenterText("ON SGMT. SCHD. SCREEN", 4);
                 break;
 
             case Settings_SchedulerType_Interval:
@@ -156,7 +157,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     case Settings_IntervaSwitchType_Sunset: {
                         // Switch on schedule setting label
                         uint8_t x = LeftText("OFFSET:", 4);
-                        SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
+                        SSD1306_fillArea(x, 4, 128 - x, 1, SSD1306_COLOR_BLACK);
                         // Unit label
                         Text_draw("MIN", 4, PositionAfter("OFFSET: xxx"), 0, false);
                         break;
@@ -165,7 +166,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     case Settings_IntervalSwitchType_Time: {
                         // Switch on time setting label
                         uint8_t x = LeftText("TIME:", 4);
-                        SSD1306_fillArea(x, 4, 127 - x, 1, SSD1306_COLOR_BLACK);
+                        SSD1306_fillArea(x, 4, 128 - x, 1, SSD1306_COLOR_BLACK);
                         // Time hour-minute separator
                         Text_draw(":", 4, CalculateTextWidth("TIME: xx"), 0, false);
                         break;
@@ -177,7 +178,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     case Settings_IntervaSwitchType_Sunset: {
                         // Switch off schedule setting label
                         uint8_t x = LeftText("OFFSET:", 6);
-                        SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
+                        SSD1306_fillArea(x, 6, 128 - x, 1, SSD1306_COLOR_BLACK);
                         // Unit label
                         Text_draw("MIN", 6, PositionAfter("OFFSET: xxx"), 0, false);
                         break;
@@ -186,7 +187,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     case Settings_IntervalSwitchType_Time: {
                         // Switch off time setting label
                         uint8_t x = LeftText("TIME:", 6);
-                        SSD1306_fillArea(x, 6, 127 - x, 1, SSD1306_COLOR_BLACK);
+                        SSD1306_fillArea(x, 6, 128 - x, 1, SSD1306_COLOR_BLACK);
                         // Time hour-minute separator
                         Text_draw(":", 6, CalculateTextWidth("TIME: xx"), 0, false);
                         break;
@@ -218,7 +219,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     3, PositionAfter("ON:"), 0, InvertForSelectionIndex(3)
                 );
                 // Clean the background after the text
-                SSD1306_fillArea(x, 3, 127 - x, 1, SSD1306_COLOR_BLACK);
+                SSD1306_fillArea(x, 3, 128 - x, 1, SSD1306_COLOR_BLACK);
             }
 
             // Switch off schedule type
@@ -232,7 +233,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(6)
                 );
                 // Clean the background after the text
-                SSD1306_fillArea(x, 5, 127 - x, 1, SSD1306_COLOR_BLACK);
+                SSD1306_fillArea(x, 5, 128 - x, 1, SSD1306_COLOR_BLACK);
             }
 
             switch (context.settings->intervals[context.intervalIndex].onSwitch.type) {
