@@ -41,14 +41,6 @@ static struct MainScreenContext {
 
 inline static void drawOutputToggleKeyHelp()
 {
-    static const uint8_t MiniBulbIcon[] = {
-        0b00011110,
-        0b11100001,
-        0b10111001,
-        0b11100001,
-        0b00011110
-    };
-
     static const uint8_t SwitchOffStateIcon[] = {
         0b00111100,
         0b01111110,
@@ -96,10 +88,10 @@ inline static void drawOutputToggleKeyHelp()
     };
 
     static const uint8_t width =
-        sizeof(MiniBulbIcon)
+        sizeof(Graphics_MiniBulbIcon)
         + sizeof(SwitchOffStateIcon);
 
-    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - width / 2, 7, 0);
+    Graphics_drawBitmap(Graphics_MiniBulbIcon, 5, 64 - width / 2, 7, 0);
 
     Graphics_drawBitmap(
         OutputController_outputEnableTargetState()

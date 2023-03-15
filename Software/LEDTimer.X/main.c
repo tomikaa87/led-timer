@@ -123,20 +123,12 @@ inline static void showStartupScreen()
 {
     SSD1306_clear();
 
-    static const uint8_t MiniBulbIcon[] = {
-        0b00011110,
-        0b11100001,
-        0b10111001,
-        0b11100001,
-        0b00011110
-    };
-
     static const char Title[] = "LED TIMER";
     static const char GitHub[] = "GITHUB.COM/TOMIKAA87";
 
     uint8_t iconPos = 64 - (CalculateTextWidth(Title) + 5 + 5) / 2;
 
-    Graphics_drawBitmap(MiniBulbIcon, 5, iconPos, 1, 0);
+    Graphics_drawBitmap(Graphics_MiniBulbIcon, 5, iconPos, 1, 0);
     Text_draw(Title, 1, iconPos + 10, 0, false);
 
     static const char FirmwareVersion[] = "V" Config_FirmwareVersion;

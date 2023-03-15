@@ -79,6 +79,9 @@ extern const uint8_t Graphics_ClearIcon[Graphics_ClearIconWidth];
 #define Graphics_SunOnTheHorizonIconWidth           11
 extern const uint8_t Graphics_SunOnTheHorizonIcon[Graphics_SunOnTheHorizonIconWidth];
 
+#define Graphics_MiniBulIconWidth                   5
+extern const uint8_t Graphics_MiniBulbIcon[Graphics_MiniBulIconWidth];
+
 enum {
     GRAPHICS_DRAW_INVERT =  SSD1306_SEND_INVERT,
     GRAPHICS_DRAW_FLIPX =   SSD1306_SEND_FLIPX,

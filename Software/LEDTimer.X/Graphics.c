@@ -245,6 +245,14 @@ const uint8_t Graphics_SunOnTheHorizonIcon[Graphics_SunOnTheHorizonIconWidth] = 
     0b10100000
 };
 
+const uint8_t Graphics_MiniBulbIcon[Graphics_MiniBulIconWidth] = {
+    0b00011110,
+    0b11100001,
+    0b10111001,
+    0b11100001,
+    0b00011110
+};
+
 void Graphics_drawBitmap(
     const uint8_t* const bitmap,
     const uint8_t width,
