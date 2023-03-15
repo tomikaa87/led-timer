@@ -64,9 +64,6 @@ extern const uint8_t Graphics_SelectIcon[Graphics_SelectIconWidth];
 #define Graphics_HeaderLeftCapIconWidth             7
 extern const uint8_t Graphics_HeaderLeftCapIcon[Graphics_HeaderLeftCapIconWidth];
 
-#define Graphics_HeaderRightCapIconWidth            7
-extern const uint8_t Graphics_HeaderRightCapIcon[Graphics_HeaderRightCapIconWidth];
-
 #define Graphics_AdjustIconWidth                    12
 extern const uint8_t Graphics_AdjustIcon[Graphics_AdjustIconWidth];
 
@@ -177,5 +174,5 @@ void Graphics_drawScheduleSegmentIndicator(
     SSD1306_sendData(Graphics_HeaderLeftCapIcon, sizeof(Graphics_HeaderLeftCapIcon)); \
     _Pos = Text_draw(_Text, 0, _Pos + sizeof(Graphics_HeaderLeftCapIcon) + 2, 0, false); \
     SSD1306_setStartColumn(_Pos + 1); \
-    SSD1306_sendData(Graphics_HeaderRightCapIcon, sizeof(Graphics_HeaderRightCapIcon)); \
+    SSD1306_sendData2(Graphics_HeaderLeftCapIcon, sizeof(Graphics_HeaderLeftCapIcon), SSD1306_SEND_FLIPX | SSD1306_SEND_FLIPY | SSD1306_SEND_BITSHIFT(1) | SSD1306_SEND_BITSHIFT_REVERSE); \
 }

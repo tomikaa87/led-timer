@@ -106,9 +106,10 @@ typedef enum {
 } SSD1306_Color;
 
 enum {
-    SSD1306_SEND_INVERT =   (1 << 0),
-    SSD1306_SEND_FLIPX =    (1 << 1),
-    SSD1306_SEND_FLIPY =    (1 << 2)
+    SSD1306_SEND_INVERT =           (1 << 0),
+    SSD1306_SEND_FLIPX =            (1 << 1),
+    SSD1306_SEND_FLIPY =            (1 << 2),
+    SSD1306_SEND_BITSHIFT_REVERSE = (1 << 6)
 };
 
 #define SSD1306_SEND_BITSHIFT(_N) (uint8_t)(((_N) & 0b111u) << 3)

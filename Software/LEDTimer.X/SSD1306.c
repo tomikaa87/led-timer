@@ -343,7 +343,11 @@ void SSD1306_sendData2(
         }
 
         if (bitShift) {
-            byte <<= bitShift;
+            if (flags & SSD1306_SEND_BITSHIFT_REVERSE) {
+                byte >>= bitShift;
+            } else {
+                byte <<= bitShift;
+            }
         }
 
         if (flags & SSD1306_SEND_INVERT) {

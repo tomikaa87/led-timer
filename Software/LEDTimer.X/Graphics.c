@@ -184,16 +184,6 @@ const uint8_t Graphics_HeaderLeftCapIcon[Graphics_HeaderLeftCapIconWidth] = {
     0b01010101
 };
 
-const uint8_t Graphics_HeaderRightCapIcon[Graphics_HeaderRightCapIconWidth] = {
-    0b01010101,
-    0b00101010,
-    0b00010101,
-    0b00001010,
-    0b00000101,
-    0b00000010,
-    0b00000001
-};
-
 const uint8_t Graphics_AdjustIcon[Graphics_AdjustIconWidth] = {
     0b00111000,
     0b01000100,
