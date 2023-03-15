@@ -278,7 +278,7 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.375"/>
       </PICkit3PlatformTool>
-      <item path="SunsetSunrise.c" ex="false" overriding="true">
+      <item path="SunsetSunrise.c" ex="false" overriding="false">
         <HI-TECH-COMP>
           <property key="additional-warnings" value="true"/>
           <property key="asmlist" value="true"/>
@@ -607,8 +607,8 @@
         <property key="optimization-debug" value="false"/>
         <property key="optimization-invariant-enable" value="false"/>
         <property key="optimization-invariant-value" value="16"/>
-        <property key="optimization-level" value="-O3"/>
-        <property key="optimization-speed" value="true"/>
+        <property key="optimization-level" value="-Os"/>
+        <property key="optimization-speed" value="false"/>
         <property key="optimization-stable-enable" value="false"/>
         <property key="preprocess-assembler" value="true"/>
         <property key="short-enums" value="true"/>
@@ -711,7 +711,7 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.375"/>
       </PICkit3PlatformTool>
-      <item path="SunsetSunrise.c" ex="false" overriding="true">
+      <item path="SunsetSunrise.c" ex="false" overriding="false">
         <HI-TECH-COMP>
           <property key="additional-warnings" value="true"/>
           <property key="asmlist" value="true"/>
