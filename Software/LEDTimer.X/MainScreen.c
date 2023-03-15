@@ -118,6 +118,7 @@ inline static void drawKeypadHelpBar()
 
     Graphics_DrawKeypadHelpBarSeparators();
 
+#if 0
     static const uint8_t SettingsIcon[] = {
         0b01001001,
         0b01001001,
@@ -128,6 +129,9 @@ inline static void drawKeypadHelpBar()
     };
 
     Graphics_drawBitmap(SettingsIcon, 6, 1, 7, 0);
+#else
+    SSD1306_fillAreaPattern(1, 7, 6, 1, 0b01001001);
+#endif
 
     drawOutputToggleKeyHelp();
 }
