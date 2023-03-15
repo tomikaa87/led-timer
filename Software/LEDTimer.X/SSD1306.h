@@ -105,6 +105,14 @@ typedef enum {
     SSD1306_COLOR_WHITE
 } SSD1306_Color;
 
+enum {
+    SSD1306_SEND_INVERT =   (1 << 0),
+    SSD1306_SEND_FLIPX =    (1 << 1),
+    SSD1306_SEND_FLIPY =    (1 << 2)
+};
+
+#define SSD1306_SEND_BITSHIFT(_N) (uint8_t)(((_N) & 0b111u) << 3)
+
 // High level API
 void SSD1306_init(void);
 void SSD1306_setInvertEnabled(bool enabled);
@@ -120,9 +128,13 @@ void SSD1306_fillAreaPattern(uint8_t x, uint8_t startPage, uint8_t width, uint8_
 void SSD1306_sendCommand(SSD1306_Command cmd);
 void SSD1306_sendData(
     const uint8_t* data,
+    uint8_t length
+);
+
+void SSD1306_sendData2(
+    const uint8_t* data,
     uint8_t length,
-    uint8_t bitShift,
-    bool invert
+    uint8_t flags
 );
 
 void SSD1306_enablePageAddressing(void);

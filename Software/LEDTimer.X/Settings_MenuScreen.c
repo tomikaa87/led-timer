@@ -105,7 +105,7 @@ void Settings_MenuScreen_update(const bool redraw)
 {
     if (redraw) {
         Graphics_DrawScreenTitle("SETTINGS");
-        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_SelectIcon);
+        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_ArrowDownIcon, Graphics_SelectIcon);
 
         drawMenuItems();
         drawPositionIndicator();

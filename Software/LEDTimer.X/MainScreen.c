@@ -99,7 +99,7 @@ inline static void drawOutputToggleKeyHelp()
         sizeof(MiniBulbIcon)
         + sizeof(SwitchOffStateIcon);
 
-    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - width / 2, 7, false);
+    Graphics_drawBitmap(MiniBulbIcon, 5, 64 - width / 2, 7, 0);
 
     Graphics_drawBitmap(
         OutputController_outputEnableTargetState()
@@ -108,7 +108,7 @@ inline static void drawOutputToggleKeyHelp()
         sizeof(SwitchOnStateIcon),
         64 - width / 2 + 7,
         7,
-        false
+        0
     );
 }
 
@@ -127,7 +127,7 @@ inline static void drawKeypadHelpBar()
         0b01001001,
     };
 
-    Graphics_drawBitmap(SettingsIcon, 6, 1, 7, false);
+    Graphics_drawBitmap(SettingsIcon, 6, 1, 7, 0);
 
     drawOutputToggleKeyHelp();
 }
@@ -146,7 +146,7 @@ inline static void drawClock()
 
 static inline void drawScheduleBar()
 {
-    Graphics_drawScheduleBar(0, Settings_data.scheduler.segmentData, false, true);
+    Graphics_drawScheduleBar(0, Settings_data.scheduler.segmentData, GRAPHICS_DRAW_SCHEDULE_BAR_FLIP);
 }
 
 static inline void drawScheduleSegmentIndicator(const bool redraw)
@@ -157,7 +157,7 @@ static inline void drawScheduleSegmentIndicator(const bool redraw)
 
     if (context.scheduleSegmentIndex != segmentIndex || redraw) {
         context.scheduleSegmentIndex = segmentIndex;
-        Graphics_drawScheduleSegmentIndicator(2, segmentIndex, false, true);
+        Graphics_drawScheduleSegmentIndicator(2, segmentIndex, GRAPHICS_DRAW_SCHEDULE_BAR_FLIP);
     }
 }
 
@@ -214,7 +214,7 @@ inline static void drawPowerIndicator()
             Graphics_BatteryIndicatorCapWidth,
             x,
             7,
-            false
+            0
         );
 
         x += Graphics_BatteryIndicatorCapWidth;
@@ -225,7 +225,7 @@ inline static void drawPowerIndicator()
                 Graphics_BatteryIndicatorBodyEmptyWidth,
                 x,
                 7,
-                false
+                0
             );
 
             ++x;
@@ -237,7 +237,7 @@ inline static void drawPowerIndicator()
                 Graphics_BatteryIndicatorBodyFullWidth,
                 x,
                 7,
-                false
+                0
             );
 
             ++x;
@@ -248,7 +248,7 @@ inline static void drawPowerIndicator()
             Graphics_BatteryIndicatorEndCapWidth,
             x,
             7,
-            false
+            0
         );
     } else {
         static const uint8_t X = 127 - Graphics_ExternalPowerIndicatorWidth;
@@ -258,7 +258,7 @@ inline static void drawPowerIndicator()
             Graphics_ExternalPowerIndicatorWidth,
             X,
             7,
-            false
+            0
         );
     }
 }

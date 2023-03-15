@@ -143,7 +143,7 @@ const uint8_t Graphics_ExitIcon[Graphics_ExitIconWidth] = {
     0b00010000
 };
 
-const uint8_t Graphics_NextIcon[Graphics_NextIconWidth] = {
+const uint8_t Graphics_ArrowDownIcon[Graphics_ArrowDownIconWidth] = {
     0b00010000,
     0b00110000,
     0b01110000,
@@ -231,12 +231,26 @@ const uint8_t Graphics_ClearIcon[Graphics_ClearIconWidth] = {
     0b11111111
 };
 
+const uint8_t Graphics_SunOnTheHorizonIcon[Graphics_SunOnTheHorizonIconWidth] = {
+    0b10100000,
+    0b10100100,
+    0b10001000,
+    0b11100000,
+    0b10010000,
+    0b10010110,
+    0b10010000,
+    0b11100000,
+    0b10001000,
+    0b10100100,
+    0b10100000
+};
+
 void Graphics_drawBitmap(
     const uint8_t* const bitmap,
     const uint8_t width,
     const uint8_t x,
     const uint8_t page,
-    const bool invert
+    const uint8_t flags
 )
 {
     if (page > SSD1306_PAGE_COUNT || width == 0 || x + width >= SSD1306_LCDWIDTH) {
@@ -246,7 +260,7 @@ void Graphics_drawBitmap(
     SSD1306_enablePageAddressing();
     SSD1306_setPage(page);
     SSD1306_setStartColumn(x);
-    SSD1306_sendData(bitmap, width, 0, invert);
+    SSD1306_sendData2(bitmap, width, flags);
 }
 
 void Graphics_drawMultipageBitmap(
@@ -255,7 +269,7 @@ void Graphics_drawMultipageBitmap(
     const uint8_t pageCount,
     const uint8_t x,
     uint8_t startPage,
-    const bool invert
+    const uint8_t flags
 )
 {
     if (startPage + pageCount > SSD1306_PAGE_COUNT) {
@@ -263,7 +277,7 @@ void Graphics_drawMultipageBitmap(
     }
 
     for (uint8_t i = pageCount; i > 0; --i) {
-        Graphics_drawBitmap(bitmap, width, x, startPage++, invert);
+        Graphics_drawBitmap(bitmap, width, x, startPage++, flags);
         bitmap += width;
     }
 }
@@ -271,10 +285,10 @@ void Graphics_drawMultipageBitmap(
 void Graphics_drawScheduleBar(
     const uint8_t line,
     const ScheduleSegmentData segmentData,
-    const bool invert,
-    const bool flip
+    const uint8_t flags
 )
 {
+    uint8_t flip = flags & GRAPHICS_DRAW_SCHEDULE_BAR_FLIP;
 	uint8_t longTick = flip ? 0b00001111 : 0b11110000;
 	uint8_t shortTick = flip ? 0b00001110 : 0b01110000;
 	uint8_t segmentActiveIndicator = flip ? 0b11101000 : 0b00010111;
@@ -308,7 +322,7 @@ void Graphics_drawScheduleBar(
 				bitmap = segmentInactiveIndicator;
 		}
 
-		SSD1306_sendData(&bitmap, 1, 0, invert);
+		SSD1306_sendData2(&bitmap, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
 
 		if (++tickCounter == 5) {
 			tickCounter = 0;
@@ -330,18 +344,17 @@ void Graphics_drawScheduleBar(
 
     uint8_t textLine = flip ? line : line + 1;
 
-	Text_draw("0", textLine, 1, 1, invert);
-	Text_draw("6", textLine, 31, 1, invert);
-	Text_draw("12", textLine, 58, 1, invert);
-	Text_draw("18", textLine, 88, 1, invert);
-	Text_draw("24", textLine, 115, 1, invert);
+	Text_draw("0", textLine, 1, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("6", textLine, 31, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("12", textLine, 58, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("18", textLine, 88, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("24", textLine, 115, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
 }
 
 void Graphics_drawScheduleSegmentIndicator(
     const uint8_t line,
     const uint8_t segmentIndex,
-    const bool invert,
-    const bool flip
+    const uint8_t flags
 )
 {
 	static const uint8_t SegmentIndicatorBitmap[] = {
@@ -350,14 +363,6 @@ void Graphics_drawScheduleSegmentIndicator(
 		0b01111100,
 		0b00100000,
 		0b00010000
-	};
-
-    static const uint8_t SegmentIndicatorBitmapFlipped[] = {
-		0b00001000,
-		0b00000100,
-		0b00111110,
-		0b00000100,
-		0b00001000
 	};
 
 	uint8_t x = 2; // initial offset from left
@@ -386,10 +391,10 @@ void Graphics_drawScheduleSegmentIndicator(
 	SSD1306_fillArea(0, line, 128, 1, 0);
 
     Graphics_drawBitmap(
-        flip ? SegmentIndicatorBitmapFlipped : SegmentIndicatorBitmap,
+        SegmentIndicatorBitmap,
         sizeof(SegmentIndicatorBitmap),
         x,
         line,
-        invert
+        flags
     );
 }

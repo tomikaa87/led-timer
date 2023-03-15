@@ -1027,12 +1027,17 @@ uint8_t Text_draw(
 {
     uint8_t length = (uint8_t)strlen(s);
 
-    if (length == 0 || line > 7 || x > 127 || yOffset > 7) {
+    if (length == 0 || line > 7 || x > 127) {
         return x;
     }
 
     SSD1306_enablePageAddressing();
     SSD1306_setPage(line);
+
+    uint8_t sendFlags = SSD1306_SEND_BITSHIFT(yOffset);
+    if (invert) {
+        sendFlags |= SSD1306_SEND_INVERT;
+    }
 
     for (uint8_t i = length; i > 0; --i) {
         // Stop if the next character won't fit
@@ -1047,7 +1052,7 @@ uint8_t Text_draw(
         if (c == ' ') {
             for (uint8_t j = ASCIIReduced_SpaceWidth; j > 0; --j) {
                 const uint8_t data = 0;
-                SSD1306_sendData(&data, 1, yOffset, invert);
+                SSD1306_sendData2(&data, 1, sendFlags);
             }
         } else {
             const uint8_t* charData;
@@ -1062,7 +1067,7 @@ uint8_t Text_draw(
             }
 
             // Send data to the display
-            SSD1306_sendData(charData, ASCIIReduced_CharWidth, yOffset, invert);
+            SSD1306_sendData2(charData, ASCIIReduced_CharWidth, sendFlags);
         }
 
         x += ASCIIReduced_CharWidth;
@@ -1070,7 +1075,7 @@ uint8_t Text_draw(
         // Clear the pixels between the characters
         for (uint8_t j = ASCIIReduced_CharSpacing; j > 0; --j) {
             static const uint8_t data = 0;
-            SSD1306_sendData(&data, 1, yOffset, invert);
+            SSD1306_sendData2(&data, 1, sendFlags);
             ++x;
         }
     }
@@ -1088,6 +1093,11 @@ uint8_t Text_draw7Seg(
 
     if (length == 0 || line > (7 - Numbers7Seg_Pages) || x > 127) {
         return x;
+    }
+
+    uint8_t sendFlags = 0;
+    if (invert) {
+        sendFlags |= SSD1306_SEND_INVERT;
     }
 
     SSD1306_enablePageAddressing();
@@ -1108,14 +1118,14 @@ uint8_t Text_draw7Seg(
                 // Cost-efficient dash symbol
                 uint8_t charData = 0b00011100;
                 for (uint8_t j = Numbers7Seg_CharWidth - 5; j > 0; --j) {
-                    SSD1306_sendData(&charData, 1, 0, invert);
+                    SSD1306_sendData2(&charData, 1, sendFlags);
                 }
 
                 x += Numbers7Seg_CharWidth - 5 + Numbers7Seg_CharSpacing;
             } else if (c == '+') {
                 SSD1306_setStartColumn(x);
                 SSD1306_setPage(line + 1);
-                SSD1306_sendData(Plus7Seg, sizeof(Plus7Seg), 0, invert);
+                SSD1306_sendData2(Plus7Seg, sizeof(Plus7Seg), sendFlags);
 
                 x += Plus7Seg_CharWidth + Numbers7Seg_CharSpacing;
             } else {
@@ -1135,7 +1145,7 @@ uint8_t Text_draw7Seg(
                         charData = Colon7Seg[page];
                     }
 
-                    SSD1306_sendData(charData, width, 0, invert);
+                    SSD1306_sendData2(charData, width, sendFlags);
                 }
 
                 x += width;
@@ -1150,7 +1160,7 @@ uint8_t Text_draw7Seg(
                 SSD1306_setStartColumn(x);
 
                 uint8_t charData[Numbers7Seg_CharWidth] = { 0 };
-                SSD1306_sendData(charData, sizeof(charData), 0, invert);
+                SSD1306_sendData2(charData, sizeof(charData), sendFlags);
             }
 
             x += Numbers7Seg_CharWidth;

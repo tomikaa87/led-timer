@@ -60,8 +60,8 @@ void SettingsScreen_SegmentScheduler_update(const bool redraw)
         false
     );
 
-    Graphics_drawScheduleSegmentIndicator(4, context.segmentIndex, false, false);
-    Graphics_drawScheduleBar(5, context.settings->segmentData, false, false);
+    Graphics_drawScheduleSegmentIndicator(4, context.segmentIndex, 0);
+    Graphics_drawScheduleBar(5, context.settings->segmentData, 0);
 }
 
 static void adjustScheduleSegmentAndStepForward(const bool set)

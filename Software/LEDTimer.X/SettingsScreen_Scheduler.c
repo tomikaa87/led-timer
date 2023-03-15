@@ -50,7 +50,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 {
     if (redraw) {
         Graphics_DrawScreenTitle("SCHEDULER");
-        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_NextIcon, Graphics_AdjustIcon);
+        Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_ArrowDownIcon, Graphics_AdjustIcon);
     }
 
     static const char* SchedulerTypes[] = { "INTERVAL", "SEGMENT", "OFF" };

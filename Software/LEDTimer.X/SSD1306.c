@@ -24,7 +24,7 @@ enum
 {
     SSD1306_I2C_ADDRESS = 0x3Cu,
     SSD1306_I2C_DC_FLAG = 0x40u,
-    SSD1306_I2C_CO_FLAG = 0x80u
+    SSD1306_I2C_CO_FLAG = 0x00u
 };
 
 //#define SSD1306_DEBUG
@@ -47,9 +47,9 @@ static inline void i2cWait()
     );
 }
 
-static void i2cTransmit(const uint8_t* data, uint8_t length)
+static void i2cStart(const uint8_t command)
 {
-	// Start
+    // Start
 	i2cWait();
 	SSP1CON2bits.SEN = 1;
 
@@ -57,13 +57,14 @@ static void i2cTransmit(const uint8_t* data, uint8_t length)
 	i2cWait();
 	SSP1BUF = SSD1306_I2C_ADDRESS << 1;
 
-	// Send data
-	while (length-- > 0) {
-		i2cWait();
-		SSP1BUF = *data++;
-	}
+    // Send command / DC flag
+    i2cWait();
+    SSP1BUF = command;
+}
 
-	// Stop
+static void i2cStop()
+{
+    // Stop
 	i2cWait();
 	SSP1CON2bits.PEN = 1;
 }
@@ -232,20 +233,14 @@ void SSD1306_clear()
     SSD1306_sendCommand(1);
 #endif
 
-    for (uint16_t i = SSD1306_SCREEN_BUFFER_SIZE; i > 0; i -= 16) {
-#ifdef SSD1306_DEBUG
-        printf("SSD1306_clear: sending data chunk. i = %u, i, buffer);
-#endif
+    i2cStart(SSD1306_I2C_DC_FLAG);
 
-        uint8_t data[17] = { 0 };
-        data[0] = SSD1306_I2C_DC_FLAG;
-
-        i2cTransmit(data, sizeof(data));
-
-#ifdef SSD1306_DEBUG
-        printf("SSD1306_update: data chunk written\r\n");
-#endif
+    for (uint16_t i = SSD1306_SCREEN_BUFFER_SIZE; i > 0; --i) {
+        i2cWait();
+        SSP1BUF = 0;
     }
+
+    i2cStop();
 
 #ifdef SSD1306_DEBUG
     printf("SSD1306_update: finished\r\n");
@@ -254,27 +249,46 @@ void SSD1306_clear()
 
 void SSD1306_sendCommand(const SSD1306_Command cmd)
 {
-    uint8_t data[2] = { 0, cmd };
+    i2cStart(SSD1306_I2C_CO_FLAG);
 
-    i2cTransmit(data, sizeof(data));
+    i2cWait();
+    SSP1BUF = cmd;
+
+    i2cStop();
 
 #ifdef SSD1306_DEBUG
     printf("SSD1306_sendCommand: %02x. I2C status: %d\r\n", cmd, status);
 #endif
 }
 
+static void sendCommand2(
+    const SSD1306_Command cmd,
+    const uint8_t arg1,
+    const uint8_t arg2
+)
+{
+    i2cStart(SSD1306_I2C_CO_FLAG);
+
+    i2cWait();
+    SSP1BUF = cmd;
+
+    i2cWait();
+    SSP1BUF = arg1;
+
+    i2cWait();
+    SSP1BUF = arg2;
+
+    i2cStop();
+}
+
 void SSD1306_setColumnAddress(const uint8_t start, const uint8_t end)
 {
-    uint8_t data[3] = { SSD1306_CMD_COLUMNADDR, start & 0x7F, end & 0x7F };
-
-    i2cTransmit(data, sizeof(data));
+    sendCommand2(SSD1306_CMD_COLUMNADDR, start & 0x7F, end & 0x7F);
 }
 
 void SSD1306_setPageAddress(const uint8_t start, const uint8_t end)
 {
-    uint8_t data[3] = { SSD1306_CMD_PAGEADDR, start & 0b111, end & 0b111 };
-
-    i2cTransmit(data, sizeof(data));
+    sendCommand2(SSD1306_CMD_PAGEADDR, start & 0b111, end & 0b111);
 }
 
 void SSD1306_setPage(const uint8_t page)
@@ -291,34 +305,56 @@ void SSD1306_setStartColumn(const uint8_t address)
 }
 
 void SSD1306_sendData(
-    const uint8_t* const data,
-    const uint8_t length,
-    uint8_t bitShift,
-    const bool invert
+    const uint8_t* data,
+    const uint8_t length
 )
 {
-    bitShift &= 0b111;
-    uint8_t bytesRemaining = length;
-    uint8_t dataIndex = 0;
-    static const uint8_t chunk_size = 16;
+    SSD1306_sendData2(data, length, 0);
+}
 
-    while (bytesRemaining > 0) {
-        uint8_t count = bytesRemaining >= chunk_size ? chunk_size : bytesRemaining;
-        bytesRemaining -= count;
+void SSD1306_sendData2(
+    const uint8_t* const data,
+    uint8_t length,
+    const uint8_t flags
+)
+{
+    uint8_t bitShift = (flags >> 3) & 0b111;
+    uint8_t dataIndex = (flags & SSD1306_SEND_FLIPY) ? length - 1 : 0;
 
-        uint8_t buffer[17];
-        buffer[0] = SSD1306_I2C_DC_FLAG;
+    i2cStart(SSD1306_I2C_DC_FLAG);
 
-        for (uint8_t i = 1; i <= count; ++i) {
-            uint8_t byte = (uint8_t)(data[dataIndex++] << bitShift);
-            if (invert) {
-                byte = ~byte;
-            }
-            buffer[i] = byte;
+    while (length-- > 0) {
+        uint8_t byte = data[dataIndex];
+
+        if (flags & SSD1306_SEND_FLIPY) {
+            --dataIndex;
+        } else {
+            ++dataIndex;
         }
 
-        i2cTransmit(buffer, count + 1);
+        if (flags & SSD1306_SEND_FLIPX) {
+            uint8_t reverse = 0;
+            for (uint8_t i = 7; i > 0; --i) {
+                reverse |= byte & 1;
+                reverse <<= 1;
+                byte >>= 1;
+            }
+            byte = reverse;
+        }
+
+        if (bitShift) {
+            byte <<= bitShift;
+        }
+
+        if (flags & SSD1306_SEND_INVERT) {
+            byte = ~byte;
+        }
+
+        i2cWait();
+        SSP1BUF = byte;
     }
+
+    i2cStop();
 }
 
 void SSD1306_enablePageAddressing()
@@ -347,10 +383,6 @@ void SSD1306_fillAreaPattern(
 ) {
     SSD1306_enablePageAddressing();
 
-    uint8_t data[2];
-    data[0] = SSD1306_I2C_DC_FLAG;
-    data[1] = pattern;
-
     for (uint8_t i = pages, page = startPage; i > 0; --i, ++page) {
         if (page >= 8) {
             return;
@@ -359,9 +391,14 @@ void SSD1306_fillAreaPattern(
         SSD1306_setPage(page);
         SSD1306_setStartColumn(x);
 
+        i2cStart(SSD1306_I2C_DC_FLAG);
+
         for (uint8_t j = width; j > 0 && x + j < SSD1306_LCDWIDTH; --j) {
-            i2cTransmit(data, sizeof(data));
+            i2cWait();
+            SSP1BUF = pattern;
         }
+
+        i2cStop();
     }
 }
 

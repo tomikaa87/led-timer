@@ -136,7 +136,7 @@ inline static void showStartupScreen()
 
     uint8_t iconPos = 64 - (CalculateTextWidth(Title) + 5 + 5) / 2;
 
-    Graphics_drawBitmap(MiniBulbIcon, 5, iconPos, 1, false);
+    Graphics_drawBitmap(MiniBulbIcon, 5, iconPos, 1, 0);
     Text_draw(Title, 1, iconPos + 10, 0, false);
 
     static const char FirmwareVersion[] = "V" Config_FirmwareVersion;
