@@ -397,7 +397,7 @@ void SSD1306_fillAreaPattern(
 
         i2cStart(SSD1306_I2C_DC_FLAG);
 
-        for (uint8_t j = width; j > 0 && x + j < SSD1306_LCDWIDTH; --j) {
+        for (uint8_t j = width; j > 0 && x + j <= SSD1306_LCDWIDTH; --j) {
             i2cWait();
             SSP1BUF = pattern;
         }

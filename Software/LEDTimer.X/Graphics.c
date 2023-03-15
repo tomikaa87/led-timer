@@ -341,12 +341,13 @@ void Graphics_drawScheduleBar(
 	}
 
     uint8_t textLine = flip ? line : line + 1;
+    uint8_t yOffset = flip ? 1 : 0;
 
-	Text_draw("0", textLine, 1, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
-	Text_draw("6", textLine, 31, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
-	Text_draw("12", textLine, 58, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
-	Text_draw("18", textLine, 88, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
-	Text_draw("24", textLine, 115, 1, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("0", textLine, 1, yOffset, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("6", textLine, 31, yOffset, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("12", textLine, 58, yOffset, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("18", textLine, 88, yOffset, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
+	Text_draw("24", textLine, 115, yOffset, flags & GRAPHICS_DRAW_SCHEDULE_BAR_INVERT);
 }
 
 void Graphics_drawScheduleSegmentIndicator(
