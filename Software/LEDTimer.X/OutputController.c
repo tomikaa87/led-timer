@@ -86,6 +86,10 @@ static inline bool isSwitchedOnBySchedule()
             uint16_t currentTime = Clock_getMinutesSinceMidnight();
 
             for (uint8_t i = 0; i < Config_Settings_IntervalScheduleCount; ++i) {
+                if (!Settings_data.scheduler.intervals[i].active) {
+                    continue;
+                }
+
                 uint16_t onTime = calculateSwitchTime(
                     &Settings_data.scheduler.intervals[i].onSwitch
                 );

@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// Max 3 bits (0..7)
 typedef enum
 {
     Settings_SchedulerType_Interval,
@@ -33,6 +34,7 @@ typedef enum
     Settings_SchedulerType_Off
 } Settings_SchedulerType;
 
+// Max 3 bits (0..7)
 typedef enum
 {
     Settings_IntervalSwitchType_Time,
@@ -44,16 +46,23 @@ typedef struct
 {
     struct Scheduler
     {
-        Settings_SchedulerType type;
+        uint8_t type : 3;               // Settings_SchedulerType
+        uint8_t reserved : 5;
 
         ScheduleSegmentData segmentData;
 
         struct IntervalScheduler
         {
+            uint8_t active : 1;
+            uint8_t reserved : 7;
+
             struct IntervalSwitch
             {
-                Settings_IntervalSwitchType type;
+                uint8_t type : 3;       // Settings_IntervalSwitchType
+                uint8_t reserved : 5;
+
                 int8_t sunOffset;
+
                 uint8_t timeHour;
                 uint8_t timeMinute;
             } onSwitch, offSwitch;

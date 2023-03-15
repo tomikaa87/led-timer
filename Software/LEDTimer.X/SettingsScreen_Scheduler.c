@@ -29,14 +29,15 @@
 
 static struct SettingScreen_Scheduler_Context {
     struct Scheduler* settings;
-    uint8_t selection : 3;
+    uint8_t selection : 4;
     uint8_t schedulerTypeChanged : 1;
     uint8_t onSwitchChanged : 1;
     uint8_t offSwitchChanged : 1;
     uint8_t selectionChanged : 1;
     uint8_t intervalIndexChanged : 1;
+    uint8_t activeStateChanged : 1;
     uint8_t intervalIndex : 3;
-    uint8_t reserved : 5;
+    uint8_t reserved : 3;
 } context;
 
 void SettingsScreen_Scheduler_init(struct Scheduler* settings)
@@ -82,6 +83,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
         context.offSwitchChanged = true;
         context.selectionChanged = true;
         context.intervalIndexChanged = true;
+        context.activeStateChanged = true;
     }
 
     if (context.schedulerTypeChanged) {
@@ -105,8 +107,10 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
     if (context.settings->type == Settings_SchedulerType_Interval) {
         if (context.schedulerTypeChanged) {
-            // Interval scheduler program index name
+            // Interval scheduler program index title
             LeftText("SCHEDULE:", 2);
+            // Interval active state title
+            Text_draw("ACTIVE:", 2, PositionAfter("SCHEDULE: x"), 0, false);
         }
 
         if (context.intervalIndexChanged || context.selectionChanged) {
@@ -114,6 +118,17 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             char s[2];
             sprintf(s, "%u", context.intervalIndex + 1);
             Text_draw(s, 2, PositionAfter("SCHEDULE:"), 0, InvertForSelectionIndex(1));
+        }
+
+        if (context.activeStateChanged || context.selectionChanged) {
+            // Interval active state value
+            Text_draw(
+                context.settings->intervals[context.intervalIndex].active ? "1" : "0",
+                2,
+                PositionAfter("SCHEDULE: x ACTIVE:"),
+                false,
+                InvertForSelectionIndex(2)
+            );
         }
     }
 
@@ -200,7 +215,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             ) {
                 uint8_t x = Text_draw(
                     SwitchTypes[context.settings->intervals[context.intervalIndex].onSwitch.type],
-                    3, PositionAfter("ON:"), 0, InvertForSelectionIndex(2)
+                    3, PositionAfter("ON:"), 0, InvertForSelectionIndex(3)
                 );
                 // Clean the background after the text
                 SSD1306_fillArea(x, 3, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -214,7 +229,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
             ) {
                 uint8_t x = Text_draw(
                     SwitchTypes[context.settings->intervals[context.intervalIndex].offSwitch.type],
-                    5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(5)
+                    5, PositionAfter("OFF:"), 0, InvertForSelectionIndex(6)
                 );
                 // Clean the background after the text
                 SSD1306_fillArea(x, 5, 127 - x, 1, SSD1306_COLOR_BLACK);
@@ -226,7 +241,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Offset value label
                     char s[4];
                     sprintf(s, "%+3.2d", context.settings->intervals[context.intervalIndex].onSwitch.sunOffset);
-                    Text_draw(s, 4, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(3));
+                    Text_draw(s, 4, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(4));
                     break;
                 }
 
@@ -235,11 +250,11 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
                     // Time hour value label
                     sprintf(s, "%2d", context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
-                    Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(3));
+                    Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(4));
 
                     // Time minute value label
                     sprintf(s, "%02d", context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
-                    Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(4));
+                    Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(5));
                     break;
                 }
             }
@@ -250,7 +265,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Offset value label
                     char s[4];
                     sprintf(s, "%+3.2d", context.settings->intervals[context.intervalIndex].offSwitch.sunOffset);
-                    Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(6));
+                    Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(7));
                     break;
                 }
 
@@ -259,11 +274,11 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
                     // Time hour value label
                     sprintf(s, "%2d", context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
-                    Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(6));
+                    Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(7));
 
                     // Time minute value label
                     sprintf(s, "%02d", context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
-                    Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(7));
+                    Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(8));
                     break;
                 }
             }
@@ -284,13 +299,13 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 /*
     Selection index table:
 
-        Index | 0        | 1      | 2       | 3           | 4      | 5        | 6            | 7
-    Mode      |          |        |         |             |        |          |              |
-    ------------------------------------------------------------------------------------------------
-    Time/Time | Type sel | PgmIdx | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
-    Sun /Time | Type sel | PgmIdx | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
-    Time/Sun  | Type sel | PgmIdx | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
-    Sun /Sun  | Type sel | PgmIdx | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
+        Index | 0        | 1      | 2      | 3       | 4           | 5      | 6        | 7            | 8
+    Mode      |          |        |        |         |             |        |          |              |
+    ----------|----------|--------|--------|---------|-------------|--------|----------|--------------|--------
+    Time/Time | Type sel | PgmIdx | Active | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
+    Sun /Time | Type sel | PgmIdx | Active | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
+    Time/Sun  | Type sel | PgmIdx | Active | ON trig | ON hour     | ON min | OFF trig | OFF hour     | OFF min
+    Sun /Sun  | Type sel | PgmIdx | Active | ON trig | ON Sun offs | -      | OFF trig | OFF Sun offs | -
 */
 
 static void selectNextItem()
@@ -303,15 +318,17 @@ static void selectNextItem()
     ++context.selection;
     context.selectionChanged = true;
 
-    if (context.selection == 4 && context.settings->intervals[context.intervalIndex].onSwitch.type != Settings_IntervalSwitchType_Time) {
+    if (context.selection == 5 && context.settings->intervals[context.intervalIndex].onSwitch.type != Settings_IntervalSwitchType_Time) {
         ++context.selection;
     }
 
-    if (context.selection == 7 && context.settings->intervals[context.intervalIndex].offSwitch.type != Settings_IntervalSwitchType_Time) {
+    if (context.selection == 8 && context.settings->intervals[context.intervalIndex].offSwitch.type != Settings_IntervalSwitchType_Time) {
         ++context.selection;
     }
 
-    // Automatic roll-over for > 7
+    if (context.selection > 8) {
+        context.selection = 0;
+    }
 }
 
 static void adjustSelectedItem()
@@ -359,12 +376,18 @@ static void adjustSelectedItem()
         }
 
         case 2: {
+            ++context.settings->intervals[context.intervalIndex].active;
+            context.activeStateChanged = true;
+            break;
+        }
+
+        case 3: {
             RotateSwitchType(context.settings->intervals[context.intervalIndex].onSwitch.type);
             context.onSwitchChanged = true;
             break;
         }
 
-        case 3: {
+        case 4: {
             switch (context.settings->intervals[context.intervalIndex].onSwitch.type) {
                 case Settings_IntervalSwitchType_Time: {
                     RotateHour(context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
@@ -383,20 +406,20 @@ static void adjustSelectedItem()
             break;
         }
 
-        case 4: {
+        case 5: {
             if (context.settings->intervals[context.intervalIndex].onSwitch.type == Settings_IntervalSwitchType_Time) {
                 RotateMinute(context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
             }
             break;
         }
 
-        case 5: {
+        case 6: {
             RotateSwitchType(context.settings->intervals[context.intervalIndex].offSwitch.type);
             context.offSwitchChanged = true;
             break;
         }
 
-        case 6: {
+        case 7: {
             switch (context.settings->intervals[context.intervalIndex].offSwitch.type) {
                 case Settings_IntervalSwitchType_Time: {
                     RotateHour(context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
@@ -415,7 +438,7 @@ static void adjustSelectedItem()
             break;
         }
 
-        case 7: {
+        case 8: {
             if (context.settings->intervals[context.intervalIndex].offSwitch.type == Settings_IntervalSwitchType_Time) {
                 RotateMinute(context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
             }
