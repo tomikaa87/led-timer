@@ -137,7 +137,7 @@ void Clock_setDate(
     const uint8_t day,
     const uint8_t weekday
 ) {
-    if (month > 11 || day > 31 || weekday > 6) {
+    if (month > 12 || day > 31 || weekday > 6) {
         return;
     }
 
@@ -179,7 +179,7 @@ inline uint16_t Clock_calculateDayOfYear()
 {
     uint16_t day = 0;
 
-    for (uint8_t i = 1; i < context.month - 1; ++i) {
+    for (uint8_t i = 1; i < context.month; ++i) {
         day += lastDayOfMonth(i);
     }
 

@@ -94,7 +94,7 @@ typedef struct
         int8_t timeZoneOffsetHalfHours;
     } time;
 
-    // This must be the last member
+    // This must be the last field
     uint8_t crc8;
 } SettingsData;
 

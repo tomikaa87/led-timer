@@ -22,6 +22,7 @@
 #include "Config.h"
 #include "Keypad.h"
 #include "SSD1306.h"
+#include "SunsetSunrise.h"
 #include "System.h"
 #include "UI.h"
 
@@ -407,6 +408,7 @@ void UI_keyEvent(uint8_t keyCode)
                     memcpy(&Settings_data, &context.modifiedSettings, sizeof(SettingsData));
                     SSD1306_setContrastLevel(Settings_data.display.brightness);
                     Settings_save();
+                    SunriseSunset_update();
 
 #if DEBUG_ENABLE_PRINT
                     puts("UI:BackToMain");

@@ -148,7 +148,7 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
                     break;
 
                 case 1:
-                    if (++context.month > 11) {
+                    if (++context.month > 12) {
                         context.month = 1;
                     }
                     context.lastDayOfMonth = lastDayOfMonth();
