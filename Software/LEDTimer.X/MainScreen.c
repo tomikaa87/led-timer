@@ -39,7 +39,7 @@ static struct MainScreenContext {
     .scheduleSegmentIndex = 0
 };
 
-inline static void drawOutputToggleKeyHelp()
+static void drawOutputToggleKeyHelp()
 {
     static const uint8_t SwitchOffStateIcon[] = {
         0b00111100,
@@ -104,7 +104,7 @@ inline static void drawOutputToggleKeyHelp()
     );
 }
 
-inline static void drawKeypadHelpBar()
+static void drawKeypadHelpBar()
 {
     SSD1306_fillArea(0, 7, 128, 1, SSD1306_COLOR_BLACK);
 
@@ -128,7 +128,7 @@ inline static void drawKeypadHelpBar()
     drawOutputToggleKeyHelp();
 }
 
-inline static void drawClock()
+static void drawClock()
 {
     uint8_t hours = (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
     uint8_t minutes = (uint8_t)(Clock_getMinutesSinceMidnight() - hours * 60);
@@ -140,24 +140,43 @@ inline static void drawClock()
     Text_draw7Seg(s, 3, 15, false);
 }
 
-static inline void drawScheduleBar()
+static void drawScheduleWidget(const bool redraw)
 {
-    Graphics_drawScheduleBar(0, Settings_data.scheduler.segmentData, GRAPHICS_DRAW_SCHEDULE_BAR_FLIP);
-}
+    if (redraw) {
+        // Fill the background
+        SSD1306_fillArea(0, 0, 128, 2, SSD1306_COLOR_BLACK);
+    }
 
-static inline void drawScheduleSegmentIndicator(const bool redraw)
-{
-    uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
-        Clock_getMinutesSinceMidnight()
-    );
+    switch (Settings_data.scheduler.type) {
+        case Settings_SchedulerType_Interval: {
 
-    if (context.scheduleSegmentIndex != segmentIndex || redraw) {
-        context.scheduleSegmentIndex = segmentIndex;
-        Graphics_drawScheduleSegmentIndicator(2, segmentIndex, GRAPHICS_DRAW_SCHEDULE_BAR_FLIP);
+            break;
+        }
+
+        case Settings_SchedulerType_Segment: {
+            if (redraw) {
+                Graphics_drawScheduleBar(
+                    0,
+                    Settings_data.scheduler.segmentData,
+                    GRAPHICS_DRAW_SCHEDULE_BAR_FLIP
+                );
+            }
+
+            uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
+                Clock_getMinutesSinceMidnight()
+            );
+
+            if (context.scheduleSegmentIndex != segmentIndex || redraw) {
+                context.scheduleSegmentIndex = segmentIndex;
+                Graphics_drawScheduleSegmentIndicator(2, segmentIndex, GRAPHICS_DRAW_SCHEDULE_BAR_FLIP);
+            }
+
+            break;
+        }
     }
 }
 
-inline static void drawBulbIcon(const bool visible)
+static void drawBulbIcon(const bool visible)
 {
     static const uint8_t X = 127 - Graphics_BulbIconWidth - 15;
 
@@ -181,7 +200,7 @@ inline static void drawBulbIcon(const bool visible)
     }
 }
 
-inline static void drawPowerIndicator()
+static void drawPowerIndicator()
 {
     // TODO use the PowerInputChanged event in the future
     static bool lastPowerInputType = false;
@@ -263,17 +282,16 @@ void MainScreen_update(const bool redraw)
 {
     if (redraw) {
         drawKeypadHelpBar();
-        drawScheduleBar();
     }
 
     drawBulbIcon(OutputController_isOutputEnabled());
     drawClock();
-    drawScheduleSegmentIndicator(redraw);
+    drawScheduleWidget(redraw);
     drawOutputToggleKeyHelp();
     drawPowerIndicator();
 }
 
-inline bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
+bool MainScreen_handleKeyPress(const uint8_t keyCode, const bool hold)
 {
     switch (keyCode) {
         // Propagate to the UI to show the Settings
