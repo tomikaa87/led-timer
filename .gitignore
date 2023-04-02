@@ -33,3 +33,7 @@ Temporary Items
 *.fcstd2
 *.FCStd2
 Hardware/Private
+
+# CLion
+**/cmake-build-*/
+**/.idea
