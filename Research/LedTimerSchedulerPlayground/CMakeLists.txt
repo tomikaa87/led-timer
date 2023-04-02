@@ -3,16 +3,22 @@ project(LedTimerSchedulerPlayground)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (APPLE)
+    set(GITHUB_DIR "/Users/tkarpati/github")
+else(LINUX)
+    set(GITHUB_DIR "/home/tomikaa/github")
+endif()
+
 add_executable(LedTimerSchedulerPlayground
         main.cpp
-        /Users/tkarpati/github/googletest/googletest/src/gtest-all.cc
-        /Users/tkarpati/github/fmt/src/format.cc
-        /Users/tkarpati/github/fmt/src/os.cc
+        ${GITHUB_DIR}/googletest/googletest/src/gtest-all.cc
+        ${GITHUB_DIR}/fmt/src/format.cc
+        ${GITHUB_DIR}/fmt/src/os.cc
 )
 
 target_include_directories(LedTimerSchedulerPlayground
     PRIVATE
-        /Users/tkarpati/github/googletest/googletest/include/
-        /Users/tkarpati/github/googletest/googletest/
-        /Users/tkarpati/github/fmt/include
+        ${GITHUB_DIR}/googletest/googletest/include/
+        ${GITHUB_DIR}/googletest/googletest/
+        ${GITHUB_DIR}/fmt/include
 )
