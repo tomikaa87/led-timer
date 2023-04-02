@@ -35,12 +35,13 @@ def calculate(latitude, longitude, year, day_of_year):
 
 
 def make_lut(latitude: float, longitude: float):
+    print('#include "Clock.h"')
     print('#include <stdint.h>')
     print(f'// Sunrise-sunset LUT for latitude={latitude}, longitude={longitude}.')
     print('// Made by SunriseSunsetLUTGenerator.py.')
     print('// First value is the sunrise, second is the sunset, both measured in minutes from midnight, in UTC.')
     print('// During non-leap years, February 29th (index=59) must be skipped, all subsequent indices must be offset by 1.')
-    print('const uint16_t SunriseSunsetLUT[366][2] = {\n    ', end='')
+    print('const Clock_Time SunriseSunsetLUT[366][2] = {\n    ', end='')
     column = 0
     for doy in range(0, 366):
         sunrise, sunset = calculate(latitude, longitude, 2024, doy)

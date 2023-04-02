@@ -18,6 +18,7 @@
     Created on 2023-01-31
 */
 
+#include "Clock.h"
 #include "Graphics.h"
 #include "Keypad.h"
 #include "SettingsScreen_SegmentScheduler.h"
@@ -45,8 +46,8 @@ void SettingsScreen_SegmentScheduler_update(const bool redraw)
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_SetIcon, Graphics_ClearIcon);
     }
 
-    uint16_t minutesSinceMidnightForSegment =
-        (uint16_t)context.segmentIndex * 30;
+    Clock_Time minutesSinceMidnightForSegment =
+        (Clock_Time)context.segmentIndex * 30;
     uint8_t hours = (uint8_t)(minutesSinceMidnightForSegment / 60);
     uint8_t minutes = (uint8_t)(minutesSinceMidnightForSegment - hours * 60);
 

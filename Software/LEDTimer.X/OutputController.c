@@ -49,21 +49,21 @@ static struct OutputControllerContext
     .prevStateFromSchedule = 0
 };
 
-uint16_t calculateSunEventTime(const uint16_t eventTime, const int8_t offset) {
+Clock_Time calculateSunEventTime(const Clock_Time eventTime, const int8_t offset) {
     int16_t t = (int16_t)(eventTime) + (int16_t)(offset);
 
     if (t < 0) {
-        return (uint16_t)(1440 + t);
+        return (Clock_Time)(1440 + t);
     }
 
     if (t > 1440) {
-        return (uint16_t)(t - 1440);
+        return (Clock_Time)(t - 1440);
     }
 
-    return (uint16_t)t;
+    return (Clock_Time)t;
 }
 
-uint16_t calculateSwitchTime(struct IntervalSwitch* sw)
+Clock_Time calculateSwitchTime(struct IntervalSwitch* sw)
 {
     switch (sw->type) {
         case Settings_IntervalSwitchType_Time:
@@ -83,18 +83,18 @@ static inline bool isSwitchedOnBySchedule()
 {
     switch (Settings_data.scheduler.type) {
         case Settings_SchedulerType_Interval: {
-            uint16_t currentTime = Clock_getMinutesSinceMidnight();
+            Clock_Time currentTime = Clock_getMinutesSinceMidnight();
 
             for (uint8_t i = 0; i < Config_Settings_IntervalScheduleCount; ++i) {
                 if (!Settings_data.scheduler.intervals[i].active) {
                     continue;
                 }
 
-                uint16_t onTime = calculateSwitchTime(
+                Clock_Time onTime = calculateSwitchTime(
                     &Settings_data.scheduler.intervals[i].onSwitch
                 );
 
-                uint16_t offTime = calculateSwitchTime(
+                Clock_Time offTime = calculateSwitchTime(
                     &Settings_data.scheduler.intervals[i].offSwitch
                 );
 

@@ -26,8 +26,8 @@
 #include "SunsetSunrise.h"
 
 static struct SunriseSunsetContext {
-    uint16_t sunrise;
-    uint16_t sunset;
+    Clock_Time sunrise;
+    Clock_Time sunset;
 } context;
 
 #if !SUNRISE_SUNSET_USE_LUT
@@ -76,7 +76,7 @@ void SunriseSunset_setTimeZone(
     data->timeOffset = timeZoneOffset + (dst ? 1 : 0);
 }
 
-uint16_t SunriseSunset_calculate(
+Clock_Time SunriseSunset_calculate(
     SunriseSunsetData* const data,
     const bool sunset,
     const uint16_t dayOfYear
@@ -117,12 +117,12 @@ uint16_t SunriseSunset_calculate(
     uint8_t minute = (uint8_t)(round((adjustedTime - hour) * 60.0));
 
     // Convert to minutes since midnight
-    return (uint16_t)hour * 60 + minute;
+    return (Clock_Time)hour * 60 + minute;
 }
 #else
-extern const uint16_t SunriseSunsetLUT[2][365];
+extern const Clock_Time SunriseSunsetLUT[2][365];
 
-uint16_t SunriseSunset_calculate(
+Clock_Time SunriseSunset_calculate(
     const bool sunset,
     const uint16_t dayOfYear
 ) {
@@ -134,12 +134,12 @@ uint16_t SunriseSunset_calculate(
 }
 #endif
 
-uint16_t SunriseSunset_getSunrise(void)
+Clock_Time SunriseSunset_getSunrise(void)
 {
     return context.sunrise;
 }
 
-uint16_t SunriseSunset_getSunset(void)
+Clock_Time SunriseSunset_getSunset(void)
 {
     return context.sunset;
 }

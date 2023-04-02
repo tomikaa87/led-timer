@@ -20,16 +20,19 @@
 
 #pragma once
 
+#include "Clock.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef uint16_t Clock_Ticks;
+typedef int16_t Clock_Ticks;
+typedef int16_t Clock_Time;
 
 typedef volatile struct
 {
     volatile Clock_Ticks ticks;
     volatile Clock_Ticks fastTicks;
-    volatile uint16_t minutesSinceMidnight;
+    volatile Clock_Time minutesSinceMidnight;
     volatile uint8_t seconds;
     volatile bool updateCalendar;
 } Clock_InterruptContext;
@@ -53,8 +56,8 @@ typedef volatile struct
 }
 
 inline uint8_t Clock_getSeconds(void);
-inline uint16_t Clock_getMinutesSinceMidnight(void);
-void Clock_setMinutesSinceMidnight(uint16_t value);
+inline Clock_Time Clock_getMinutesSinceMidnight(void);
+void Clock_setMinutesSinceMidnight(Clock_Time value);
 inline Clock_Ticks Clock_getTicks(void);
 inline Clock_Ticks Clock_getFastTicks(void);
 inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);

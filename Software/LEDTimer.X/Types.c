@@ -20,9 +20,9 @@
 
 #include "Types.h"
 
-inline uint8_t Types_calculateScheduleSegmentIndex(const uint16_t minutes)
+inline uint8_t Types_calculateScheduleSegmentIndex(const Clock_Time minutes)
 {
-    if (minutes >= 1440) {
+    if (minutes < 0 || minutes >= 1440) {
         return 0;
     }
 

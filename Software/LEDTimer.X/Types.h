@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "Clock.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -33,7 +35,7 @@ typedef uint8_t ScheduleSegmentData[6];
  * @param minutes Elapsed minutes from midnight.
  * @return Segment index from 0 to 47.
  */
-inline uint8_t Types_calculateScheduleSegmentIndex(uint16_t minutes);
+inline uint8_t Types_calculateScheduleSegmentIndex(Clock_Time minutes);
 
 bool Types_getScheduleSegmentBit(
     const ScheduleSegmentData data,

@@ -52,12 +52,12 @@ inline uint8_t Clock_getSeconds()
     return Clock_interruptContext.seconds;
 }
 
-inline uint16_t Clock_getMinutesSinceMidnight()
+inline Clock_Time Clock_getMinutesSinceMidnight()
 {
     return Clock_interruptContext.minutesSinceMidnight;
 }
 
-void Clock_setMinutesSinceMidnight(const uint16_t value)
+void Clock_setMinutesSinceMidnight(const Clock_Time value)
 {
     TMR1_WriteTimer(0);
     Clock_interruptContext.minutesSinceMidnight = value;

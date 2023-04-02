@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "Clock.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -49,19 +51,19 @@ void SunriseSunset_setTimeZone(
     bool dst
 );
 
-uint16_t SunriseSunset_calculate(
+Clock_Time SunriseSunset_calculate(
     SunriseSunsetData* data,
     bool sunset,
     uint16_t dayOfYear
 );
 #else
-uint16_t SunriseSunset_calculate(
+Clock_Time SunriseSunset_calculate(
     bool sunset,
     uint16_t dayOfYear
 );
 #endif
 
-uint16_t SunriseSunset_getSunrise(void);
-uint16_t SunriseSunset_getSunset(void);
+Clock_Time SunriseSunset_getSunrise(void);
+Clock_Time SunriseSunset_getSunset(void);
 
 void SunriseSunset_update(void);
