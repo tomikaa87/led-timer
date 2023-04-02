@@ -159,26 +159,37 @@ static void drawScheduleWidget(const bool redraw)
                     &on
                 )
             ) {
-                Clock_Time transitionTime = 0;
+                struct IntervalSwitch* sw = NULL;
 
                 if (on) {
-                    transitionTime = OutputController_calculateSwitchTime(
-                        &Settings_data.scheduler.intervals[index].onSwitch
-                    );
+                    sw = &Settings_data.scheduler.intervals[index].onSwitch;
                 } else {
-                    transitionTime = OutputController_calculateSwitchTime(
-                        &Settings_data.scheduler.intervals[index].offSwitch
-                    );
+                    sw = &Settings_data.scheduler.intervals[index].offSwitch;
                 }
+
+                Clock_Time transitionTime = OutputController_calculateSwitchTime(sw);
 
                 uint8_t hours = (uint8_t)(transitionTime / 60);
                 uint8_t minutes = (uint8_t)(transitionTime - hours * 60);
 
                 char buf[25] = { 0 };
-                sprintf(buf, "%3s: %2u:%02u", on ? "ON" : "OFF", hours, minutes);
-                Text_draw(buf, 0, 0, 0, false);
+                sprintf(buf, "-> %3s: %2u:%02u", on ? "ON" : "OFF", hours, minutes);
+                uint8_t x = Text_draw(buf, 0, 0, 0, false);
+
+                bool sunBased = true;
+                if (sw->type == Settings_IntervalSwitchType_Sunrise) {
+                    sprintf(buf, "(%s%+3.2d)", "SR", sw->sunOffset);
+                } else if (sw->type == Settings_IntervaSwitchType_Sunset) {
+                    sprintf(buf, "(%s%+3.2d)", "SS", sw->sunOffset);
+                } else {
+                    sunBased = false;
+                }
+
+                if (sunBased) {
+                    Text_draw(buf, 0, x + 5, 0, false);
+                }
             } else {
-                Text_draw("---: --:--", 0, 0, 0, false);
+                Text_draw("--> ---: --:--", 0, 0, 0, false);
             }
 
             break;
