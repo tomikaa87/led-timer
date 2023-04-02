@@ -63,7 +63,7 @@ Clock_Time calculateSunEventTime(const Clock_Time eventTime, const int8_t offset
     return (Clock_Time)t;
 }
 
-Clock_Time calculateSwitchTime(struct IntervalSwitch* sw)
+Clock_Time OutputController_calculateSwitchTime(struct IntervalSwitch* sw)
 {
     switch (sw->type) {
         case Settings_IntervalSwitchType_Time:
@@ -90,11 +90,11 @@ static inline bool isSwitchedOnBySchedule()
                     continue;
                 }
 
-                Clock_Time onTime = calculateSwitchTime(
+                Clock_Time onTime = OutputController_calculateSwitchTime(
                     &Settings_data.scheduler.intervals[i].onSwitch
                 );
 
-                Clock_Time offTime = calculateSwitchTime(
+                Clock_Time offTime = OutputController_calculateSwitchTime(
                     &Settings_data.scheduler.intervals[i].offSwitch
                 );
 
@@ -300,4 +300,147 @@ void OutputController_updateState()
 #endif
 
     context.forceOutputStateUpdate = 1;
+}
+
+typedef struct {
+    Clock_Time on;
+    Clock_Time off;
+} Schedule;
+
+static Clock_Time calcOffTime(const Schedule s)
+{
+    if (s.on <= s.off) {
+        return s.off;
+    } else {
+        return s.off + 1440;
+    }
+}
+
+bool OutputController_getNextTransition(
+    const Clock_Time time,
+    int8_t* const index,
+    bool* const on
+) {
+    if (!index || !on) {
+        return false;
+    }
+
+    Schedule schedules[Config_Settings_IntervalScheduleCount];
+
+    // Gather all the active schedules
+    int8_t scheduleCount = 0;
+    for (int8_t i = 0; i < Config_Settings_IntervalScheduleCount; ++i) {
+        if (Settings_data.scheduler.intervals[i].active) {
+            schedules[scheduleCount].on = OutputController_calculateSwitchTime(
+                &Settings_data.scheduler.intervals[i].onSwitch
+            );
+
+            schedules[scheduleCount].off = OutputController_calculateSwitchTime(
+                &Settings_data.scheduler.intervals[i].offSwitch
+            );
+
+            ++scheduleCount;
+        }
+    }
+
+    if (scheduleCount == 0) {
+        return false;
+    }
+
+    // Calculate the state for the specified time
+    bool currentlyOn = false;
+    for (int8_t i = 0; i < scheduleCount; ++i) {
+        Schedule s = schedules[i];
+        if (
+            (s.on <= s.off && time >= s.on && time < s.off)
+            || (s.off < s.on && (time >= s.on || time < s.off))
+        ) {
+            currentlyOn = true;
+            break;
+        }
+    }
+
+    // Only one schedule, nothing to calculate
+    if (scheduleCount == 1) {
+        *on = !currentlyOn;
+        *index = 0;
+        return true;
+    }
+
+    // Sort the schedules by ON time using an index array
+    int8_t sortedIndices[Config_Settings_IntervalScheduleCount];
+    for (int8_t i = 0; i < scheduleCount; ++i) {
+        sortedIndices[i] = i;
+    }
+    for (int8_t i = 1; i < scheduleCount; ++i) {
+        int8_t tmp = sortedIndices[i];
+        int8_t j = i - 1;
+        while (j >= 0 && schedules[sortedIndices[j]].on > schedules[tmp].on) {
+            sortedIndices[j + 1] = sortedIndices[j];
+            --j;
+        }
+        sortedIndices[j + 1] = tmp;
+    }
+
+    typedef struct {
+        int8_t onIdx;
+        int8_t offIdx;
+    } StackElem;
+
+    // Merge overlapping intervals, results will be on the stack
+    StackElem stack[Config_Settings_IntervalScheduleCount];
+    int8_t stackIndex = 0;
+    stack[0].onIdx = sortedIndices[0];
+    stack[0].offIdx = sortedIndices[0];
+    for (int8_t i = 1; i < scheduleCount; ++i) {
+        StackElem top = stack[stackIndex];
+
+        if (calcOffTime(schedules[top.offIdx]) < schedules[sortedIndices[i]].on) {
+            StackElem e = { .onIdx = sortedIndices[i], .offIdx = sortedIndices[i] };
+            stack[++stackIndex] = e;
+        } else if (calcOffTime(schedules[top.offIdx]) < calcOffTime(schedules[sortedIndices[i]])) {
+            top.offIdx = sortedIndices[i];
+            stack[stackIndex] = top;
+        }
+    }
+
+    // Find the matching interval
+    Clock_Time lastDiff = 2880;
+    int8_t foundIndex = -1;
+    while (stackIndex >= 0) {
+        StackElem s = stack[stackIndex--];
+
+        Clock_Time onTime = schedules[s.onIdx].on;
+        Clock_Time offTime = calcOffTime(schedules[s.offIdx]);
+
+        if (offTime - onTime >= 1440) {
+            return false;
+        }
+
+        if (currentlyOn) {
+            // Find the active schedule and store its OFF time
+            if ((time >= onTime && time < offTime) || time + 1440 < offTime) {
+                foundIndex = s.offIdx;
+                break;
+            }
+        } else {
+            // Find the nearest schedule and store its ON time
+            Clock_Time diff;
+            if (onTime < time) {
+                diff = 1440 - time + onTime;
+            } else {
+                diff = onTime - time;
+            }
+
+            if (foundIndex < 0 || diff < lastDiff) {
+                foundIndex = s.onIdx;
+                lastDiff = diff;
+            }
+        }
+    }
+
+    *index = foundIndex;
+    *on = !currentlyOn;
+
+    return foundIndex >= 0;
 }

@@ -149,6 +149,37 @@ static void drawScheduleWidget(const bool redraw)
 
     switch (Settings_data.scheduler.type) {
         case Settings_SchedulerType_Interval: {
+            int8_t index = -1;
+            bool on = false;
+
+            if (
+                OutputController_getNextTransition(
+                    Clock_getMinutesSinceMidnight(),
+                    &index,
+                    &on
+                )
+            ) {
+                Clock_Time transitionTime = 0;
+
+                if (on) {
+                    transitionTime = OutputController_calculateSwitchTime(
+                        &Settings_data.scheduler.intervals[index].onSwitch
+                    );
+                } else {
+                    transitionTime = OutputController_calculateSwitchTime(
+                        &Settings_data.scheduler.intervals[index].offSwitch
+                    );
+                }
+
+                uint8_t hours = (uint8_t)(transitionTime / 60);
+                uint8_t minutes = (uint8_t)(transitionTime - hours * 60);
+
+                char buf[25] = { 0 };
+                sprintf(buf, "%3s: %2u:%02u", on ? "ON" : "OFF", hours, minutes);
+                Text_draw(buf, 0, 0, 0, false);
+            } else {
+                Text_draw("---: --:--", 0, 0, 0, false);
+            }
 
             break;
         }

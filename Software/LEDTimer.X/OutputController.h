@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include "Clock.h"
+#include "Settings.h"
+
 #include <stdbool.h>
 
 /**
@@ -56,3 +59,26 @@ inline bool OutputController_isOutputEnabled(void);
  * is enabled, this function will update the PWM duty cycle as well.
  */
 void OutputController_updateState(void);
+
+/**
+ * Calculates the next state transition based on the configured schedules
+ * and the specified time.
+ *
+ * @param time Time value in minutes from midnight used for the calculation
+ * @param index Output parameter, set to the index of the schedule involved in the next transition
+ * @param on Output parameter, set to true for ON transition and false for OFF transition
+ * @return true If a transition can be calculated, false otherwise
+ */
+bool OutputController_getNextTransition(
+    Clock_Time time,
+    int8_t* index,
+    bool* on
+);
+
+/**
+ * Calculates switch time from based on the specified switch data.
+ *
+ * @param sw Switch data from an interval-type schedule
+ * @return Clock_Time Calculated switch time in minutes from midnight
+ */
+Clock_Time OutputController_calculateSwitchTime(struct IntervalSwitch* sw);
