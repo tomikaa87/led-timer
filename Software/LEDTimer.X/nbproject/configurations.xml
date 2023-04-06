@@ -106,6 +106,8 @@
       <itemPath>Makefile</itemPath>
       <itemPath>LEDTimer.mc3</itemPath>
     </logicalFolder>
+    <itemPath>SettingsScreen_DST.c</itemPath>
+    <itemPath>SettingsScreen_DST.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>

@@ -30,6 +30,7 @@
 #include "Settings_MenuScreen.h"
 #include "SettingsScreen_Date.h"
 #include "SettingsScreen_DisplayBrightness.h"
+#include "SettingsScreen_DST.h"
 #include "SettingsScreen_LEDBrightness.h"
 #include "SettingsScreen_Location.h"
 #include "SettingsScreen_Scheduler.h"
@@ -127,6 +128,7 @@ typedef enum {
     UI_Screen_Settings_Date,
     UI_Screen_Settings_Time,
     UI_Screen_Settings_TimeZone,
+    UI_Screen_Settings_DST,
     UI_Screen_Settings_Location
 } UI_Screen;
 
@@ -237,6 +239,10 @@ static void updateScreen(const bool redraw)
 
         case UI_Screen_Settings_TimeZone:
             SettingsScreen_TimeZone_update(redraw);
+            break;
+
+        case UI_Screen_Settings_DST:
+            SettingsScreen_DST_update(redraw);
             break;
 
         case UI_Screen_Settings_Location:
@@ -447,8 +453,12 @@ void UI_keyEvent(uint8_t keyCode)
                             SettingsScreen_TimeZone_init(&context.modifiedSettings.time);
                             switchToScreen(UI_Screen_Settings_TimeZone);
                             break;
-#if !SUNRISE_SUNSET_USE_LUT
                         case 7:
+                            SettingsScreen_DST_init(&context.modifiedSettings.dst);
+                            switchToScreen(UI_Screen_Settings_DST);
+                            break;
+#if !SUNRISE_SUNSET_USE_LUT
+                        case 8:
                             SettingsScreen_Location_init(&context.modifiedSettings.location);
                             switchToScreen(UI_Screen_Settings_Location);
                             break;
@@ -499,6 +509,12 @@ void UI_keyEvent(uint8_t keyCode)
 
         case UI_Screen_Settings_TimeZone:
             if (!SettingsScreen_TimeZone_handleKeyPress(keyCode, hold)) {
+                switchToScreen(UI_Screen_Settings);
+            }
+            break;
+
+        case UI_Screen_Settings_DST:
+            if (!SettingsScreen_DST_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
             break;

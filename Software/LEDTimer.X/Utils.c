@@ -20,6 +20,31 @@
 
 #include "Utils.h"
 
+const char* Date_DayShortNames[7] = {
+    "SUN",
+    "MON",
+    "TUE",
+    "WED",
+    "THU",
+    "FRI",
+    "SAT"
+};
+
+const char* Date_MonthShortNames[12] = {
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC"
+};
+
 bool Date_isLeapYear(const YearsFrom2023 year)
 {
     uint16_t y = year + 2023;

@@ -35,6 +35,7 @@ static const char* MenuItems[] = {
     "DATE",
     "TIME",
     "TIME ZONE",
+    "DST",
 #if !SUNRISE_SUNSET_USE_LUT
     "LOCATION"
 #endif

@@ -20,13 +20,8 @@
 
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "Settings.h"
 
-extern const char* Date_DayShortNames[7];
-extern const char* Date_MonthShortNames[12];
-
-typedef uint8_t YearsFrom2023;
-
-bool Date_isLeapYear(YearsFrom2023 year);
-uint8_t Date_lastDayOfMonth(uint8_t month, bool leapYear);
+void SettingsScreen_DST_init(struct DST* settings);
+void SettingsScreen_DST_update(bool redraw);
+bool SettingsScreen_DST_handleKeyPress(uint8_t keyCode, bool hold);
