@@ -59,21 +59,21 @@ uint8_t Text_calculateWidth(const char* s);
 uint8_t Text_calculateWidth7Seg(const char* s);
 
 #define CalculateTextWidth(_Text) ( \
-    (sizeof(_Text) - 1) * 5 \
-    + ((sizeof(_Text) >= 2) ? (sizeof(_Text) - 2) : 0) * 1 \
+    (sizeof((_Text)) - 1) * 5 \
+    + ((sizeof((_Text)) >= 2) ? (sizeof((_Text)) - 2) : 0) * 1 \
 )
 
 #define LeftText(_Text, _Line) \
-    Text_draw(_Text, _Line, 0, 0, false)
+    Text_draw((_Text), (_Line), 0, 0, false)
 
 #define CenterText(_Text, _Line) \
-    Text_draw(_Text, _Line, 64 - CalculateTextWidth(_Text) / 2, 0, false)
+    Text_draw((_Text), (_Line), 64 - CalculateTextWidth((_Text)) / 2, 0, false)
 
 #define RightText(_Text, _Line) \
-    Text_draw(_Text, _Line, 127 - CalculateTextWidth(_Text), 0, false)
+    Text_draw((_Text), (_Line), 127 - CalculateTextWidth((_Text)), 0, false)
 
-#define LeftHelpText(_Text) LeftText(_Text, 0)
+#define LeftHelpText(_Text) LeftText((_Text), 0)
 
-#define CenterHelpText(_Text) CenterText(_Text, 0)
+#define CenterHelpText(_Text) CenterText((_Text), 0)
 
-#define RightHelpText(_Text) RightText(_Text, 0)
+#define RightHelpText(_Text) RightText((_Text), 0)

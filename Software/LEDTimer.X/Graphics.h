@@ -123,10 +123,10 @@ void Graphics_drawScheduleSegmentIndicator(
     Graphics_drawBitmap((_Icon), sizeof((_Icon)), (_Column), (_Line), 0)
 
 #define Graphics_DrawCenterIcon(_Line, _Icon) \
-    Graphics_DrawIcon(64 - sizeof((_Icon)) / 2, _Line, _Icon)
+    Graphics_DrawIcon(64 - sizeof((_Icon)) / 2, (_Line), (_Icon))
 
 #define Graphics_DrawRightIcon(_Line, _Icon) \
-    Graphics_DrawIcon(128 - sizeof((_Icon)), _Line, _Icon)
+    Graphics_DrawIcon(128 - sizeof((_Icon)), (_Line), (_Icon))
 
 #define Graphics_DrawKeypadHelpBar(_Icon1, _Icon2, _Icon3) \
     Graphics_DrawKeypadHelpBarSeparators(); \
