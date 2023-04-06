@@ -415,3 +415,13 @@ void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos)
         | SSD1306_SEND_BITSHIFT_REVERSE
     );
 }
+
+void Graphics_DrawKeypadHelpBarSeparators()
+{
+    SSD1306_enablePageAddressing();
+    SSD1306_setPage(7);
+    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2);
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator));
+    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2);
+    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator));
+}

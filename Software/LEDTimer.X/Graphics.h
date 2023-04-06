@@ -121,10 +121,6 @@ void Graphics_drawScheduleSegmentIndicator(
 
 #define Graphics_DrawIcon(_Column, _Line, _Icon) \
     Graphics_drawBitmap((_Icon), sizeof((_Icon)), (_Column), (_Line), 0)
-//    SSD1306_enablePageAddressing(); \
-//    SSD1306_setStartColumn((_Column)); \
-//    SSD1306_setPage((_Line)); \
-//    SSD1306_sendData((_Icon), sizeof((_Icon)))
 
 #define Graphics_DrawCenterIcon(_Line, _Icon) \
     Graphics_DrawIcon(64 - sizeof((_Icon)) / 2, _Line, _Icon)
@@ -133,40 +129,20 @@ void Graphics_drawScheduleSegmentIndicator(
     Graphics_DrawIcon(128 - sizeof((_Icon)), _Line, _Icon)
 
 #define Graphics_DrawKeypadHelpBar(_Icon1, _Icon2, _Icon3) \
-    SSD1306_enablePageAddressing(); \
-    SSD1306_setPage(7); \
+    Graphics_DrawKeypadHelpBarSeparators(); \
     SSD1306_setStartColumn(0); \
     SSD1306_sendData((_Icon1), sizeof((_Icon1))); \
-    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
-    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator)); \
     SSD1306_setStartColumn(64 - sizeof((_Icon2)) / 2); \
     SSD1306_sendData((_Icon2), sizeof((_Icon2))); \
-    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
-    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator)); \
     SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
     SSD1306_sendData((_Icon3), sizeof((_Icon3)))
-
-// void Graphics_DrawKeypadHelpBarHelper()
 
 #define Graphics_DrawKeypadHelpBarLeftRight(_Icon1, _Icon3) \
-    SSD1306_enablePageAddressing(); \
-    SSD1306_setPage(7); \
+    Graphics_DrawKeypadHelpBarSeparators(); \
     SSD1306_setStartColumn(0); \
     SSD1306_sendData((_Icon1), sizeof((_Icon1))); \
-    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
-    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator)); \
-    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
-    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator)); \
     SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
     SSD1306_sendData((_Icon3), sizeof((_Icon3)))
-
-#define Graphics_DrawKeypadHelpBarSeparators() \
-    SSD1306_enablePageAddressing(); \
-    SSD1306_setPage(7); \
-    SSD1306_setStartColumn(32 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
-    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator)); \
-    SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
-    SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator))
 
 #define Graphics_DrawScreenTitle(_Text) { \
     Graphics_DrawScreenTitleHelper( \
@@ -176,3 +152,4 @@ void Graphics_drawScheduleSegmentIndicator(
 }
 
 void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos);
+void Graphics_DrawKeypadHelpBarSeparators();
