@@ -129,7 +129,7 @@ void Graphics_drawScheduleSegmentIndicator(
     Graphics_DrawIcon(128 - sizeof((_Icon)), (_Line), (_Icon))
 
 #define Graphics_DrawKeypadHelpBar(_Icon1, _Icon2, _Icon3) \
-    Graphics_DrawKeypadHelpBarSeparators(); \
+    Graphics_drawKeypadHelpBarSeparators(); \
     SSD1306_setStartColumn(0); \
     SSD1306_sendData((_Icon1), sizeof((_Icon1))); \
     SSD1306_setStartColumn(64 - sizeof((_Icon2)) / 2); \
@@ -138,18 +138,19 @@ void Graphics_drawScheduleSegmentIndicator(
     SSD1306_sendData((_Icon3), sizeof((_Icon3)))
 
 #define Graphics_DrawKeypadHelpBarLeftRight(_Icon1, _Icon3) \
-    Graphics_DrawKeypadHelpBarSeparators(); \
+    Graphics_drawKeypadHelpBarSeparators(); \
     SSD1306_setStartColumn(0); \
     SSD1306_sendData((_Icon1), sizeof((_Icon1))); \
     SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
     SSD1306_sendData((_Icon3), sizeof((_Icon3)))
 
 #define Graphics_DrawScreenTitle(_Text) { \
-    Graphics_DrawScreenTitleHelper( \
+    Graphics_drawScreenTitleHelper( \
         (_Text), \
         64 - CalculateTextWidth((_Text)) / 2 - sizeof(Graphics_HeaderLeftCapIcon) - 2 \
     ); \
 }
 
-void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos);
-void Graphics_DrawKeypadHelpBarSeparators();
+void Graphics_drawScreenTitleHelper(const char* text, uint8_t pos);
+void Graphics_drawKeypadHelpBarSeparators();
+void Graphics_drawVerticalLine(uint8_t x, uint8_t line);

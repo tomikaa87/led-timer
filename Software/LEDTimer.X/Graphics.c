@@ -398,7 +398,7 @@ void Graphics_drawScheduleSegmentIndicator(
     );
 }
 
-void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos)
+void Graphics_drawScreenTitleHelper(const char* text, uint8_t pos)
 {
     SSD1306_enablePageAddressing();
     SSD1306_setPage(0);
@@ -416,7 +416,7 @@ void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos)
     );
 }
 
-void Graphics_DrawKeypadHelpBarSeparators()
+void Graphics_drawKeypadHelpBarSeparators()
 {
     SSD1306_enablePageAddressing();
     SSD1306_setPage(7);
@@ -424,4 +424,13 @@ void Graphics_DrawKeypadHelpBarSeparators()
     SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator));
     SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2);
     SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator));
+}
+
+void Graphics_drawVerticalLine(const uint8_t x, const uint8_t line)
+{
+    static const uint8_t Pattern = 0xFF;
+
+    SSD1306_setPage(line);
+    SSD1306_setStartColumn(x);
+    SSD1306_sendData(&Pattern, sizeof(Pattern));
 }

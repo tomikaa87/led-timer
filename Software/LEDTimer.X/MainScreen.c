@@ -108,7 +108,7 @@ static void drawKeypadHelpBar()
 {
     SSD1306_fillArea(0, 7, 128, 1, SSD1306_COLOR_BLACK);
 
-    Graphics_DrawKeypadHelpBarSeparators();
+    Graphics_drawKeypadHelpBarSeparators();
 
 #if 0
     static const uint8_t SettingsIcon[] = {
@@ -152,6 +152,16 @@ static void drawScheduleWidget(const bool redraw)
             int8_t index = -1;
             bool on = false;
 
+            Graphics_drawBitmap(
+                Graphics_ArrowRightIcon,
+                Graphics_ArrowRightIconWidth,
+                1,
+                0,
+                0
+            );
+
+            const uint8_t StartPos = Graphics_ArrowRightIconWidth + 6;
+
             if (
                 OutputController_getNextTransition(
                     Clock_getMinutesSinceMidnight(),
@@ -173,23 +183,41 @@ static void drawScheduleWidget(const bool redraw)
                 uint8_t minutes = (uint8_t)(transitionTime - hours * 60);
 
                 char buf[25] = { 0 };
-                sprintf(buf, "-> %3s: %2u:%02u", on ? "ON" : "OFF", hours, minutes);
-                uint8_t x = Text_draw(buf, 0, 0, 0, false);
+                sprintf(buf, "%3s: %2u:%02u", on ? "ON" : "OFF", hours, minutes);
+                uint8_t x = Text_draw(buf, 0, StartPos, 0, false);
 
-                bool sunBased = true;
-                if (sw->type == Settings_IntervalSwitchType_Sunrise) {
-                    sprintf(buf, "(%s%+3.2d)", "SR", sw->sunOffset);
-                } else if (sw->type == Settings_IntervaSwitchType_Sunset) {
-                    sprintf(buf, "(%s%+3.2d)", "SS", sw->sunOffset);
-                } else {
-                    sunBased = false;
-                }
+                // Sun-based switch time indicator
+                if (
+                    sw->type == Settings_IntervalSwitchType_Sunrise
+                    || sw->type == Settings_IntervaSwitchType_Sunset
+                ) {
+                    x = 128
+                        - Graphics_SunOnTheHorizonIconWidth
+                        - 1
+                        - Graphics_ArrowDownIconWidth
+                        - 5
+                        - CalculateTextWidth("+00")
+                        - 1;
 
-                if (sunBased) {
-                    Text_draw(buf, 0, x + 5, 0, false);
+                    Graphics_DrawIcon(x, 0, Graphics_SunOnTheHorizonIcon);
+
+                    x += Graphics_SunOnTheHorizonIconWidth + 1;
+                    Graphics_drawBitmap(
+                        Graphics_ArrowDownIcon,
+                        Graphics_ArrowDownIconWidth,
+                        x,
+                        0,
+                        sw->type == Settings_IntervalSwitchType_Sunrise
+                            ? GRAPHICS_DRAW_FLIPX
+                            : 0
+                    );
+
+                    sprintf(buf, "%+3.2d", sw->sunOffset);
+                    x += Graphics_ArrowDownIconWidth + 5;
+                    x = Text_draw(buf, 0, x, 0, false);
                 }
             } else {
-                Text_draw("--> ---: --:--", 0, 0, 0, false);
+                Text_draw("---: --:--", 0, StartPos, 0, false);
             }
 
             break;
