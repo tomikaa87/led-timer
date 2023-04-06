@@ -336,8 +336,10 @@ void SSD1306_sendData2(
             uint8_t reverse = 0;
             for (uint8_t i = 8; i > 0; --i) {
                 reverse |= byte & 1;
-                reverse <<= 1;
                 byte >>= 1;
+                if (i > 1) {
+                    reverse <<= 1;
+                }
             }
             byte = reverse;
         }
