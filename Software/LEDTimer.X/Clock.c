@@ -39,12 +39,12 @@ static struct Clock_Context {
     uint8_t weekday : 3;
     uint8_t leapYear : 1;
     uint8_t month : 7;
-    uint8_t yearsFrom2023;
+    YearsFrom2023 year;
 } context = {
     .day = 1,
     .weekday = 0,
     .month = 1,
-    .yearsFrom2023 = 0
+    .year = 0
 };
 
 inline uint8_t Clock_getSeconds()
@@ -84,29 +84,6 @@ inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
     return (Clock_Ticks)abs((int16_t)Clock_interruptContext.fastTicks - (int16_t)since);
 }
 
-static bool isLeapYear()
-{
-    uint16_t year = context.yearsFrom2023 + 2023;
-    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
-}
-
-static uint8_t lastDayOfMonth(const uint8_t month)
-{
-    if (month == 2) {
-        if (isLeapYear()) {
-            return 29;
-        }
-
-        return 28;
-    }
-
-    if (month == 4 || month == 6 || month == 9 || month == 11) {
-        return 30;
-    }
-
-    return 31;
-}
-
 void Clock_task()
 {
     if (Clock_interruptContext.updateCalendar) {
@@ -116,14 +93,14 @@ void Clock_task()
             context.weekday = 0;
         }
 
-        if (++context.day > lastDayOfMonth(context.month)) {
+        if (++context.day > Date_lastDayOfMonth(context.month, context.leapYear)) {
             context.day = 1;
 
             if (++context.month > 11) {
                 context.month = 1;
-                ++context.yearsFrom2023;
+                ++context.year;
 
-                context.leapYear = isLeapYear();
+                context.leapYear = Date_isLeapYear(context.year);
             }
 
             SunriseSunset_update();
@@ -132,7 +109,7 @@ void Clock_task()
 }
 
 void Clock_setDate(
-    const uint8_t yearsFrom2023,
+    const YearsFrom2023 year,
     const uint8_t month,
     const uint8_t day,
     const uint8_t weekday
@@ -141,18 +118,18 @@ void Clock_setDate(
         return;
     }
 
-    context.yearsFrom2023 = yearsFrom2023;
+    context.year = year;
     context.month = month;
     context.day = day;
     context.weekday = weekday;
-    context.leapYear = isLeapYear();
+    context.leapYear = Date_isLeapYear(context.year);
 
     SunriseSunset_update();
 }
 
-inline uint8_t Clock_getYearsFrom2023()
+inline YearsFrom2023 Clock_getYear()
 {
-    return context.yearsFrom2023;
+    return context.year;
 }
 
 inline uint8_t Clock_getMonth()
@@ -170,17 +147,17 @@ inline uint8_t Clock_getWeekday()
     return context.weekday;
 }
 
-inline uint8_t Clock_isLeapYear()
+inline bool Clock_isLeapYear()
 {
     return context.leapYear;
 }
 
-inline uint16_t Clock_calculateDayOfYear()
+uint16_t Clock_calculateDayOfYear()
 {
     uint16_t day = 0;
 
     for (uint8_t i = 1; i < context.month; ++i) {
-        day += lastDayOfMonth(i);
+        day += Date_lastDayOfMonth(i, context.leapYear);
     }
 
     day += context.day;

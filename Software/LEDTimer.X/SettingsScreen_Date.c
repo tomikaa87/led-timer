@@ -22,6 +22,7 @@
 #include "Graphics.h"
 #include "Keypad.h"
 #include "SettingsScreen_Date.h"
+#include "Utils.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,43 +30,23 @@
 #include <string.h>
 
 static struct SettingScreen_Date_Context {
-    uint8_t yearsFrom2023;
+    YearsFrom2023 year;
     uint8_t month;
     uint8_t day;
-    uint8_t selectionIndex;
     uint8_t lastDayOfMonth;
+    uint8_t selectionIndex;
 } context;
-
-static bool isLeapYear()
-{
-    uint16_t year = context.yearsFrom2023 + 2023;
-    return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
-}
-
-static uint8_t lastDayOfMonth()
-{
-    if (context.month == 2) {
-        if (isLeapYear()) {
-            return 29;
-        }
-
-        return 28;
-    }
-
-    if (context.month == 4 || context.month == 6 || context.month == 9 || context.month == 11) {
-        return 30;
-    }
-
-    return 31;
-}
 
 void SettingsScreen_Date_init()
 {
-    memset(&context, 0, sizeof(struct SettingScreen_Date_Context));
-    context.yearsFrom2023 = Clock_getYearsFrom2023();
+    context.year = Clock_getYear();
     context.month = Clock_getMonth();
     context.day = Clock_getDay();
-    context.lastDayOfMonth = lastDayOfMonth();
+    context.lastDayOfMonth = Date_lastDayOfMonth(
+        context.month,
+        Date_isLeapYear(context.year)
+    );
+    context.selectionIndex = 0;
 }
 
 void SettingsScreen_Date_update(const bool redraw)
@@ -86,7 +67,7 @@ void SettingsScreen_Date_update(const bool redraw)
     uint8_t xPrev = x;
 
     // Year
-    sprintf(s, "%04u", (uint16_t)context.yearsFrom2023 + 2023);
+    sprintf(s, "%04u", (uint16_t)context.year + 2023);
     x = Text_draw7Seg(s, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
     x += ExtraSpacing;
@@ -115,7 +96,7 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
             }
 
             Clock_setDate(
-                context.yearsFrom2023,
+                context.year,
                 context.month,
                 context.day,
                 0 // TODO add weekday
@@ -138,10 +119,13 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
             switch (context.selectionIndex) {
                 case 0:
                     // Max year = 2050
-                    if (++context.yearsFrom2023 > 28) {
-                        context.yearsFrom2023 = 0;
+                    if (++context.year > 28) {
+                        context.year = 0;
                     }
-                    context.lastDayOfMonth = lastDayOfMonth();
+                    context.lastDayOfMonth = Date_lastDayOfMonth(
+                        context.month,
+                        Date_isLeapYear(context.year)
+                    );
                     if (context.day > context.lastDayOfMonth) {
                         context.day = context.lastDayOfMonth;
                     }
@@ -151,7 +135,10 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
                     if (++context.month > 12) {
                         context.month = 1;
                     }
-                    context.lastDayOfMonth = lastDayOfMonth();
+                    context.lastDayOfMonth = Date_lastDayOfMonth(
+                        context.month,
+                        Date_isLeapYear(context.year)
+                    );
                     if (context.day > context.lastDayOfMonth) {
                         context.day = context.lastDayOfMonth;
                     }

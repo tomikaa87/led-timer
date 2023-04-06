@@ -21,6 +21,7 @@
 #pragma once
 
 #include "Clock.h"
+#include "Utils.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -63,10 +64,10 @@ inline Clock_Ticks Clock_getFastTicks(void);
 inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);
 inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since);
 void Clock_task(void);
-void Clock_setDate(uint8_t yearsFrom2023, uint8_t month, uint8_t day, uint8_t weekday);
-inline uint8_t Clock_getYearsFrom2023(void);
+void Clock_setDate(YearsFrom2023 year, uint8_t month, uint8_t day, uint8_t weekday);
+inline YearsFrom2023 Clock_getYear(void);
 inline uint8_t Clock_getMonth(void);
 inline uint8_t Clock_getDay(void);
 inline uint8_t Clock_getWeekday(void);
-inline uint8_t Clock_isLeapYear(void);
-inline uint16_t Clock_calculateDayOfYear(void);
+inline bool Clock_isLeapYear(void);
+uint16_t Clock_calculateDayOfYear(void);
