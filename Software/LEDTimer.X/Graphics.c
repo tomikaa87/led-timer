@@ -251,7 +251,7 @@ void Graphics_drawBitmap(
     const uint8_t flags
 )
 {
-    if (page > SSD1306_PAGE_COUNT || width == 0 || x + width >= SSD1306_LCDWIDTH) {
+    if (page > SSD1306_PAGE_COUNT || width == 0 || x + width > SSD1306_LCDWIDTH) {
         return;
     }
 
