@@ -122,7 +122,7 @@
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.17.343"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -555,7 +555,7 @@
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.17.343"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
