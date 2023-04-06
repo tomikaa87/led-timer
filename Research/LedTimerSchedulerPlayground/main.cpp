@@ -2,7 +2,16 @@
 #include <fmt/format.h>
 
 #include <stack>
+#include <string_view>
 #include <vector>
+
+using namespace std::string_view_literals;
+
+int main()
+{
+    testing::InitGoogleTest();
+    return RUN_ALL_TESTS();
+}
 
 namespace scheduler
 {
@@ -746,8 +755,182 @@ TEST(Scheduler, FourOverlappingSchedulesOutOfOrder_TwoMergedIntervals_FirstInter
     EXPECT_FALSE(on);
 }
 
-int main()
+namespace dst
 {
-    testing::InitGoogleTest();
-    return RUN_ALL_TESTS();
+    enum
+    {
+        First,
+        Second,
+        Last = 0b11
+    };
+
+    struct DSTData {
+        // Byte 0
+        uint8_t startOrdinal : 2;       // 00: 1st, 01: 2nd, 11: last
+        uint8_t endOrdinal : 2;
+        uint8_t startShiftHours : 2;    // 0..3
+        uint8_t endShiftHours : 2;
+        // Byte 1
+        uint8_t startMonth : 4;         // 0..11
+        uint8_t endMonth : 4;           // 0..11
+        // Byte 2
+        uint8_t startDayOfWeek : 3;     // 0..6
+        uint8_t endDayOfWeek : 3;
+        uint8_t reserved : 2;
+    };
+
+    bool IsDST(const DSTData data, const int month, const int day, const int dayOfWeek, const int hour)
+    {
+        std::array Days{ "SU"sv, "MO"sv, "TU"sv, "WE"sv, "TH"sv, "FR"sv, "SA"sv };
+        std::array Months{ "JA"sv, "FE"sv, "MA"sv, "AP"sv, "MY"sv, "JN"sv, "JL"sv, "AU"sv, "SE"sv, "OC"sv, "NO"sv, "DE"sv };
+        fmt::print("data={{sO={},eO={},sSH={},eSH={},sM={},eM={},sDoW={},eDoW={}}}, m={}, day={}, dow={} h={}",
+            data.startOrdinal,
+            data.endOrdinal,
+            data.startShiftHours,
+            data.endShiftHours,
+            Months[data.startMonth],
+            Months[data.endMonth],
+            Days[data.startDayOfWeek],
+            Days[data.endDayOfWeek],
+            Months[month],
+            day,
+            Days[dayOfWeek],
+            hour
+        );
+
+        if (month < data.startMonth || month > data.endMonth) {
+            return false;
+        }
+
+        if (month > data.startMonth && month < data.endMonth) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+enum
+{
+    January,
+    February,
+    March,
+    April,
+    May,
+    June,
+    July,
+    August,
+    September,
+    October,
+    November,
+    December
+};
+
+enum
+{
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday
+};
+
+// https://en.wikipedia.org/wiki/Daylight_saving_time_by_country
+
+TEST(DST, BeforeStart_DifferentMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
+{
+    dst::DSTData data{
+            .startOrdinal = dst::Second,
+            .endOrdinal = dst::First,
+            .startShiftHours = 2,
+            .endShiftHours = 2,
+            .startMonth = March,
+            .endMonth = November,
+            .startDayOfWeek = Sunday,
+            .endDayOfWeek = Sunday
+    };
+
+    EXPECT_FALSE(dst::IsDST(data, February, 0, Sunday, 0));
+}
+
+TEST(DST, BeforeStart_SameMonthBeforeTime__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
+{
+    dst::DSTData data{
+            .startOrdinal = dst::Second,
+            .endOrdinal = dst::First,
+            .startShiftHours = 2,
+            .endShiftHours = 2,
+            .startMonth = March,
+            .endMonth = November,
+            .startDayOfWeek = Sunday,
+            .endDayOfWeek = Sunday
+    };
+
+    EXPECT_FALSE(dst::IsDST(data, March, 0, Monday, 0));
+}
+
+TEST(DST, BeforeEnd_NextMonthAfterStart__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
+{
+    dst::DSTData data{
+            .startOrdinal = dst::Second,
+            .endOrdinal = dst::First,
+            .startShiftHours = 2,
+            .endShiftHours = 2,
+            .startMonth = March,
+            .endMonth = November,
+            .startDayOfWeek = Sunday,
+            .endDayOfWeek = Sunday
+    };
+
+    EXPECT_TRUE(dst::IsDST(data, April, 0, Monday, 0));
+}
+
+TEST(DST, BeforeEnd_PreviousMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
+{
+    dst::DSTData data{
+            .startOrdinal = dst::Second,
+            .endOrdinal = dst::First,
+            .startShiftHours = 2,
+            .endShiftHours = 2,
+            .startMonth = March,
+            .endMonth = November,
+            .startDayOfWeek = Sunday,
+            .endDayOfWeek = Sunday
+    };
+
+    EXPECT_TRUE(dst::IsDST(data, October, 0, Monday, 0));
+}
+
+TEST(DST, BeforeEnd_SameMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
+{
+    dst::DSTData data{
+            .startOrdinal = dst::Second,
+            .endOrdinal = dst::First,
+            .startShiftHours = 2,
+            .endShiftHours = 2,
+            .startMonth = March,
+            .endMonth = November,
+            .startDayOfWeek = Sunday,
+            .endDayOfWeek = Sunday
+    };
+
+    EXPECT_TRUE(dst::IsDST(data, November, 0, Monday, 0));
+}
+
+TEST(DST, AfterEnd_NextMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
+{
+    dst::DSTData data{
+            .startOrdinal = dst::Second,
+            .endOrdinal = dst::First,
+            .startShiftHours = 2,
+            .endShiftHours = 2,
+            .startMonth = March,
+            .endMonth = November,
+            .startDayOfWeek = Sunday,
+            .endDayOfWeek = Sunday
+    };
+
+    EXPECT_FALSE(dst::IsDST(data, December, 0, Monday, 0));
 }

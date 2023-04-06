@@ -1,0 +1,25 @@
+shift: +1h
+dow: 0..6 (sunday .. saturday)
+mon: 1..12
+start:
+	1st 2nd last	<mon>	<dow>		<hour (UTC)>
+  def:          *	3	0		1
+end:
+	1st 2nd last	<mon>	<dow>		<hour (UTC)>
+  def:          *	10	0		1
+
+data:
+	typedef struct {
+		// Byte 0
+		uint8_t startOrdinal : 2;	// 00: 1st, 01: 2nd, 11: last
+		uint8_t endOrdinal : 2;
+		uint8_t startShiftHours : 2;	// 0..3
+		uint8_t endShiftHours : 2;
+		// Byte 1
+		uint8_t startMonth : 4;		// 0..11
+		uint8_t endMonth : 4;		// 0..11
+		// Byte 2
+		uint8_t startDayOfWeek : 3;	// 0..6
+		uint8_t endDayOfWeek : 3;
+		uint8_t reserved : 2;
+	} DSTData;
