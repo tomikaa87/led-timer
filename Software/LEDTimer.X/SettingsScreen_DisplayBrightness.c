@@ -33,7 +33,6 @@ static struct SettingScreen_DisplayBrightness_Context {
 
 void SettingsScreen_DisplayBrightness_init(struct Display* settings)
 {
-    memset(&context, 0, sizeof(struct SettingScreen_DisplayBrightness_Context));
     context.settings = settings;
 }
 

@@ -35,7 +35,6 @@ static struct SettingScreen_TimeZone_Context {
 
 void SettingsScreen_TimeZone_init(struct Time* settings)
 {
-    memset(&context, 0, sizeof(struct SettingScreen_TimeZone_Context));
     context.settings = settings;
 }
 

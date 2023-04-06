@@ -42,8 +42,15 @@ static struct SettingScreen_Scheduler_Context {
 
 void SettingsScreen_Scheduler_init(struct Scheduler* settings)
 {
-    memset(&context, 0, sizeof(struct SettingScreen_Scheduler_Context));
     context.settings = settings;
+    context.selection = 0;
+    context.schedulerTypeChanged = 0;
+    context.onSwitchChanged = 0;
+    context.offSwitchChanged = 0;
+    context.selectionChanged = 0;
+    context.intervalIndexChanged = 0;
+    context.activeStateChanged = 0;
+    context.intervalIndex = 0;
 }
 
 void SettingsScreen_Scheduler_update(const bool redraw)

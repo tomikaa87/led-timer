@@ -98,7 +98,8 @@ static void drawPositionIndicator()
 
 void Settings_MenuScreen_init()
 {
-    memset(&context, 0, sizeof(struct Settings_MenuScreen_Context));
+    context.selectionIndex = 0;
+    context.viewPosition = 0;
 }
 
 void Settings_MenuScreen_update(const bool redraw)

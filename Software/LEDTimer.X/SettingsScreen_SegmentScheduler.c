@@ -35,8 +35,8 @@ static struct SettingScreen_SegmentScheduler_Context {
 
 void SettingsScreen_SegmentScheduler_init(struct Scheduler* settings)
 {
-    memset(&context, 0, sizeof(struct SettingScreen_SegmentScheduler_Context));
     context.settings = settings;
+    context.segmentIndex = 0;
 }
 
 void SettingsScreen_SegmentScheduler_update(const bool redraw)

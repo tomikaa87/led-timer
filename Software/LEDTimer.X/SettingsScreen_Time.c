@@ -37,9 +37,10 @@ static struct SettingScreen_Time_Context {
 
 void SettingsScreen_Time_init()
 {
-    memset(&context, 0, sizeof(struct SettingScreen_Time_Context));
     context.hours = (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
     context.minutes = (uint8_t)(Clock_getMinutesSinceMidnight() - context.hours * 60);
+    context.clockAdjusted = 0;
+    context.selectionIndex = 0;
 }
 
 void SettingsScreen_Time_update(const bool redraw)
