@@ -220,6 +220,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 context.onSwitchChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
+                || context.intervalIndexChanged
             ) {
                 uint8_t x = Text_draw(
                     SwitchTypes[context.settings->intervals[context.intervalIndex].onSwitch.type],
@@ -234,6 +235,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 context.offSwitchChanged
                 || context.schedulerTypeChanged
                 || context.selectionChanged
+                || context.intervalIndexChanged
             ) {
                 uint8_t x = Text_draw(
                     SwitchTypes[context.settings->intervals[context.intervalIndex].offSwitch.type],
