@@ -146,6 +146,8 @@ void Graphics_drawScheduleSegmentIndicator(
     SSD1306_setStartColumn(128 - sizeof((_Icon3))); \
     SSD1306_sendData((_Icon3), sizeof((_Icon3)))
 
+// void Graphics_DrawKeypadHelpBarHelper()
+
 #define Graphics_DrawKeypadHelpBarLeftRight(_Icon1, _Icon3) \
     SSD1306_enablePageAddressing(); \
     SSD1306_setPage(7); \
@@ -166,13 +168,11 @@ void Graphics_drawScheduleSegmentIndicator(
     SSD1306_setStartColumn(96 - sizeof(Graphics_KeypadHelpBarSeparator) / 2); \
     SSD1306_sendData(Graphics_KeypadHelpBarSeparator, sizeof(Graphics_KeypadHelpBarSeparator))
 
-#define Graphics_DrawScreenTitle(_Text) {\
-    SSD1306_enablePageAddressing(); \
-    SSD1306_setPage(0); \
-    uint8_t _Pos = 64 - CalculateTextWidth(_Text) / 2 - sizeof(Graphics_HeaderLeftCapIcon) - 2; \
-    SSD1306_setStartColumn(_Pos); \
-    SSD1306_sendData(Graphics_HeaderLeftCapIcon, sizeof(Graphics_HeaderLeftCapIcon)); \
-    _Pos = Text_draw(_Text, 0, _Pos + sizeof(Graphics_HeaderLeftCapIcon) + 2, 0, false); \
-    SSD1306_setStartColumn(_Pos + 1); \
-    SSD1306_sendData2(Graphics_HeaderLeftCapIcon, sizeof(Graphics_HeaderLeftCapIcon), SSD1306_SEND_FLIPX | SSD1306_SEND_FLIPY | SSD1306_SEND_BITSHIFT(1) | SSD1306_SEND_BITSHIFT_REVERSE); \
+#define Graphics_DrawScreenTitle(_Text) { \
+    Graphics_DrawScreenTitleHelper( \
+        (_Text), \
+        64 - CalculateTextWidth((_Text)) / 2 - sizeof(Graphics_HeaderLeftCapIcon) - 2 \
+    ); \
 }
+
+void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos);

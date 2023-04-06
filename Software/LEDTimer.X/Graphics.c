@@ -397,3 +397,21 @@ void Graphics_drawScheduleSegmentIndicator(
         flags
     );
 }
+
+void Graphics_DrawScreenTitleHelper(const char* text, uint8_t pos)
+{
+    SSD1306_enablePageAddressing();
+    SSD1306_setPage(0);
+    SSD1306_setStartColumn(pos);
+    SSD1306_sendData(Graphics_HeaderLeftCapIcon, sizeof(Graphics_HeaderLeftCapIcon));
+    pos = Text_draw(text, 0, pos + sizeof(Graphics_HeaderLeftCapIcon) + 2, 0, false);
+    SSD1306_setStartColumn(pos + 1);
+    SSD1306_sendData2(
+        Graphics_HeaderLeftCapIcon,
+        sizeof(Graphics_HeaderLeftCapIcon),
+        SSD1306_SEND_FLIPX
+        | SSD1306_SEND_FLIPY
+        | SSD1306_SEND_BITSHIFT(1)
+        | SSD1306_SEND_BITSHIFT_REVERSE
+    );
+}
