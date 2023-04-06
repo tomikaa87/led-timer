@@ -334,7 +334,7 @@ void SSD1306_sendData2(
 
         if (flags & SSD1306_SEND_FLIPX) {
             uint8_t reverse = 0;
-            for (uint8_t i = 7; i > 0; --i) {
+            for (uint8_t i = 8; i > 0; --i) {
                 reverse |= byte & 1;
                 reverse <<= 1;
                 byte >>= 1;
