@@ -53,6 +53,19 @@ bool Date_isLeapYear(const YearsFrom2023 year)
 
 uint8_t Date_lastDayOfMonth(const uint8_t month, const bool leapYear)
 {
+    static const uint8_t Days[12] = {
+        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
+
+    uint8_t day = Days[month - 1];
+
+    if (month == 2 && leapYear) {
+        day += 1;
+    }
+
+    return day;
+
+#if 0
     if (month == 2) {
         if (leapYear) {
             return 29;
@@ -66,4 +79,5 @@ uint8_t Date_lastDayOfMonth(const uint8_t month, const bool leapYear)
     }
 
     return 31;
+#endif
 }
