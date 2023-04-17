@@ -777,25 +777,71 @@ namespace dst
         uint8_t startDayOfWeek : 3;     // 0..6
         uint8_t endDayOfWeek : 3;
         uint8_t reserved : 2;
+        // Byte 3
+        uint8_t startHour : 4;
+        uint8_t endHour : 4;
     };
 
-    bool IsDST(const DSTData data, const int month, const int day, const int dayOfWeek, const int hour)
+    int DaysInMonth(const int month, const bool leapYear)
+    {
+        if (month < 1 || month > 12) {
+            return 0;
+        }
+
+        static const uint8_t Days[12] = {
+                31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+        };
+
+        uint8_t day = Days[month - 1];
+
+        if (month == 2 && leapYear) {
+            day += 1;
+        }
+
+        return day;
+    }
+
+    int8_t DayOfMonth(
+            const uint8_t targetDayOfWeek,
+            const uint8_t currentDayOfWeek,
+            const int8_t ordinal,
+            const uint8_t daysInMonth,
+            const uint8_t currentDate
+    )
+    {
+        if (ordinal >= 0) {
+            int8_t diffToTargetWeekday = (targetDayOfWeek - currentDayOfWeek + 7) % 7;
+            return currentDate + diffToTargetWeekday + ordinal * 7;
+        } else {
+            int8_t lastDayWeekday = (currentDayOfWeek + daysInMonth - currentDate) % 7;
+//            int8_t diffToTargetWeekday = (targetDayOfWeek - currentDayOfWeek + 7) % 7;
+            return daysInMonth - lastDayWeekday + targetDayOfWeek + ((ordinal + 1) * 7);
+        }
+    }
+
+    bool IsDST(const DSTData data,
+               const uint8_t month,
+               const uint8_t daysInMonth,
+               const uint8_t date,
+               const uint8_t dayOfWeek,
+               const uint8_t hour
+   )
     {
         std::array Days{ "SU"sv, "MO"sv, "TU"sv, "WE"sv, "TH"sv, "FR"sv, "SA"sv };
         std::array Months{ "JA"sv, "FE"sv, "MA"sv, "AP"sv, "MY"sv, "JN"sv, "JL"sv, "AU"sv, "SE"sv, "OC"sv, "NO"sv, "DE"sv };
-        fmt::print("data={{sO={},eO={},sSH={},eSH={},sM={},eM={},sDoW={},eDoW={}}}, m={}, day={}, dow={} h={}",
-            data.startOrdinal,
-            data.endOrdinal,
-            data.startShiftHours,
-            data.endShiftHours,
-            Months[data.startMonth],
-            Months[data.endMonth],
-            Days[data.startDayOfWeek],
-            Days[data.endDayOfWeek],
-            Months[month],
-            day,
-            Days[dayOfWeek],
-            hour
+        fmt::print("data={{sO={},eO={},sSH={},eSH={},sM={},eM={},sDoW={},eDoW={}}}, m={}, date={}, dow={} h={}}}",
+                   data.startOrdinal,
+                   data.endOrdinal,
+                   data.startShiftHours,
+                   data.endShiftHours,
+                   Months[data.startMonth],
+                   Months[data.endMonth],
+                   Days[data.startDayOfWeek],
+                   Days[data.endDayOfWeek],
+                   Months[month],
+                   date,
+                   Days[dayOfWeek],
+                   hour
         );
 
         if (month < data.startMonth || month > data.endMonth) {
@@ -804,6 +850,44 @@ namespace dst
 
         if (month > data.startMonth && month < data.endMonth) {
             return true;
+        }
+
+        if (month == data.startMonth) {
+            int8_t ordinal = data.startOrdinal <= 0b10 ? (int8_t)(data.startOrdinal) + 1: (int8_t)-1;
+            int8_t startDay = DayOfMonth(
+                    data.startDayOfWeek,
+                    dayOfWeek,
+                    ordinal,
+                    daysInMonth,
+                    date
+            );
+
+            if (startDay > 0 && date > startDay) {
+                return true;
+            }
+
+            if (date == startDay && hour >= data.startHour) {
+                return true;
+            }
+        }
+
+        if (month == data.endMonth) {
+            int8_t ordinal = data.endOrdinal <= 0b10 ? (int8_t)(data.endOrdinal) + 1 : (int8_t)-1;
+            int8_t endDay = DayOfMonth(
+                    data.endDayOfWeek,
+                    dayOfWeek,
+                    ordinal,
+                    daysInMonth,
+                    date
+            );
+
+            if (date < endDay) {
+                return true;
+            }
+
+            if (date == endDay && hour < data.endHour) {
+                return true;
+            }
         }
 
         return false;
@@ -837,7 +921,313 @@ enum
     Saturday
 };
 
+TEST(DayOfMonth, StartsWithSunday_FirstSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, 0, 31, 1), 1);
+}
+
+TEST(DayOfMonth, StartsWithSunday_SecondSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, 1, 31, 1), 8);
+}
+
+TEST(DayOfMonth, StartsWithSunday_ThirdSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, 2, 31, 1), 15);
+}
+
+TEST(DayOfMonth, StartsWithSunday_FourthSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, 3, 31, 1), 22);
+}
+
+TEST(DayOfMonth, StartsWithSunday_FifthSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, 4, 31, 1), 29);
+}
+
+TEST(DayOfMonth, StartsWithSunday_LastSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, -1, 31, 1), 29);
+}
+
+TEST(DayOfMonth, StartsWithSunday_SundayOrdinalMinus2)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, -2, 31, 1), 22);
+}
+
+TEST(DayOfMonth, StartsWithSunday_SundayOrdinalMinus3)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, -3, 31, 1), 15);
+}
+
+TEST(DayOfMonth, StartsWithSunday_SundayOrdinalMinus4)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, -4, 31, 1), 8);
+}
+
+TEST(DayOfMonth, StartsWithSunday_SundayOrdinalMinus5)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Sunday, -5, 31, 1), 1);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_FirstSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, 0, 31, 1), 2);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_SecondSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, 1, 31, 1), 9);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_ThirdSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, 2, 31, 1), 16);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_FourthSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, 3, 31, 1), 23);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_FifthSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, 4, 31, 1), 30);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_LastSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, -1, 31, 1), 30);
+}
+
+TEST(DayOfMonth, StartsWithSaturday_SundayOrdinalMinus2)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Saturday, -2, 31, 1), 23);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FirstSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, 0, 31, 1), 7);
+}
+
+TEST(DayOfMonth, StartsWithMonday_SecondSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, 1, 31, 1), 14);
+}
+
+TEST(DayOfMonth, StartsWithMonday_ThirdSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, 2, 31, 1), 21);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FourthSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, 3, 31, 1), 28);
+}
+
+TEST(DayOfMonth, StartsWithMonday_LastSunday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, -1, 31, 1), 28);
+}
+
+TEST(DayOfMonth, StartsWithMonday_SundayOrdinalMinus2)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, -2, 31, 1), 21);
+}
+
+TEST(DayOfMonth, StartsWithMonday_SundayOrdinalMinus3)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, -3, 31, 1), 14);
+}
+
+TEST(DayOfMonth, StartsWithMonday_SundayOrdinalMinus4)
+{
+    EXPECT_EQ(dst::DayOfMonth(Sunday, Monday, -4, 31, 1), 7);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FirstFriday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, 0, 31, 1), 5);
+}
+
+TEST(DayOfMonth, StartsWithMonday_SecondFriday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, 1, 31, 1), 12);
+}
+
+TEST(DayOfMonth, StartsWithMonday_ThirdFriday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, 2, 31, 1), 19);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FourthFriday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, 3, 31, 1), 26);
+}
+
+TEST(DayOfMonth, StartsWithMonday_LastFriday)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, -1, 31, 1), 26);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FridayOrdinalMinus2)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, -2, 31, 1), 19);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FridayOrdinalMinus3)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, -3, 31, 1), 12);
+}
+
+TEST(DayOfMonth, StartsWithMonday_FridayOrdinalMinus4)
+{
+    EXPECT_EQ(dst::DayOfMonth(Friday, Monday, -4, 31, 1), 5);
+}
+
+class IsDSTTest : public ::testing::Test
+{
+protected:
+    void SetUp() override {
+        _data.startOrdinal = dst::First;
+        _data.endOrdinal = dst::Last;
+
+        _data.startMonth = March;
+        _data.endMonth = November;
+
+        _data.startDayOfWeek = Sunday;
+        _data.endDayOfWeek = Sunday;
+
+        _data.startShiftHours = 1;
+        _data.endShiftHours = 1;
+
+        _data.startHour = 2;
+        _data.endHour = 2;
+    }
+
+    dst::DSTData _data{};
+};
+
+TEST_F(IsDSTTest, BeforeStart)
+{
+    EXPECT_FALSE(dst::IsDST(_data, January, dst::DaysInMonth(January, false), 1, Sunday, 0));
+}
+
+TEST_F(IsDSTTest, BeforeStart_SameMonth)
+{
+    EXPECT_FALSE(dst::IsDST(_data, March, dst::DaysInMonth(March, false), 1, Wednesday, 0));
+}
+
+TEST_F(IsDSTTest, BeforeStart_SameDay)
+{
+    EXPECT_FALSE(dst::IsDST(_data, March, dst::DaysInMonth(March, false), 5, Sunday, 0));
+}
+
+TEST_F(IsDSTTest, RightAfterStart)
+{
+    EXPECT_TRUE(dst::IsDST(_data, March, dst::DaysInMonth(March, false), 5, Sunday, 2));
+}
+
+TEST_F(IsDSTTest, BeforeEnd)
+{
+    EXPECT_TRUE(dst::IsDST(_data, October, dst::DaysInMonth(October, false), 1, Sunday, 0));
+}
+
+TEST_F(IsDSTTest, BeforeEnd_SameMonth)
+{
+    EXPECT_TRUE(dst::IsDST(_data, November, dst::DaysInMonth(November, false), 1, Wednesday, 0));
+}
+
+TEST_F(IsDSTTest, BeforeEnd_SameDay)
+{
+    EXPECT_TRUE(dst::IsDST(_data, November, dst::DaysInMonth(November, false), 26, Sunday, 0));
+}
+
+TEST_F(IsDSTTest, RightAfterEnd)
+{
+    EXPECT_FALSE(dst::IsDST(_data, November, dst::DaysInMonth(November, false), 26, Sunday, 3));
+}
+
+TEST_F(IsDSTTest, AfterEnd_SameMonth)
+{
+    EXPECT_FALSE(dst::IsDST(_data, November, dst::DaysInMonth(November, false), 27, Monday, 0));
+}
+
+TEST_F(IsDSTTest, AfterEnd)
+{
+    EXPECT_FALSE(dst::IsDST(_data, December, dst::DaysInMonth(December, false), 31, Sunday, 0));
+}
+
 // https://en.wikipedia.org/wiki/Daylight_saving_time_by_country
+
+//TEST(DST_FirstDayOfMonth, )
+
+// Test fixture for the DaysInMonth function
+class DaysInMonthTest : public testing::Test {
+protected:
+    // Initialize any objects or variables needed for each test case
+    void SetUp() override {
+    }
+
+    // Clean up any objects or variables created during testing
+    void TearDown() override {
+    }
+};
+
+// Test case for a regular year
+TEST_F(DaysInMonthTest, TestRegularYear) {
+    // Call the function with a regular year (not a leap year)
+    int days = dst::DaysInMonth(2, false);
+
+    // Check that the result is correct
+    EXPECT_EQ(days, 28);
+}
+
+// Test case for a leap year
+TEST_F(DaysInMonthTest, TestLeapYear) {
+    // Call the function with a leap year
+    int days = dst::DaysInMonth(2, true);
+
+    // Check that the result is correct
+    EXPECT_EQ(days, 29);
+}
+
+// Test case for January (month 1)
+TEST_F(DaysInMonthTest, TestJanuary) {
+    // Call the function with January
+    int days = dst::DaysInMonth(1, false);
+
+    // Check that the result is correct
+    EXPECT_EQ(days, 31);
+}
+
+// Test case for December (month 12)
+TEST_F(DaysInMonthTest, TestDecember) {
+    // Call the function with December
+    int days = dst::DaysInMonth(12, false);
+
+    // Check that the result is correct
+    EXPECT_EQ(days, 31);
+}
+
+// Test case for an invalid month (less than 1)
+TEST_F(DaysInMonthTest, TestInvalidMonth1) {
+    // Call the function with an invalid month
+    int days = dst::DaysInMonth(0, false);
+
+    // Check that the result is 0 (invalid input)
+    EXPECT_EQ(days, 0);
+}
+
+// Test case for an invalid month (greater than 12)
+TEST_F(DaysInMonthTest, TestInvalidMonth2) {
+    // Call the function with an invalid month
+    int days = dst::DaysInMonth(13, false);
+
+    // Check that the result is 0 (invalid input)
+    EXPECT_EQ(days, 0);
+}
 
 TEST(DST, BeforeStart_DifferentMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
 {
@@ -852,7 +1242,7 @@ TEST(DST, BeforeStart_DifferentMonth__Start_SecondSundayInMarchAt2_End_FirstSund
             .endDayOfWeek = Sunday
     };
 
-    EXPECT_FALSE(dst::IsDST(data, February, 0, Sunday, 0));
+    EXPECT_FALSE(dst::IsDST(data, February, 0, 0, Sunday, 0));
 }
 
 TEST(DST, BeforeStart_SameMonthBeforeTime__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
@@ -868,7 +1258,7 @@ TEST(DST, BeforeStart_SameMonthBeforeTime__Start_SecondSundayInMarchAt2_End_Firs
             .endDayOfWeek = Sunday
     };
 
-    EXPECT_FALSE(dst::IsDST(data, March, 0, Monday, 0));
+    EXPECT_FALSE(dst::IsDST(data, March, 0, 0, Monday, 0));
 }
 
 TEST(DST, BeforeEnd_NextMonthAfterStart__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
@@ -884,7 +1274,7 @@ TEST(DST, BeforeEnd_NextMonthAfterStart__Start_SecondSundayInMarchAt2_End_FirstS
             .endDayOfWeek = Sunday
     };
 
-    EXPECT_TRUE(dst::IsDST(data, April, 0, Monday, 0));
+    EXPECT_TRUE(dst::IsDST(data, April, 0, 0, Monday, 0));
 }
 
 TEST(DST, BeforeEnd_PreviousMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
@@ -900,7 +1290,7 @@ TEST(DST, BeforeEnd_PreviousMonth__Start_SecondSundayInMarchAt2_End_FirstSundayN
             .endDayOfWeek = Sunday
     };
 
-    EXPECT_TRUE(dst::IsDST(data, October, 0, Monday, 0));
+    EXPECT_TRUE(dst::IsDST(data, October, 0, 0, Monday, 0));
 }
 
 TEST(DST, BeforeEnd_SameMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
@@ -916,7 +1306,7 @@ TEST(DST, BeforeEnd_SameMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovem
             .endDayOfWeek = Sunday
     };
 
-    EXPECT_TRUE(dst::IsDST(data, November, 0, Monday, 0));
+    EXPECT_TRUE(dst::IsDST(data, November, 0, 0, Monday, 0));
 }
 
 TEST(DST, AfterEnd_NextMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemberAt2)
@@ -932,5 +1322,5 @@ TEST(DST, AfterEnd_NextMonth__Start_SecondSundayInMarchAt2_End_FirstSundayNovemb
             .endDayOfWeek = Sunday
     };
 
-    EXPECT_FALSE(dst::IsDST(data, December, 0, Monday, 0));
+    EXPECT_FALSE(dst::IsDST(data, December, 0, 0, Monday, 0));
 }
