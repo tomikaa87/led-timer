@@ -854,7 +854,7 @@ namespace dst
         }
 
         if (month == data.startMonth) {
-            int8_t ordinal = data.startOrdinal <= 0b10 ? (int8_t)(data.startOrdinal) + 1: (int8_t)-1;
+            int8_t ordinal = data.startOrdinal <= 0b10 ? (int8_t)(data.startOrdinal): (int8_t)-1;
             int8_t startDay = DayOfMonth(
                     data.startDayOfWeek,
                     dayOfWeek,
@@ -873,7 +873,7 @@ namespace dst
         }
 
         if (month == data.endMonth) {
-            int8_t ordinal = data.endOrdinal <= 0b10 ? (int8_t)(data.endOrdinal) + 1 : (int8_t)-1;
+            int8_t ordinal = data.endOrdinal <= 0b10 ? (int8_t)(data.endOrdinal) : (int8_t)-1;
             int8_t endDay = DayOfMonth(
                     data.endDayOfWeek,
                     dayOfWeek,
