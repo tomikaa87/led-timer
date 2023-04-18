@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.24)
 project(LedTimerSchedulerPlayground)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
-if (APPLE)
-    set(GITHUB_DIR "/Users/tkarpati/github")
-else(LINUX)
-    set(GITHUB_DIR "/home/tomikaa/github")
-endif()
+file(TO_CMAKE_PATH $ENV{GITHUB_DIR} GITHUB_DIR)
 
 add_executable(LedTimerSchedulerPlayground
         main.cpp

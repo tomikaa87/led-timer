@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <fmt/format.h>
 
+#include <array>
 #include <stack>
 #include <string_view>
 #include <vector>
@@ -814,8 +815,8 @@ namespace dst
             return currentDate + diffToTargetWeekday + ordinal * 7;
         } else {
             int8_t lastDayWeekday = (currentDayOfWeek + daysInMonth - currentDate) % 7;
-//            int8_t diffToTargetWeekday = (targetDayOfWeek - currentDayOfWeek + 7) % 7;
-            return daysInMonth - lastDayWeekday + targetDayOfWeek + ((ordinal + 1) * 7);
+            int8_t diffToTargetWeekday = targetDayOfWeek > 0 ? 7 - targetDayOfWeek : 0;
+            return daysInMonth - lastDayWeekday - diffToTargetWeekday + ((ordinal + 1) * 7);
         }
     }
 
