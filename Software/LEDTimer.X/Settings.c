@@ -137,8 +137,10 @@ void SettingsData_initWithDefaults(SettingsData* const data)
     data->dst.startDayOfWeek = 0;
     data->dst.startMonth = 2;
     data->dst.startShiftHours = 1;
+    data->dst.startShiftHoursLocal = 0;
     data->dst.endOrdinal = 2;
     data->dst.endDayOfWeek = 0;
     data->dst.endMonth = 9;
     data->dst.endShiftHours = 1;
+    data->dst.endShiftHoursLocal = 0;
 }
