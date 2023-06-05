@@ -152,5 +152,5 @@ void Graphics_drawScheduleSegmentIndicator(
 }
 
 void Graphics_drawScreenTitleHelper(const char* text, uint8_t pos);
-void Graphics_drawKeypadHelpBarSeparators();
+void Graphics_drawKeypadHelpBarSeparators(void);
 void Graphics_drawVerticalLine(uint8_t x, uint8_t line);

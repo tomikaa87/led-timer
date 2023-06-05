@@ -130,4 +130,15 @@ void SettingsData_initWithDefaults(SettingsData* const data)
     memset(data, 0, sizeof(SettingsData));
 
     data->output.brightness = 255;
+
+    // Default DST settings for EU
+    // Source: https://en.wikipedia.org/wiki/Daylight_saving_time_by_country
+    data->dst.startOrdinal = 2;
+    data->dst.startDayOfWeek = 0;
+    data->dst.startMonth = 2;
+    data->dst.startShiftHours = 1;
+    data->dst.endOrdinal = 2;
+    data->dst.endDayOfWeek = 0;
+    data->dst.endMonth = 9;
+    data->dst.endShiftHours = 1;
 }

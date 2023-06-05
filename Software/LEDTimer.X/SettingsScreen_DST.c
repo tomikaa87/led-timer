@@ -24,6 +24,8 @@
 #include "SSD1306.h"
 #include "Text.h"
 
+#include <stdio.h>
+
 static struct SettingsScreen_DST_Context {
     struct DST* settings;
     uint8_t selectionIndex;
@@ -134,7 +136,62 @@ END                             @4
 
 static void adjustSelectedItem()
 {
+    switch (context.selectionIndex) {
+        // Start ordinal
+        case 0:
+            if (++context.settings->startOrdinal > 2) {
+                context.settings->startOrdinal = 0;
+            }
+            break;
 
+        // Start day-of-week
+        case 1:
+            if (++context.settings->startDayOfWeek > 6) {
+                context.settings->startDayOfWeek = 0;
+            }
+            break;
+
+        // Start month
+        case 2:
+            if (++context.settings->startMonth > 11) {
+                context.settings->startMonth = 0;
+            }
+            break;
+
+        // Start shift hours
+        case 3:
+            ++context.settings->startShiftHours;
+            break;
+
+        // End ordinal
+        case 4:
+            if (++context.settings->endOrdinal > 2) {
+                context.settings->endOrdinal = 0;
+            }
+            break;
+
+        // End day-of-week
+        case 5:
+            if (++context.settings->endDayOfWeek > 6) {
+                context.settings->endDayOfWeek = 0;
+            }
+            break;
+
+        // End month
+        case 6:
+            if (++context.settings->endMonth > 11) {
+                context.settings->endMonth = 0;
+            }
+            break;
+
+        // End shift hours
+        case 7:
+            ++context.settings->endShiftHours;
+            break;
+
+        default:
+            break;
+    }
 }
 
 bool SettingsScreen_DST_handleKeyPress(const uint8_t keyCode, const bool hold)
