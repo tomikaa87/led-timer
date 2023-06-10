@@ -324,10 +324,68 @@ namespace scheduler
         return foundIndex >= 0;
     }
 
+    bool Scheduler_GetNextTransitionV2(
+            const Schedule* const schedules,
+            const int8_t scheduleCount,
+            int16_t time,
+            int8_t* const index,
+            bool* const on
+    ) {
+        // Calculate the state for the specified time
+        bool currentlyOn = false;
+        for (int8_t i = 0; i < scheduleCount; ++i) {
+            const Schedule s = schedules[i];
+            if (
+                (s.on <= s.off && time >= s.on && time < s.off)
+                || (s.off < s.on && (time >= s.on || time < s.off))
+            ) {
+                currentlyOn = true;
+                break;
+            }
+        }
+
+        bool targetState = !currentlyOn;
+        int16_t searchTime = time;
+        bool lastOnForTime = currentlyOn;
+        while (true) {
+            if (searchTime == 24) {
+                searchTime = 0;
+            }
+
+            if (searchTime == time) {
+                return false;
+            }
+
+            bool onForTime = false;
+            int8_t lastOnIndex = -1;
+            int8_t lastOffIndex = -1;
+            for (int8_t i = 0; i < scheduleCount; ++i) {
+                const Schedule s = schedules[i];
+                if (
+                    (s.on <= s.off && searchTime >= s.on && searchTime < s.off)
+                    || (s.off < s.on && (searchTime >= s.on || searchTime < s.off))
+                ) {
+                    lastOnIndex = i;
+                    onForTime = true;
+                } else {
+                    lastOffIndex = i;
+                }
+            }
+
+            if (onForTime != lastOnForTime && onForTime == targetState) {
+                *index = targetState ? lastOnIndex : lastOffIndex;
+                *on = targetState;
+                return true;
+            }
+
+            ++searchTime;
+        }
+    }
+
     bool GetNextTransition(const Schedules& schedules, const int time, int& index, bool& on)
     {
         int8_t idx{ -1 };
-        const auto result = Scheduler_GetNextTransition(
+        const auto result = Scheduler_GetNextTransitionV2(
                 schedules.data(),
                 static_cast<int8_t>(schedules.size()),
                 static_cast<int16_t>(time),
