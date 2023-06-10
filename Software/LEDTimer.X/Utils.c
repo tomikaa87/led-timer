@@ -81,3 +81,99 @@ uint8_t Date_lastDayOfMonth(const uint8_t month, const bool leapYear)
     return 31;
 #endif
 }
+
+bool Date_dayOfMonth(
+    const uint8_t targetDayOfWeek,
+    const uint8_t currentDayOfWeek,
+    const int8_t ordinal,
+    const uint8_t daysInMonth,
+    const uint8_t currentDate
+)
+{
+    if (ordinal >= 0) {
+        int8_t diffToTargetWeekday =
+            (targetDayOfWeek - currentDayOfWeek + 7) % 7u;
+
+        return currentDate + diffToTargetWeekday + ordinal * 7;
+    } else {
+        int8_t lastDayWeekday =
+            (currentDayOfWeek + daysInMonth - currentDate) % 7;
+
+        int8_t diffToTargetWeekday =
+            targetDayOfWeek > 0
+                ? 7 - (int8_t)targetDayOfWeek
+                : 0;
+
+        return
+            daysInMonth
+            - lastDayWeekday
+            - diffToTargetWeekday
+            + ((ordinal + 1) * 7);
+    }
+}
+
+bool Date_isDst(
+    const DSTData data,
+    const uint8_t month,
+    const uint8_t daysInMonth,
+    const uint8_t date,
+    const uint8_t dayOfWeek,
+    const uint8_t hour
+)
+{
+    if (month < data.startMonth || month > data.endMonth) {
+        return false;
+    }
+
+    if (month > data.startMonth && month < data.endMonth) {
+        return true;
+    }
+
+    if (month == data.startMonth) {
+        int8_t ordinal =
+            data.startOrdinal <= 0b10
+                ? (int8_t)(data.startOrdinal)
+                : (int8_t)-1;
+
+        int8_t startDay = Date_dayOfMonth(
+            data.startDayOfWeek,
+            dayOfWeek,
+            ordinal,
+            daysInMonth,
+            date
+        );
+
+        if (startDay > 0 && date > startDay) {
+            return true;
+        }
+
+        if (date == startDay && hour >= data.startHour) {
+            return true;
+        }
+    }
+
+    if (month == data.endMonth) {
+        int8_t ordinal =
+            data.endOrdinal <= 0b10
+                ? (int8_t)(data.endOrdinal)
+                : (int8_t)-1;
+
+        int8_t endDay = Date_dayOfMonth(
+            data.endDayOfWeek,
+            dayOfWeek,
+            ordinal,
+            daysInMonth,
+            date
+        );
+
+        if (date < endDay) {
+            return true;
+        }
+
+        if (date == endDay && hour < data.endHour) {
+            return true;
+        }
+    }
+
+    return false;
+}

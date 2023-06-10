@@ -385,7 +385,7 @@ namespace scheduler
     bool GetNextTransition(const Schedules& schedules, const int time, int& index, bool& on)
     {
         int8_t idx{ -1 };
-        const auto result = Scheduler_GetNextTransitionV2(
+        const auto result = Scheduler_GetNextTransition(
                 schedules.data(),
                 static_cast<int8_t>(schedules.size()),
                 static_cast<int16_t>(time),

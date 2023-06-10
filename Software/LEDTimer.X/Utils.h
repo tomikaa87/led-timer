@@ -28,5 +28,41 @@ extern const char* Date_MonthShortNames[12];
 
 typedef uint8_t YearsFrom2023;
 
+typedef struct {
+    // Byte 0
+    uint8_t startOrdinal : 2;       // 00: 1st, 01: 2nd, 11: last
+    uint8_t endOrdinal : 2;
+    uint8_t startShiftHours : 2;    // 0..3
+    uint8_t endShiftHours : 2;
+    // Byte 1
+    uint8_t startMonth : 4;         // 0..11
+    uint8_t endMonth : 4;           // 0..11
+    // Byte 2
+    uint8_t startDayOfWeek : 3;     // 0..6
+    uint8_t endDayOfWeek : 3;
+    uint8_t reserved : 2;
+    // Byte 3
+    uint8_t startHour : 4;
+    uint8_t endHour : 4;
+} DSTData;
+
 bool Date_isLeapYear(YearsFrom2023 year);
+
 uint8_t Date_lastDayOfMonth(uint8_t month, bool leapYear);
+
+bool Date_dayOfMonth(
+    uint8_t targetDayOfWeek,
+    uint8_t currentDayOfWeek,
+    int8_t ordinal,
+    uint8_t daysInMonth,
+    uint8_t currentDate
+);
+
+bool Date_isDst(
+    DSTData data,
+    uint8_t month,
+    uint8_t daysInMonth,
+    uint8_t date,
+    uint8_t dayOfWeek,
+    uint8_t hour
+);
