@@ -37,3 +37,6 @@ Hardware/Private
 # CLion
 **/cmake-build-*/
 **/.idea
+
+# VSCode
+**/.vscode/
