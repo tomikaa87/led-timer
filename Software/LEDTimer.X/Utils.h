@@ -44,7 +44,7 @@ typedef struct {
     // Byte 3
     uint8_t startHour : 4;
     uint8_t endHour : 4;
-} DSTData;
+} Date_DstData;
 
 bool Date_isLeapYear(YearsFrom2023 year);
 
@@ -59,7 +59,7 @@ bool Date_dayOfMonth(
 );
 
 bool Date_isDst(
-    DSTData data,
+    Date_DstData data,
     uint8_t month,
     uint8_t daysInMonth,
     uint8_t date,

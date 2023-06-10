@@ -22,6 +22,7 @@
 
 #include "Config.h"
 #include "Types.h"
+#include "Utils.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -94,22 +95,7 @@ typedef struct
         int8_t timeZoneOffsetHalfHours;
     } time;
 
-    struct DST
-    {
-        // Byte 0
-        uint8_t startOrdinal : 2;           // 00: 1st, 01: 2nd, 10: last
-        uint8_t endOrdinal : 2;
-        uint8_t startShiftHours : 2;        // 0..3
-        uint8_t endShiftHours : 2;
-        // Byte 1
-        uint8_t startMonth : 4;             // 0..11
-        uint8_t endMonth : 4;               // 0..11
-        // Byte 2
-        uint8_t startDayOfWeek : 3;         // 0..6
-        uint8_t endDayOfWeek : 3;
-        uint8_t startShiftHoursLocal : 1;   // 0: UTC, 1: Local time zone
-        uint8_t endShiftHoursLocal : 1;
-    } dst;
+    Date_DstData dst;
 
     // This must be the last field
     uint8_t crc8;

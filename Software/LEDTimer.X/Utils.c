@@ -113,7 +113,7 @@ bool Date_dayOfMonth(
 }
 
 bool Date_isDst(
-    const DSTData data,
+    const Date_DstData data,
     const uint8_t month,
     const uint8_t daysInMonth,
     const uint8_t date,
