@@ -1,0 +1,3 @@
+[submodule "Software/LEDTimer.X/cmake-microchip"]
+	path = Software/LEDTimer.X/cmake-microchip
+	url = https://github.com/tomikaa87/cmake-microchip.git
