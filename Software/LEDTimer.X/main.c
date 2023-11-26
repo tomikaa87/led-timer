@@ -210,7 +210,11 @@ void main(void)
     Settings_init();
     Settings_load();
 
-    SSD1306_setContrastLevel(Settings_data.display.brightness);
+    SSD1306_setContrastLevel(
+        System_isRunningFromBackupBattery()
+            ? SSD1306_CONTRAST_LOWEST
+            : Settings_data.display.brightness
+    );
 
     showStartupScreen();
 

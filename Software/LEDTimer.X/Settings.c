@@ -131,6 +131,8 @@ void SettingsData_initWithDefaults(SettingsData* const data)
 
     data->output.brightness = 255;
 
+    data->display.brightness = 2;
+
     // Default DST settings for EU
     // Source: https://en.wikipedia.org/wiki/Daylight_saving_time_by_country
     data->dst.startOrdinal = 2;

@@ -281,6 +281,15 @@ static bool wakeUpDisplay()
     return false;
 }
 
+static void updateDisplayContrast()
+{
+    SSD1306_setContrastLevel(
+        System_isRunningFromBackupBattery()
+            ? SSD1306_CONTRAST_LOWEST
+            : Settings_data.display.brightness
+    );
+}
+
 static void switchToScreen(const UI_Screen screen)
 {
     context.screen = screen;
@@ -306,6 +315,7 @@ void UI_task()
         // TODO handle wake up events
     }
     if (context.externalEvents & UI_ExternalEvent_PowerInputChanged) {
+        updateDisplayContrast();
         wakeUpDisplay();
         context.forceUpdate = true;
     }
@@ -412,7 +422,7 @@ void UI_keyEvent(uint8_t keyCode)
                 case Settings_MenuScreen_Exited:
                     // Save settings
                     memcpy(&Settings_data, &context.modifiedSettings, sizeof(SettingsData));
-                    SSD1306_setContrastLevel(Settings_data.display.brightness);
+                    updateDisplayContrast();
                     Settings_save();
                     SunriseSunset_update();
 
