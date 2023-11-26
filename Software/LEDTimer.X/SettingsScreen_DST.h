@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "Settings.h"
+#include "Utils.h"
 
-void SettingsScreen_DST_init(struct DST* settings);
+void SettingsScreen_DST_init(Date_DstData* settings);
 void SettingsScreen_DST_update(bool redraw);
 bool SettingsScreen_DST_handleKeyPress(uint8_t keyCode, bool hold);

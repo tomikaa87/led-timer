@@ -27,11 +27,11 @@
 #include <stdio.h>
 
 static struct SettingsScreen_DST_Context {
-    struct DST* settings;
+    Date_DstData* settings;
     uint8_t selectionIndex;
 } context;
 
-void SettingsScreen_DST_init(struct DST* settings)
+void SettingsScreen_DST_init(Date_DstData* settings)
 {
     context.settings = settings;
     context.selectionIndex = 0;
