@@ -22,6 +22,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 extern const char* Date_DayShortNames[7];
 extern const char* Date_MonthShortNames[12];
@@ -66,3 +67,9 @@ bool Date_isDst(
     uint8_t dayOfWeek,
     uint8_t hour
 );
+
+#define FormatSunOffset(_buf, _offset)\
+    sprintf((_buf), "%c%2u",\
+        (_offset) >= 0 ? '+' : '-',\
+        abs((_offset))\
+    );

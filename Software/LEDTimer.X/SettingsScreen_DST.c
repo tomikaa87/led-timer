@@ -50,51 +50,54 @@ static void drawDstSettingsLine(const bool start)
     uint8_t line = start ? 3 : 5;
     uint8_t itemIndex = start ? 0 : 4;
 
-    sprintf(
-        buf,
-        "%4s",
+    x = Text_draw(
         OrdinalNames[
             start
                 ? context.settings->startOrdinal
                 : context.settings->endOrdinal
-        ]
+        ],
+        line,
+        x,
+        0,
+        context.selectionIndex == itemIndex
     );
-    x = Text_draw(buf, line, x, 0, context.selectionIndex == itemIndex);
     x += 5;
     ++itemIndex;
 
-    sprintf(
-        buf,
-        "%3s",
+    x = Text_draw(
         Date_DayShortNames[
             start
                 ? context.settings->startDayOfWeek
                 : context.settings->endDayOfWeek
-        ]
+        ],
+        line,
+        x,
+        0,
+        context.selectionIndex == itemIndex
     );
-    x = Text_draw(buf, line, x, 0, context.selectionIndex == itemIndex);
     x += 5;
     ++itemIndex;
 
     x = Text_draw("OF", line, x, 0, false);
     x += 5;
 
-    sprintf(
-        buf,
-        "%3s",
+    x = Text_draw(
         Date_MonthShortNames[
             start
                 ? context.settings->startMonth
                 : context.settings->endMonth
-        ]
+        ],
+        line,
+        x,
+        0,
+        context.selectionIndex == itemIndex
     );
-    x = Text_draw(buf, line, x, 0, context.selectionIndex == itemIndex);
     x += 5;
     ++itemIndex;
 
     sprintf(
         buf,
-        "%d:00",
+        "%u:00",
         start
             ? context.settings->startShiftHours
             : context.settings->endShiftHours

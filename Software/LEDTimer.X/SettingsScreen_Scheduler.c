@@ -250,7 +250,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 case Settings_IntervaSwitchType_Sunset: {
                     // Offset value label
                     char s[4];
-                    sprintf(s, "%+3.2d", context.settings->intervals[context.intervalIndex].onSwitch.sunOffset);
+                    FormatSunOffset(s, context.settings->intervals[context.intervalIndex].onSwitch.sunOffset);
                     Text_draw(s, 4, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(4));
                     break;
                 }
@@ -259,11 +259,11 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     char s[3];
 
                     // Time hour value label
-                    sprintf(s, "%2d", context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
+                    sprintf(s, "%2u", context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
                     Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(4));
 
                     // Time minute value label
-                    sprintf(s, "%02d", context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
+                    sprintf(s, "%02u", context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
                     Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(5));
                     break;
                 }
@@ -274,7 +274,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 case Settings_IntervaSwitchType_Sunset: {
                     // Offset value label
                     char s[4];
-                    sprintf(s, "%+3.2d", context.settings->intervals[context.intervalIndex].offSwitch.sunOffset);
+                    FormatSunOffset(s, context.settings->intervals[context.intervalIndex].offSwitch.sunOffset);
                     Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(7));
                     break;
                 }
@@ -283,11 +283,11 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     char s[3];
 
                     // Time hour value label
-                    sprintf(s, "%2d", context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
+                    sprintf(s, "%2u", context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
                     Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(7));
 
                     // Time minute value label
-                    sprintf(s, "%02d", context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
+                    sprintf(s, "%02u", context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
                     Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(8));
                     break;
                 }

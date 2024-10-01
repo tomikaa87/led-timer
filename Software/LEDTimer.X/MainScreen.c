@@ -182,9 +182,11 @@ static void drawScheduleWidget(const bool redraw)
                 uint8_t hours = (uint8_t)(transitionTime / 60);
                 uint8_t minutes = (uint8_t)(transitionTime - hours * 60);
 
+                uint8_t x = Text_draw(on ? "ON : " : "OFF: ", 0, StartPos, 0, false);
+
                 char buf[25] = { 0 };
-                sprintf(buf, "%3s: %2u:%02u", on ? "ON" : "OFF", hours, minutes);
-                uint8_t x = Text_draw(buf, 0, StartPos, 0, false);
+                sprintf(buf, "%2u:%02u", hours, minutes);
+                x = Text_draw(buf, 0, x, 0, false);
 
                 // Sun-based switch time indicator
                 if (
@@ -212,7 +214,7 @@ static void drawScheduleWidget(const bool redraw)
                             : 0
                     );
 
-                    sprintf(buf, "%+3.2d", sw->sunOffset);
+                    FormatSunOffset(buf, sw->sunOffset);
                     x += Graphics_ArrowDownIconWidth + 5;
                     x = Text_draw(buf, 0, x, 0, false);
                 }
