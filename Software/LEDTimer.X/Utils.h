@@ -69,7 +69,7 @@ bool Date_isDst(
 );
 
 #define FormatSunOffset(_buf, _offset)\
-    sprintf((_buf), "%c%2u",\
+    sprintf((_buf), "%c%02u",\
         (_offset) >= 0 ? '+' : '-',\
         abs((_offset))\
     );

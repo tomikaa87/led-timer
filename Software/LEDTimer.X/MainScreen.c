@@ -182,7 +182,7 @@ static void drawScheduleWidget(const bool redraw)
                 uint8_t hours = (uint8_t)(transitionTime / 60);
                 uint8_t minutes = (uint8_t)(transitionTime - hours * 60);
 
-                uint8_t x = Text_draw(on ? "ON : " : "OFF: ", 0, StartPos, 0, false);
+                uint8_t x = Text_draw(on ? "ON:  " : "OFF: ", 0, StartPos, 0, false);
 
                 char buf[25] = { 0 };
                 sprintf(buf, "%2u:%02u", hours, minutes);
