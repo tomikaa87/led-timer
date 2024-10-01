@@ -25,6 +25,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <time.h>
 
 typedef int16_t Clock_Ticks;
 typedef int16_t Clock_Time;
@@ -33,22 +34,15 @@ typedef volatile struct
 {
     volatile Clock_Ticks ticks;
     volatile Clock_Ticks fastTicks;
-    volatile Clock_Time minutesSinceMidnight;
-    volatile uint8_t seconds;
+    volatile time_t epoch;
     volatile bool updateCalendar;
 } Clock_InterruptContext;
 
 #define Clock_handleRTCTimerInterrupt() {\
     extern Clock_InterruptContext Clock_interruptContext; \
     Clock_interruptContext.ticks += 1; \
-    Clock_interruptContext.seconds += 2; \
-	if (Clock_interruptContext.seconds >= 60) { \
-        Clock_interruptContext.seconds = 0; \
-        if (++Clock_interruptContext.minutesSinceMidnight >= 1440) { \
-            Clock_interruptContext.minutesSinceMidnight = 0; \
-            Clock_interruptContext.updateCalendar = true; \
-        } \
-    } \
+    Clock_interruptContext.epoch += 2; \
+    Clock_interruptContext.updateCalendar = true; \
 }
 
 #define Clock_handleFastTimerInterrupt() { \
@@ -56,7 +50,7 @@ typedef volatile struct
     ++Clock_interruptContext.fastTicks; \
 }
 
-inline uint8_t Clock_getSeconds(void);
+//inline uint8_t Clock_getSeconds(void);
 inline Clock_Time Clock_getMinutesSinceMidnight(void);
 void Clock_setMinutesSinceMidnight(Clock_Time value);
 inline Clock_Ticks Clock_getTicks(void);
@@ -70,4 +64,4 @@ inline uint8_t Clock_getMonth(void);
 inline uint8_t Clock_getDay(void);
 inline uint8_t Clock_getWeekday(void);
 inline bool Clock_isLeapYear(void);
-uint16_t Clock_calculateDayOfYear(void);
+uint16_t Clock_getDayOfYear(void);

@@ -30,38 +30,56 @@
 Clock_InterruptContext Clock_interruptContext = {
     .ticks = 0,
     .fastTicks = 0,
-    .minutesSinceMidnight = 0,
-    .seconds = 0
+    .epoch = 0
 };
 
 static struct Clock_Context {
+    uint8_t hour;
+    uint8_t minute;
     uint8_t day : 5;
     uint8_t weekday : 3;
     uint8_t leapYear : 1;
-    uint8_t month : 7;
+    uint8_t month : 6;
+    uint8_t initialUpdate : 1;
     YearsFrom2023 year;
+    uint16_t dayOfYear;
 } context = {
+    .hour = 0,
+    .minute = 0,
     .day = 1,
     .weekday = 0,
     .month = 1,
-    .year = 0
+    .initialUpdate = 1,
+    .year = 0,
+    .dayOfYear = 0
 };
 
-inline uint8_t Clock_getSeconds()
-{
-    return Clock_interruptContext.seconds;
-}
+//inline uint8_t Clock_getSeconds()
+//{
+//    return Clock_interruptContext.epoch;
+//}
 
 inline Clock_Time Clock_getMinutesSinceMidnight()
 {
-    return Clock_interruptContext.minutesSinceMidnight;
+    return context.hour * 60 + context.minute;
 }
 
 void Clock_setMinutesSinceMidnight(const Clock_Time value)
 {
+    context.hour = (uint8_t)(value / 60);
+    context.minute = (uint8_t)(value - context.hour * 60);
+
+    struct tm time = {};
+    time.tm_hour = context.hour;
+    time.tm_min = context.minute;
+    time.tm_mday = context.day;
+    time.tm_mon = context.month;
+    time.tm_year = (int)context.year + 2023 - 1900;
+
+    Clock_interruptContext.epoch = mktime(&time);
+    Clock_interruptContext.updateCalendar = true;
+
     TMR1_WriteTimer(0);
-    Clock_interruptContext.minutesSinceMidnight = value;
-    Clock_interruptContext.seconds = 0;
 }
 
 inline Clock_Ticks Clock_getTicks()
@@ -89,20 +107,22 @@ void Clock_task()
     if (Clock_interruptContext.updateCalendar) {
         Clock_interruptContext.updateCalendar = false;
 
-        if (++context.weekday > 6) {
-            context.weekday = 0;
-        }
+        struct tm* time = gmtime((const time_t*)Clock_interruptContext.epoch);
 
-        if (++context.day > Date_lastDayOfMonth(context.month, context.leapYear)) {
-            context.day = 1;
+        bool updateSunriseSunset = context.dayOfYear != time->tm_yday || context.initialUpdate;
 
-            if (++context.month > 11) {
-                context.month = 1;
-                ++context.year;
+        context.initialUpdate = false;
 
-                context.leapYear = Date_isLeapYear(context.year);
-            }
+        context.hour = (uint8_t)time->tm_hour;
+        context.minute = (uint8_t)time->tm_min;
+        context.day = (uint8_t)time->tm_mday;
+        context.weekday = (uint8_t)time->tm_wday;
+        context.month = (uint8_t)time->tm_mon + 1;
+        context.year = (uint8_t)(time->tm_year + 1900 - 2023);
+        context.leapYear = Date_isLeapYear(context.year);
+        context.dayOfYear = (uint16_t)time->tm_yday;
 
+        if (updateSunriseSunset) {
             SunriseSunset_update();
         }
     }
@@ -121,8 +141,16 @@ void Clock_setDate(
     context.year = year;
     context.month = month;
     context.day = day;
-    context.weekday = weekday;
-    context.leapYear = Date_isLeapYear(context.year);
+
+    struct tm time = {};
+    time.tm_hour = context.hour;
+    time.tm_min = context.minute;
+    time.tm_mday = context.day;
+    time.tm_mon = context.month;
+    time.tm_year = (int)context.year + 2023 - 1900;
+
+    Clock_interruptContext.epoch = mktime(&time);
+    Clock_interruptContext.updateCalendar = true;
 
     SunriseSunset_update();
 }
@@ -152,15 +180,7 @@ inline bool Clock_isLeapYear()
     return context.leapYear;
 }
 
-uint16_t Clock_calculateDayOfYear()
+uint16_t Clock_getDayOfYear()
 {
-    uint16_t day = 0;
-
-    for (uint8_t i = 1; i < context.month; ++i) {
-        day += Date_lastDayOfMonth(i, context.leapYear);
-    }
-
-    day += context.day;
-
-    return day;
+    return context.dayOfYear;
 }
