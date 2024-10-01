@@ -41,13 +41,15 @@ def make_lut(latitude: float, longitude: float):
     print('// Made by SunriseSunsetLUTGenerator.py.')
     print('// First value is the sunrise, second is the sunset, both measured in minutes from midnight, in UTC.')
     print('// During non-leap years, February 29th (index=59) must be skipped, all subsequent indices must be offset by 1.')
-    print('const Clock_Time SunriseSunsetLUT[366][2] = {\n    ', end='')
+    print('const uint8_t SunriseSunsetLUT[366][2] = {\n    ', end='')
     column = 0
     for doy in range(0, 366):
         sunrise, sunset = calculate(latitude, longitude, 2024, doy)
-        sunrise_minutes_from_midnight = sunrise[0] * 60 + sunrise[1]
-        sunset_minutes_from_midnight = sunset[0] * 60 + sunset[1]
-        print(f'/* Day {doy + 1:03d} */ {{ 0x{sunrise_minutes_from_midnight:04X}, 0x{sunset_minutes_from_midnight:04X} }}', end='')
+        sunrise_buckets_from_midnight = int((sunrise[0] * 60 + sunrise[1]) / 6)
+        sunset_buckets_from_midnight = int((sunset[0] * 60 + sunset[1]) / 6)
+        assert(0 <= sunrise_buckets_from_midnight <= 255)
+        assert(0 <= sunset_buckets_from_midnight <= 255)
+        print(f'/* Day {doy + 1:03d} */ {{ 0x{sunrise_buckets_from_midnight:02X}, 0x{sunset_buckets_from_midnight:02X} }}', end='')
         column += 1
         delimiter = ',' if doy < 365 else ''
         print(delimiter, end='')

@@ -120,7 +120,7 @@ Clock_Time SunriseSunset_calculate(
     return (Clock_Time)hour * 60 + minute;
 }
 #else
-extern const Clock_Time SunriseSunsetLUT[366][2];
+extern const uint8_t SunriseSunsetLUT[366][2];
 
 Clock_Time SunriseSunset_calculate(
     const bool sunset,
@@ -130,7 +130,7 @@ Clock_Time SunriseSunset_calculate(
         return 0;
     }
 
-    Clock_Time t = SunriseSunsetLUT[dayOfYear][sunset ? 1 : 0];
+    Clock_Time t = (Clock_Time)SunriseSunsetLUT[dayOfYear][sunset ? 1 : 0] * 6;
     t += Settings_data.time.timeZoneOffsetHalfHours * 30;
 
     return t;
