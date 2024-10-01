@@ -40,8 +40,8 @@ void SettingsScreen_DST_init(Date_DstData* settings)
 static void drawDstSettingsLine(const bool start)
 {
     static const char* OrdinalNames[4] = {
-        "1ST",
-        "2ND",
+        "1ST ",
+        "2ND ",
         "LAST"
     };
 
