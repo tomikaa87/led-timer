@@ -27,7 +27,7 @@
 extern const char* Date_DayShortNames[7];
 extern const char* Date_MonthShortNames[12];
 
-typedef uint8_t YearsFrom2023;
+typedef uint8_t YearsFrom1970;
 
 typedef struct {
     // Byte 0
@@ -47,7 +47,7 @@ typedef struct {
     uint8_t endHour : 4;
 } Date_DstData;
 
-bool Date_isLeapYear(YearsFrom2023 year);
+bool Date_isLeapYear(YearsFrom1970 year);
 
 uint8_t Date_lastDayOfMonth(uint8_t month, bool leapYear);
 

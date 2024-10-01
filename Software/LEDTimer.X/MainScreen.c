@@ -130,12 +130,9 @@ static void drawKeypadHelpBar()
 
 static void drawClock()
 {
-    uint8_t hours = (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
-    uint8_t minutes = (uint8_t)(Clock_getMinutesSinceMidnight() - hours * 60);
-
     char s[6];
 //    snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
-    sprintf(s, "%02u:%02u", hours, minutes);
+    sprintf(s, "%02u:%02u", Clock_getHour(), Clock_getMinute());
 
     Text_draw7Seg(s, 3, 15, false);
 }

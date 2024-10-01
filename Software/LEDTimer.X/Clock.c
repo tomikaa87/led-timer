@@ -19,6 +19,7 @@
 */
 
 #include "Clock.h"
+#include "Settings.h"
 #include "SunsetSunrise.h"
 
 #include "mcc_generated_files/tmr1.h"
@@ -30,38 +31,55 @@
 Clock_InterruptContext Clock_interruptContext = {
     .ticks = 0,
     .fastTicks = 0,
-    .minutesSinceMidnight = 0,
-    .seconds = 0
+    .utcEpoch = 1704067200, // 2024-01-01 00:00:00
+    .updateCalendar = true
 };
 
 static struct Clock_Context {
+    uint8_t hour;
+    uint8_t minute;
     uint8_t day : 5;
     uint8_t weekday : 3;
     uint8_t leapYear : 1;
-    uint8_t month : 7;
-    YearsFrom2023 year;
+    uint8_t month : 6;
+    uint8_t initialUpdate : 1;
+    YearsFrom1970 year;
+    uint16_t dayOfYear;
 } context = {
+    .hour = 0,
+    .minute = 0,
     .day = 1,
     .weekday = 0,
     .month = 1,
-    .year = 0
+    .initialUpdate = 1,
+    .year = 0,
+    .dayOfYear = 0
 };
-
-inline uint8_t Clock_getSeconds()
-{
-    return Clock_interruptContext.seconds;
-}
 
 inline Clock_Time Clock_getMinutesSinceMidnight()
 {
-    return Clock_interruptContext.minutesSinceMidnight;
+    return (Clock_Time)context.hour * 60 + context.minute;
 }
 
-void Clock_setMinutesSinceMidnight(const Clock_Time value)
+void Clock_setTime(const uint8_t hour, const uint8_t minute)
 {
+    context.hour = hour;
+    context.minute = minute;
+
+    struct tm time = {};
+    time.tm_hour = context.hour;
+    time.tm_min = context.minute;
+    time.tm_mday = context.day;
+    time.tm_mon = context.month - 1;
+    time.tm_year = (int)context.year + 70;
+
+    TMR1_StopTimer();
+    Clock_interruptContext.utcEpoch = mktime(&time)
+        - (time_t)Settings_data.time.timeZoneOffsetHalfHours * 30 * 60;
     TMR1_WriteTimer(0);
-    Clock_interruptContext.minutesSinceMidnight = value;
-    Clock_interruptContext.seconds = 0;
+    TMR1_StartTimer();
+
+    Clock_interruptContext.updateCalendar = true;
 }
 
 inline Clock_Ticks Clock_getTicks()
@@ -89,45 +107,61 @@ void Clock_task()
     if (Clock_interruptContext.updateCalendar) {
         Clock_interruptContext.updateCalendar = false;
 
-        if (++context.weekday > 6) {
-            context.weekday = 0;
-        }
+        time_t localTime = Clock_interruptContext.utcEpoch +
+            (time_t)Settings_data.time.timeZoneOffsetHalfHours * 30 * 60;
 
-        if (++context.day > Date_lastDayOfMonth(context.month, context.leapYear)) {
-            context.day = 1;
+        struct tm* time = gmtime(&localTime);
 
-            if (++context.month > 11) {
-                context.month = 1;
-                ++context.year;
+        bool updateSunriseSunset = context.dayOfYear != time->tm_yday || context.initialUpdate;
 
-                context.leapYear = Date_isLeapYear(context.year);
-            }
+        context.initialUpdate = false;
 
+        context.hour = (uint8_t)time->tm_hour;
+        context.minute = (uint8_t)time->tm_min;
+        context.day = (uint8_t)time->tm_mday;
+        context.weekday = (uint8_t)time->tm_wday;
+        context.month = (uint8_t)time->tm_mon + 1;
+        context.year = (uint8_t)(time->tm_year - 70);
+        context.leapYear = Date_isLeapYear(context.year);
+        context.dayOfYear = (uint16_t)time->tm_yday;
+
+        if (updateSunriseSunset) {
             SunriseSunset_update();
         }
     }
 }
 
 void Clock_setDate(
-    const YearsFrom2023 year,
+    const YearsFrom1970 year,
     const uint8_t month,
-    const uint8_t day,
-    const uint8_t weekday
+    const uint8_t day
 ) {
-    if (month > 12 || day > 31 || weekday > 6) {
+    if (month > 12 || day > 31) {
         return;
     }
 
     context.year = year;
     context.month = month;
     context.day = day;
-    context.weekday = weekday;
-    context.leapYear = Date_isLeapYear(context.year);
+
+    struct tm time = {};
+    time.tm_hour = context.hour;
+    time.tm_min = context.minute;
+    time.tm_mday = context.day;
+    time.tm_mon = context.month - 1;
+    time.tm_year = (int)context.year + 70;
+
+    TMR1_StopTimer();
+    Clock_interruptContext.utcEpoch = mktime(&time) -
+        (time_t)Settings_data.time.timeZoneOffsetHalfHours * 30 * 60;
+    TMR1_StartTimer();
+
+    Clock_interruptContext.updateCalendar = true;
 
     SunriseSunset_update();
 }
 
-inline YearsFrom2023 Clock_getYear()
+inline YearsFrom1970 Clock_getYear()
 {
     return context.year;
 }
@@ -152,15 +186,17 @@ inline bool Clock_isLeapYear()
     return context.leapYear;
 }
 
-uint16_t Clock_calculateDayOfYear()
+uint16_t Clock_getDayOfYear()
 {
-    uint16_t day = 0;
+    return context.dayOfYear;
+}
 
-    for (uint8_t i = 1; i < context.month; ++i) {
-        day += Date_lastDayOfMonth(i, context.leapYear);
-    }
+inline uint8_t Clock_getHour()
+{
+    return context.hour;
+}
 
-    day += context.day;
-
-    return day;
+inline uint8_t Clock_getMinute()
+{
+    return context.minute;
 }

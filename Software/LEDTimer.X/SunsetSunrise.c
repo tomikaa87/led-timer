@@ -168,7 +168,7 @@ void SunriseSunset_update()
     SunriseSunset_setTimeZone(&data, 1, false);
 #endif
 
-    uint16_t dayOfYear = Clock_calculateDayOfYear();
+    uint16_t dayOfYear = Clock_getDayOfYear();
 
 #if SUNRISE_SUNSET_USE_LUT
     // Adjust the index for non-leap years after February 29th

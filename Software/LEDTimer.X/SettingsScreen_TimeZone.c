@@ -78,6 +78,15 @@ bool SettingsScreen_TimeZone_handleKeyPress(const uint8_t keyCode, const bool ho
                 break;
             }
 
+            // Apply changes immediately to avoid the following scenario:
+            // 1. Set the Time Zone to be different from UTC
+            // 2. Set the local time in Time settings
+            // 3. Exit the menu
+            // ER: time is the correct local time
+            // AR: time is off by the time zone offset, because without exiting the menu before
+            //     setting the time, the previous time zone is used when setting the clock
+            Settings_data.time.timeZoneOffsetHalfHours = context.settings->timeZoneOffsetHalfHours;
+
             return false;
         }
 

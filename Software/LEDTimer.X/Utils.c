@@ -45,9 +45,9 @@ const char* Date_MonthShortNames[12] = {
     "DEC"
 };
 
-bool Date_isLeapYear(const YearsFrom2023 year)
+bool Date_isLeapYear(const YearsFrom1970 year)
 {
-    uint16_t y = year + 2023;
+    uint16_t y = year + 1970;
     return (y % 4 == 0 && y % 100 != 0) || y % 400 == 0;
 }
 

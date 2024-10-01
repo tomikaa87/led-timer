@@ -37,8 +37,8 @@ static struct SettingScreen_Time_Context {
 
 void SettingsScreen_Time_init()
 {
-    context.hours = (uint8_t)(Clock_getMinutesSinceMidnight() / 60);
-    context.minutes = (uint8_t)(Clock_getMinutesSinceMidnight() - context.hours * 60);
+    context.hours = Clock_getHour();
+    context.minutes = Clock_getMinute();
     context.clockAdjusted = 0;
     context.selectionIndex = 0;
 }
@@ -86,7 +86,8 @@ bool SettingsScreen_Time_handleKeyPress(const uint8_t keyCode, const bool hold)
                 break;
             }
 
-            Clock_setMinutesSinceMidnight(context.hours * 60 + context.minutes);
+            // Apply changes immediately to keep the time accurate
+            Clock_setTime(context.hours, context.minutes);
 
             return false;
         }

@@ -30,7 +30,7 @@
 #include <string.h>
 
 static struct SettingScreen_Date_Context {
-    YearsFrom2023 year;
+    YearsFrom1970 year;
     uint8_t month;
     uint8_t day;
     uint8_t lastDayOfMonth;
@@ -67,7 +67,7 @@ void SettingsScreen_Date_update(const bool redraw)
     uint8_t xPrev = x;
 
     // Year
-    sprintf(s, "%04u", (uint16_t)context.year + 2023);
+    sprintf(s, "%04u", (uint16_t)context.year + 1970);
     x = Text_draw7Seg(s, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
     x += ExtraSpacing;
@@ -95,12 +95,7 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
                 break;
             }
 
-            Clock_setDate(
-                context.year,
-                context.month,
-                context.day,
-                0 // TODO add weekday
-            );
+            Clock_setDate(context.year, context.month, context.day);
 
             return false;
         }
@@ -119,7 +114,7 @@ bool SettingsScreen_Date_handleKeyPress(const uint8_t keyCode, const bool hold)
             switch (context.selectionIndex) {
                 case 0:
                     // Max year = 2050
-                    if (++context.year > 28) {
+                    if (++context.year > 80) {
                         context.year = 0;
                     }
                     context.lastDayOfMonth = Date_lastDayOfMonth(
