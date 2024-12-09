@@ -40,3 +40,42 @@ Hardware/Private
 
 # VSCode
 **/.vscode/
+
+# For PCBs designed using KiCad: https://www.kicad.org/
+# Format documentation: https://kicad.org/help/file-formats/
+
+# Temporary files
+*.000
+*.bak
+*.bck
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*-backups
+*.kicad_prl
+*.sch-bak
+*~*.lck
+_autosave-*
+*auto_saved_*
+*.tmp
+*-save.pro
+*-save.kicad_pcb
+fp-info-cache
+*-lib-table
+*.gbr
+*.gbrjob
+*.drl
+**/gbr/
+*.stl
+*.factory
+**/production/
+
+# Netlist files (exported from Eeschema)
+*.net
+
+# Autorouter files (exported from Pcbnew)
+*.dsn
+*.ses
+
+# Exported BOM files
+*.xml
+*.csv
