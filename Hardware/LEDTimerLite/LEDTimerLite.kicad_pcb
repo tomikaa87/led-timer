@@ -3102,7 +3102,7 @@
 			(roundrect_rratio 0.25)
 			(net 19 "unconnected-(U2-RC5-Pad4)")
 			(pinfunction "RC5")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "f74aec5c-7661-4296-8a79-b3f6f016ed6e")
 		)
 		(pad "5" smd roundrect
@@ -3112,7 +3112,7 @@
 			(roundrect_rratio 0.25)
 			(net 17 "unconnected-(U2-RC4-Pad5)")
 			(pinfunction "RC4")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "c6fc5308-0880-43b6-8649-8cddb6a885c4")
 		)
 		(pad "6" smd roundrect
@@ -3132,7 +3132,7 @@
 			(roundrect_rratio 0.25)
 			(net 18 "unconnected-(U2-RC2-Pad7)")
 			(pinfunction "RC2")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "fbbca782-1368-405f-857c-cf9cd8c6a31c")
 		)
 		(pad "8" smd roundrect
@@ -4889,7 +4889,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Switch, single pole double throw"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5196,7 +5196,7 @@
 			(remove_unused_layers no)
 			(net 12 "unconnected-(SW4-A-Pad1)")
 			(pinfunction "A")
-			(pintype "passive")
+			(pintype "passive+no_connect")
 			(uuid "cff2c3aa-d9de-4145-8068-663d34bd8bb1")
 		)
 		(pad "2" thru_hole circle
@@ -6703,7 +6703,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x02, script generated"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "B.Fab")
@@ -7266,7 +7266,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, single row, 01x02, script generated"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "B.Fab")
