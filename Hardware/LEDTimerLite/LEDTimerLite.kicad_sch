@@ -1551,43 +1551,29 @@
 				)
 			)
 		)
-		(symbol "Diode:BAT54C"
-			(pin_names
-				(offset 1.016)
-			)
+		(symbol "LEDTimer:1SS384"
+			(pin_names hide)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "D"
-				(at 0.635 -3.81 0)
+				(at 0 2.794 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(justify left)
 				)
 			)
-			(property "Value" "BAT54C"
-				(at -6.35 3.175 0)
+			(property "Value" "1SS384"
+				(at 0 -6.35 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(justify left)
 				)
 			)
-			(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-				(at 1.905 3.175 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.diodes.com/_files/datasheets/ds11005.pdf"
-				(at -2.032 0 0)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-343_SC-70-4"
+				(at 0 -8.89 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1595,37 +1581,36 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "dual schottky barrier diode, common cathode"
+			(property "Datasheet" "https://hu.mouser.com/datasheet/2/408/1SS384_datasheet_en_20180907-1133053.pdf"
+				(at 0 -11.43 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "1SS384"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
 				(at 0 0 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
-			(property "ki_keywords" "schottky diode common cathode"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "SOT?23*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "BAT54C_0_1"
+			(symbol "1SS384_0_1"
 				(polyline
 					(pts
-						(xy -1.905 0) (xy 1.905 0)
+						(xy 1.27 0) (xy -1.27 0)
 					)
 					(stroke
 						(width 0)
@@ -1637,10 +1622,10 @@
 				)
 				(polyline
 					(pts
-						(xy -1.905 1.27) (xy -1.905 1.016)
+						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
 					)
 					(stroke
-						(width 0)
+						(width 0.254)
 						(type default)
 					)
 					(fill
@@ -1649,177 +1634,22 @@
 				)
 				(polyline
 					(pts
-						(xy -1.27 -1.27) (xy -0.635 -1.27)
+						(xy -1.905 0.635) (xy -1.905 1.27) (xy -1.27 1.27) (xy -1.27 -1.27) (xy -0.635 -1.27) (xy -0.635 -0.635)
 					)
 					(stroke
-						(width 0)
+						(width 0.254)
 						(type default)
 					)
 					(fill
 						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 0) (xy -3.81 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 1.27) (xy -1.905 1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 1.27) (xy -1.27 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.635 -1.27) (xy -0.635 -1.016)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.635 -1.27) (xy 0.635 -1.016)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -1.27) (xy 0.635 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 1.27) (xy 1.27 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 1.27) (xy 1.905 1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.905 1.27) (xy 1.905 1.016)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.81 0) (xy 1.27 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -3.175 -1.27) (xy -3.175 1.27) (xy -1.27 0) (xy -3.175 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.175 -1.27) (xy 3.175 1.27) (xy 1.27 0) (xy 3.175 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 0)
-					(radius 0.254)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
 					)
 				)
 			)
-			(symbol "BAT54C_1_1"
+			(symbol "1SS384_1_1"
 				(pin passive line
-					(at -7.62 0 0)
-					(length 3.81)
-					(name "~"
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1835,9 +1665,29 @@
 					)
 				)
 				(pin passive line
-					(at 7.62 0 180)
-					(length 3.81)
-					(name "~"
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "1SS384_2_1"
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1853,9 +1703,9 @@
 					)
 				)
 				(pin passive line
-					(at 0 -5.08 90)
-					(length 5.08)
-					(name "~"
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -3292,6 +3142,12 @@
 		(uuid "7f880042-3ab7-4602-89d6-cf8df18b4464")
 	)
 	(junction
+		(at 66.04 41.91)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8253493c-02c8-49c6-89b0-7cd74e065e64")
+	)
+	(junction
 		(at 167.64 151.13)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3399,7 +3255,7 @@
 	)
 	(wire
 		(pts
-			(xy 73.66 41.91) (xy 77.47 41.91)
+			(xy 74.93 41.91) (xy 77.47 41.91)
 		)
 		(stroke
 			(width 0)
@@ -3539,17 +3395,7 @@
 	)
 	(wire
 		(pts
-			(xy 66.04 34.29) (xy 76.2 34.29)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "20259b4f-bd06-4062-8acc-ac779b46280d")
-	)
-	(wire
-		(pts
-			(xy 53.34 41.91) (xy 58.42 41.91)
+			(xy 53.34 41.91) (xy 57.15 41.91)
 		)
 		(stroke
 			(width 0)
@@ -3829,16 +3675,6 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 36.83) (xy 80.01 36.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5a679a13-a047-4786-8533-597e065c0362")
-	)
-	(wire
-		(pts
 			(xy 104.14 135.89) (xy 106.68 135.89)
 		)
 		(stroke
@@ -3886,6 +3722,16 @@
 			(type default)
 		)
 		(uuid "6502b123-0df2-40ca-a96e-4f398b5dade6")
+	)
+	(wire
+		(pts
+			(xy 66.04 36.83) (xy 66.04 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "65e4a41b-4bad-4ebc-a216-6fa1ca8e73f0")
 	)
 	(wire
 		(pts
@@ -4099,6 +3945,16 @@
 	)
 	(wire
 		(pts
+			(xy 66.04 36.83) (xy 80.01 36.83)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "931a5cec-9fe8-4155-b897-4a31bbfa39bd")
+	)
+	(wire
+		(pts
 			(xy 194.31 140.97) (xy 194.31 135.89)
 		)
 		(stroke
@@ -4229,16 +4085,6 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 34.29) (xy 76.2 36.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b030317a-cf33-4d61-8ef2-7c379806abd6")
-	)
-	(wire
-		(pts
 			(xy 134.62 106.68) (xy 116.84 106.68)
 		)
 		(stroke
@@ -4256,16 +4102,6 @@
 			(type default)
 		)
 		(uuid "b3d187b9-8a0a-460f-89cd-8fd067c4e3c8")
-	)
-	(wire
-		(pts
-			(xy 66.04 34.29) (xy 66.04 36.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b52eae93-3e0b-450a-8c07-adf37d35401b")
 	)
 	(wire
 		(pts
@@ -4389,6 +4225,16 @@
 	)
 	(wire
 		(pts
+			(xy 66.04 41.91) (xy 67.31 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d46870ac-d2f0-448c-a7f4-b7fff3f883b6")
+	)
+	(wire
+		(pts
 			(xy 165.1 106.68) (xy 173.99 106.68)
 		)
 		(stroke
@@ -4396,6 +4242,16 @@
 			(type default)
 		)
 		(uuid "d7f4aa67-32ec-45bc-bb2c-8ab141dcd372")
+	)
+	(wire
+		(pts
+			(xy 64.77 41.91) (xy 66.04 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "da353ecb-6c11-4a32-82ab-49e25df5ac19")
 	)
 	(wire
 		(pts
@@ -5019,7 +4875,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "28905bc8-0a6c-4bd2-8047-598da7b3754b")
-		(property "Reference" "D2"
+		(property "Reference" "D1"
 			(at 216.2175 92.71 0)
 			(effects
 				(font
@@ -5071,7 +4927,7 @@
 		(instances
 			(project ""
 				(path "/9e18dfcf-a5f4-466f-a700-bf8a16e1e469"
-					(reference "D2")
+					(reference "D1")
 					(unit 1)
 				)
 			)
@@ -6847,6 +6703,79 @@
 		)
 	)
 	(symbol
+		(lib_id "LEDTimer:1SS384")
+		(at 71.12 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c9c16d2b-ec26-412a-9460-8ac020e29e2a")
+		(property "Reference" "D2"
+			(at 70.866 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1SS384"
+			(at 70.866 31.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-343_SC-70-4"
+			(at 71.12 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://hu.mouser.com/datasheet/2/408/1SS384_datasheet_en_20180907-1133053.pdf"
+			(at 71.12 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1SS384"
+			(at 71.12 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "f4f58ba8-e52a-4efc-bdbb-40f798bf0f55")
+		)
+		(pin "4"
+			(uuid "a0f11544-5580-41e8-b604-3f69a94dec69")
+		)
+		(pin "1"
+			(uuid "3de96646-2e97-4a60-bda7-deceac056e92")
+		)
+		(pin "3"
+			(uuid "befb7a8e-da34-404a-9227-234af3d7f441")
+		)
+		(instances
+			(project ""
+				(path "/9e18dfcf-a5f4-466f-a700-bf8a16e1e469"
+					(reference "D2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+3V3")
 		(at 92.71 36.83 0)
 		(unit 1)
@@ -7137,6 +7066,79 @@
 		)
 	)
 	(symbol
+		(lib_id "LEDTimer:1SS384")
+		(at 60.96 41.91 180)
+		(unit 2)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f4fe8811-0082-4845-8d16-dda8944d14c5")
+		(property "Reference" "D2"
+			(at 61.341 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1SS384"
+			(at 61.341 31.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-343_SC-70-4"
+			(at 60.96 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://hu.mouser.com/datasheet/2/408/1SS384_datasheet_en_20180907-1133053.pdf"
+			(at 60.96 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1SS384"
+			(at 60.96 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "f4f58ba8-e52a-4efc-bdbb-40f798bf0f55")
+		)
+		(pin "4"
+			(uuid "a0f11544-5580-41e8-b604-3f69a94dec69")
+		)
+		(pin "1"
+			(uuid "3de96646-2e97-4a60-bda7-deceac056e92")
+		)
+		(pin "3"
+			(uuid "befb7a8e-da34-404a-9227-234af3d7f441")
+		)
+		(instances
+			(project ""
+				(path "/9e18dfcf-a5f4-466f-a700-bf8a16e1e469"
+					(reference "D2")
+					(unit 2)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+5V")
 		(at 222.25 127.635 0)
 		(unit 1)
@@ -7263,79 +7265,6 @@
 			(project ""
 				(path "/9e18dfcf-a5f4-466f-a700-bf8a16e1e469"
 					(reference "#PWR02")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Diode:BAT54C")
-		(at 66.04 41.91 0)
-		(mirror x)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "fff8192d-12e8-4d67-ae96-488e592bbcc2")
-		(property "Reference" "D1"
-			(at 66.04 45.72 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "BAT54C"
-			(at 66.04 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-416"
-			(at 67.945 45.085 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://www.diodes.com/_files/datasheets/ds11005.pdf"
-			(at 64.008 41.91 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 66.04 41.91 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "fdca6b1f-267d-4dfe-b9a2-c09211249d92")
-		)
-		(pin "2"
-			(uuid "004ee153-dba8-403d-ada8-b9c792fc3853")
-		)
-		(pin "3"
-			(uuid "606200bb-53f7-4e85-be86-13664346d26d")
-		)
-		(instances
-			(project ""
-				(path "/9e18dfcf-a5f4-466f-a700-bf8a16e1e469"
-					(reference "D1")
 					(unit 1)
 				)
 			)
