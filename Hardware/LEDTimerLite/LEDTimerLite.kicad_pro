@@ -60,8 +60,7 @@
         }
       ],
       "drc_exclusions": [
-        "unconnected_items|107954000|65659000|63151c3d-8b62-410b-8320-47c1e79abd19|74493827-d0c3-4e56-bd17-f6649205d1f3",
-        "unconnected_items|123976000|68370000|f6a32b55-5ed5-4c99-a2c2-248e262dc321|368628ae-5575-4558-a138-9017b103781e"
+        "unconnected_items|107954000|65659000|7da08a6d-d88b-44ad-844e-ef3baa5364b5|74493827-d0c3-4e56-bd17-f6649205d1f3"
       ],
       "meta": {
         "version": 2
