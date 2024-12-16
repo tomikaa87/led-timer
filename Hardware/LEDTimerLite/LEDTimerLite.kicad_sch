@@ -3255,6 +3255,12 @@
 		(uuid "5dff9054-e85a-49ba-bcb7-a9b545a2c6cd")
 	)
 	(junction
+		(at 129.54 151.13)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "78067433-840d-43d5-8d40-7f67399b65d1")
+	)
+	(junction
 		(at 53.34 54.61)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3351,6 +3357,12 @@
 		(uuid "e1bd0c6a-8b31-4487-9055-ffe6d0c1225d")
 	)
 	(junction
+		(at 129.54 129.54)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e4cdb22f-5df0-4dea-8e58-f9ae227f5a55")
+	)
+	(junction
 		(at 196.85 151.13)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3409,6 +3421,16 @@
 			(type default)
 		)
 		(uuid "0159c3f3-5111-4f13-86ac-4c8eab2d5725")
+	)
+	(wire
+		(pts
+			(xy 129.54 151.13) (xy 149.86 151.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "017f1d6f-e2b1-4014-ae7c-4160916a957e")
 	)
 	(wire
 		(pts
@@ -3572,7 +3594,7 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 151.13) (xy 149.86 151.13)
+			(xy 116.84 151.13) (xy 129.54 151.13)
 		)
 		(stroke
 			(width 0)
@@ -3719,6 +3741,16 @@
 			(type default)
 		)
 		(uuid "4b71b59e-b83d-47f4-9941-ccdaeab4c0e5")
+	)
+	(wire
+		(pts
+			(xy 129.54 129.54) (xy 129.54 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4c249031-13ac-43ab-af57-7864148f9056")
 	)
 	(wire
 		(pts
@@ -4209,6 +4241,16 @@
 			(type default)
 		)
 		(uuid "a011872b-8504-4a1e-93cd-2981e8162215")
+	)
+	(wire
+		(pts
+			(xy 129.54 148.59) (xy 129.54 151.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0b28f0c-4e3f-40c0-8aba-b26fbd56523e")
 	)
 	(wire
 		(pts
@@ -5743,6 +5785,76 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:C")
+		(at 129.54 144.78 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7645fa11-d55c-4e34-b031-c4d792e9256a")
+		(property "Reference" "C4"
+			(at 133.35 143.5099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 133.35 146.0499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder"
+			(at 130.5052 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 129.54 144.78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 129.54 144.78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6e59ff6c-750b-4cca-bb03-83f1e9879837")
+		)
+		(pin "2"
+			(uuid "598db14d-4982-4007-bc85-bbadee994999")
+		)
+		(instances
+			(project "LEDTimerLite"
+				(path "/9e18dfcf-a5f4-466f-a700-bf8a16e1e469"
+					(reference "C4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x02_Pin")
 		(at 228.6 133.35 0)
 		(mirror y)
@@ -5868,7 +5980,7 @@
 			)
 		)
 		(pin "1"
-			(uuid "eeb65a9b-1e8b-4438-b5d2-d13f9e82458f")
+			(uuid "eeb65a9b-1e8b-4438-b5d2-d13f9e824590")
 		)
 		(instances
 			(project ""
@@ -5963,7 +6075,7 @@
 				)
 			)
 		)
-		(property "Value" "AP7383-36WW7"
+		(property "Value" "AP7383-33WW7"
 			(at 41.91 36.83 0)
 			(effects
 				(font
@@ -7460,16 +7572,16 @@
 			)
 		)
 		(pin "2"
-			(uuid "f4f58ba8-e52a-4efc-bdbb-40f798bf0f55")
+			(uuid "f4f58ba8-e52a-4efc-bdbb-40f798bf0f56")
 		)
 		(pin "4"
-			(uuid "a0f11544-5580-41e8-b604-3f69a94dec69")
+			(uuid "a0f11544-5580-41e8-b604-3f69a94dec6a")
 		)
 		(pin "1"
-			(uuid "3de96646-2e97-4a60-bda7-deceac056e92")
+			(uuid "3de96646-2e97-4a60-bda7-deceac056e93")
 		)
 		(pin "3"
-			(uuid "befb7a8e-da34-404a-9227-234af3d7f441")
+			(uuid "befb7a8e-da34-404a-9227-234af3d7f442")
 		)
 		(instances
 			(project ""
