@@ -44,11 +44,10 @@
 #include "Clock.h"
 #include "Config.h"
 #include "OutputController.h"
+#include "ProgrammingInterface.h"
 #include "Settings.h"
 #include "System.h"
-
-// FIXME for testing
-#include "SunsetSunrise.h"
+#include "UserInterface.h"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -57,36 +56,31 @@
 
 static struct MainContext
 {
-    volatile bool adcConversionFinished;
+    volatile uint8_t adcConversionFinished : 1;
+    volatile uint8_t buttonPressed : 1;
 } context = {
-    .adcConversionFinished = false
+    .adcConversionFinished = 0,
+    .buttonPressed = 0
 };
 
 void __interrupt() isr(void)
 {
     if (IOCIE && IOCIF) {
-        // RA0 IOC - SW1
-        if (IOCAF0) {
-            IOCAF0 = 0;
+        // RC3 IOC - SW
+        if (IOCCF3) {
+            IOCCF3 = 0;
+            context.buttonPressed = 1;
             System_handleExternalWakeUp();
-        }
-
-        // RA1 IOC - SW2
-        if (IOCAF1) {
-            IOCAF1 = 0;
-            System_handleExternalWakeUp();
-        }
-
-        // RC5 IOC - SW3
-        if (IOCCF5) {
-            IOCCF5 = 0;
-            System_handleExternalWakeUp();
+            ProgrammingInterface_logEvent(PI_LOG_ButtonPress);
         }
 
         // RA2 IOC - LDO_SENSE
         if (IOCAF2) {
             IOCAF2 = 0;
             System_handleLDOSenseInterrupt();
+            ProgrammingInterface_logEvent(
+                RA2 == 0 ? PI_LOG_LDOPowerDown : PI_LOG_LDOPowerUp
+            );
         }
     }
 
@@ -94,7 +88,7 @@ void __interrupt() isr(void)
         if (ADIE && ADIF) {
             ADIF = 0;
             System_handleADCInterrupt(((uint16_t)ADRESH) << 8 | ADRESL);
-            context.adcConversionFinished = true;
+            context.adcConversionFinished = 1;
         }
 
         if (TMR4IE & TMR4IF) {
@@ -109,7 +103,7 @@ void __interrupt() isr(void)
 
         if (RCIE && RCIF) {
             char c = RCREG;
-            (void)c;
+            ProgrammingInterface_processInputChar(c);
         }
     }
 }
@@ -153,41 +147,16 @@ inline static void showStartupScreen()
 void main(void)
 {
     System_init();
+
     Settings_init();
     Settings_load();
 
-    showStartupScreen();
+    ProgrammingInterface_init();
+    ProgrammingInterface_logEvent(PI_LOG_Startup);
 
-    // Sunrise/Sunset calculation test code
+    UserInterface_init();
 
-#if 0
-    SunriseSunsetData data;
-
-    SunriseSunset_setPosition(
-        &data,
-        Types_bcdToDouble(
-            Settings_data.location.latitudeBcd,
-            Settings_data.location.latitudeSign
-        ),
-        Types_bcdToDouble(
-            Settings_data.location.longitudeBcd,
-            Settings_data.location.longitudeSign
-        )
-//        19.046867,
-//        47.467442
-    );
-    SunriseSunset_setTimeZone(&data, 1, false);
-
-    SunriseSunset_Time sunrise = SunriseSunset_calculate(&data, false, 28);
-    SunriseSunset_Time sunset = SunriseSunset_calculate(&data, true, 28);
-
-    char s[20];
-    sprintf(s, "%2d:%02d, %2d:%02d",
-        sunrise.hour, sunrise.minute,
-        sunset.hour, sunset.minute
-    );
-    Text_draw(s, 7, 0, 0, false);
-#endif
+//    showStartupScreen();
 
     System_onWakeUp(System_WakeUpReason_Startup);
 
@@ -211,20 +180,35 @@ void main(void)
         Clock_task();
 
         if (runHeavyTasks) {
+            // Handle button press
+            if (context.buttonPressed) {
+                context.buttonPressed = 0;
+                UserInterface_buttonPressEvent();
+                System_onWakeUp(System_WakeUpReason_KeyPress);
+            }
+
             systemTaskResult = System_task();
 
             if (systemTaskResult.powerInputChanged) {
+                UserInterface_setExternalEvent(UI_ExternalEvent_PowerInputChanged);
             }
 
             if (context.adcConversionFinished) {
                 context.adcConversionFinished = false;
+                UserInterface_setExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
             }
 
             if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
+                UserInterface_setExternalEvent(UI_ExternalEvent_SystemGoingToSleep);
             }
+
+            ProgrammingInterface_task();
+
+            UserInterface_task();
         }
 
         if (OutputController_task() == OutputController_TaskResult_OutputStateChanged) {
+            UserInterface_setExternalEvent(UI_ExternalEvent_OutputStateChanged);
         }
 
         if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
@@ -234,12 +218,17 @@ void main(void)
             }
 #endif
 
+            ProgrammingInterface_logEvent(PI_LOG_EnterSleepMode);
+
             System_SleepResult sleepResult = System_sleep();
+
+            ProgrammingInterface_logEvent(PI_LOG_LeaveSleepMode);
 
             runHeavyTasks =
                 sleepResult == System_SleepResult_WakeUpFromExternalSource;
 
             if (runHeavyTasks) {
+                UserInterface_setExternalEvent(UI_ExternalEvent_SystemWakeUp);
 #if DEBUG_ENABLE
                 ++_DebugState.heavyTaskUpdateValue;
 #endif

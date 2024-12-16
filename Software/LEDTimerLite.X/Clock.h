@@ -66,3 +66,4 @@ inline bool Clock_isLeapYear(void);
 uint16_t Clock_getDayOfYear(void);
 inline uint8_t Clock_getHour(void);
 inline uint8_t Clock_getMinute(void);
+inline time_t Clock_getUtcEpoch(void);

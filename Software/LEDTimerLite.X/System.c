@@ -19,30 +19,30 @@
 */
 
 // CONFIG1
-#pragma config FEXTOSC = OFF    // FEXTOSC External Oscillator mode Selection bits->Oscillator not enabled
-#pragma config RSTOSC = HFINT1    // Power-up default value for COSC bits->HFINTOSC (1MHz)
-#pragma config CLKOUTEN = OFF    // Clock Out Enable bit->CLKOUT function is disabled; I/O or oscillator function on OSC2
-#pragma config CSWEN = ON    // Clock Switch Enable bit->Writing to NOSC and NDIV is allowed
-#pragma config FCMEN = ON    // Fail-Safe Clock Monitor Enable->Fail-Safe Clock Monitor is enabled
+#pragma config FEXTOSC = OFF    // FEXTOSC External Oscillator mode Selection bits (Oscillator not enabled)
+#pragma config RSTOSC = HFINT1  // Power-up default value for COSC bits (HFINTOSC (1MHz))
+#pragma config CLKOUTEN = OFF   // Clock Out Enable bit (CLKOUT function is disabled; I/O or oscillator function on OSC2)
+#pragma config CSWEN = ON       // Clock Switch Enable bit (Writing to NOSC and NDIV is allowed)
+#pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable (Fail-Safe Clock Monitor is disabled)
 
 // CONFIG2
-#pragma config MCLRE = ON    // Master Clear Enable bit->MCLR/VPP pin function is MCLR; Weak pull-up enabled
-#pragma config PWRTE = ON    // Power-up Timer Enable bit->PWRT enabled
-#pragma config WDTE = OFF    // Watchdog Timer Enable bits->WDT disabled; SWDTEN is ignored
-#pragma config LPBOREN = OFF    // Low-power BOR enable bit->ULPBOR disabled
-#pragma config BOREN = OFF    // Brown-out Reset Enable bits->Brown-out Reset disabled
-#pragma config BORV = LOW    // Brown-out Reset Voltage selection bit->Brown-out voltage (Vbor) set to 1.90V
-#pragma config PPS1WAY = ON    // PPSLOCK bit One-Way Set Enable bit->The PPSLOCK bit can be cleared and set only once; PPS registers remain locked after one clear/set cycle
-#pragma config STVREN = ON    // Stack Overflow/Underflow Reset Enable bit->Stack Overflow or Underflow will cause a Reset
-#pragma config DEBUG = OFF    // Debugger enable bit->Background debugger disabled
+#pragma config MCLRE = ON       // Master Clear Enable bit (MCLR/VPP pin function is MCLR; Weak pull-up enabled)
+#pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT disabled)
+#pragma config WDTE = OFF       // Watchdog Timer Enable bits (WDT disabled; SWDTEN is ignored)
+#pragma config LPBOREN = OFF    // Low-power BOR enable bit (ULPBOR disabled)
+#pragma config BOREN = OFF      // Brown-out Reset Enable bits (Brown-out Reset disabled)
+#pragma config BORV = LOW       // Brown-out Reset Voltage selection bit (Brown-out voltage (Vbor) set to 2.45V)
+#pragma config PPS1WAY = OFF    // PPSLOCK bit One-Way Set Enable bit (The PPSLOCK bit can be set and cleared repeatedly (subject to the unlock sequence))
+#pragma config STVREN = ON      // Stack Overflow/Underflow Reset Enable bit (Stack Overflow or Underflow will cause a Reset)
+#pragma config DEBUG = OFF      // Debugger enable bit (Background debugger disabled)
 
 // CONFIG3
-#pragma config WRT = ALL    // User NVM self-write protection bits->0000h to 3FFFh write protected, no addresses may be modified
-#pragma config LVP = ON    // Low Voltage Programming Enable bit->Low Voltage programming enabled. MCLR/VPP pin function is MCLR. MCLRE configuration bit is ignored.
+#pragma config WRT = OFF        // User NVM self-write protection bits (Write protection off)
+#pragma config LVP = OFF        // Low Voltage Programming Enable bit (High Voltage on MCLR/VPP must be used for programming.)
 
 // CONFIG4
-#pragma config CP = OFF    // User NVM Program Memory Code Protection bit->User NVM code protection disabled
-#pragma config CPD = OFF    // Data NVM Memory Code Protection bit->Data NVM code protection disabled
+#pragma config CP = OFF         // User NVM Program Memory Code Protection bit (User NVM code protection disabled)
+#pragma config CPD = OFF        // Data NVM Memory Code Protection bit (Data NVM code protection disabled)
 
 #include "Clock.h"
 #include "Config.h"
@@ -53,6 +53,8 @@
 #include <xc.h>
 
 volatile uint16_t _System_adcResult = 0;
+
+#define DEBUG_REDIRECT_EUSART 1
 
 System_InterruptContext System_interruptContext = {
     .adc = {
@@ -152,32 +154,65 @@ void System_init()
     // GPIO
     ANSELA = 0x37
         & ~(1 << 2)                         // RA2 is digital
+#if !DEBUG_REDIRECT_EUSART
         & ~(1 << 1)                         // RA1 is digital
-        & ~1;                               // RA0 is digital
+        & ~1                                // RA0 is digital
+#endif
+        ;
+
     TRISA = 0x3F
-        & ~1;                               // RAO is output
+#if !DEBUG_REDIRECT_EUSART
+        & ~1                                // RAO is output
+#endif
+        ;
+
     WPUA = 0x3F
-        & ~(1 << 1)                         // WPUA1=0
-        & ~1;                               // WPUA0=0
+#if !DEBUG_REDIRECT_EUSART
+        & ~1                                // WPUA0=0
+#endif
+        ;
+
     ANSELC = 0xFF
-        & ~(1 << 2)                         // RC2 is digital
+        & ~(1 << 4)                         // RC4 is digital
         & ~(1 << 3)                         // RC3 is digital
-        & ~(1 << 4);                        // RC4 is digital
+        & ~(1 << 2)                         // RC2 is digital
+#if DEBUG_REDIRECT_EUSART
+        & ~(1 << 1)                         // RC1 is digital
+        & ~1                                // RC0 is digital
+#endif
+        ;
+
     TRISC = 0xFF
+        & ~(1 << 4)                         // RC4 is output
         & ~(1 << 2)                         // RC2 is output
-        & ~(1 << 4);                        // RC4 is output
+#if DEBUG_REDIRECT_EUSART
+        & ~1                                // RC0 is output
+#endif
+        ;
+
     WPUC = 0xFF
+        & ~(1 << 4)                         // WPUC4=0
         & ~(1 << 2)                         // WPUC2=0
-        & ~(1 << 4);                        // WPUC4=0
+#if DEBUG_REDIRECT_EUSART
+        & ~1                                // WPUC0=0
+#endif
+        ;
 
     // PPS
+#if DEBUG_REDIRECT_EUSART
+    RC0PPS = 0b10100;                       // RC0PPS=TX
+    RXPPS = 0b10001;                        // RXPPS=RC1
+#else
     RA0PPS = 0b10100;                       // RA0PPS=TX
-    RC4PPS = 0b00010;                       // RC4PPS=PWM5
     RXPPS = 0b00001;                        // RXPPS=RA1
+#endif
+    RC4PPS = 0b00010;                       // RC4PPS=PWM5
 
     // IOC
     IOCAN =
         (1 << 2);                           // RA2 interrupt on negative edge
+    IOCAP =
+        (1 << 2);                           // RA2 interrupt on positive edge
     IOCCN =
         (1 << 3);                           // RC3 interrupt on negative edge
 
@@ -243,7 +278,7 @@ void System_init()
         | (1 << 2)                          // CMP2MD=1
         | (1 << 1);                         // CMP1MD=1
     PMD3 =
-        (1 << 7)                            //CWG2MD=1
+        (1 << 7)                            // CWG2MD=1
         | (1 << 6)                          // CWG1MD=1
         | (1 << 5)                          // PWM6MD=1
         | (1 << 3)                          // CCP4MD=1
@@ -266,7 +301,6 @@ void System_init()
     PIE1 =
         (1 << 6)                            // ADIE=1
         | (1 << 5)                          // RCIE=1
-        | (1 << 1)                          // TMR2IE=1
         | 1;                                // TMR1IE=1
     PIE2 =
         (1 << 1);                           // TMR4IE=1

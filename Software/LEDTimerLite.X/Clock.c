@@ -231,3 +231,8 @@ inline uint8_t Clock_getMinute()
 {
     return context.minute;
 }
+
+inline time_t Clock_getUtcEpoch()
+{
+    return Clock_interruptContext.utcEpoch;
+}
