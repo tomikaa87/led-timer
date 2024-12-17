@@ -79,7 +79,7 @@ void __interrupt() isr(void)
             IOCAF2 = 0;
             System_handleLDOSenseInterrupt();
             ProgrammingInterface_logEvent(
-                RA2 == 0 ? PI_LOG_LDOPowerDown : PI_LOG_LDOPowerUp
+                RA2 == 1 ? PI_LOG_LDOPowerDown : PI_LOG_LDOPowerUp
             );
         }
     }

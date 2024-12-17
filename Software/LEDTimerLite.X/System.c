@@ -54,6 +54,8 @@
 
 volatile uint16_t _System_adcResult = 0;
 
+#undef DEBUG_ENABLE_PRINT
+#define DEBUG_ENABLE_PRINT 1
 #define DEBUG_REDIRECT_EUSART 1
 
 System_InterruptContext System_interruptContext = {
@@ -313,7 +315,9 @@ void System_init()
     // Wait for the initial measurement to avoid invalid readings after startup
     while (!System_interruptContext.adc.updated);
 
-    updateBatteryLevel();
+    if (System_isRunningFromBackupBattery()) {
+        updateBatteryLevel();
+    }
 }
 
 System_TaskResult System_task()
@@ -341,7 +345,10 @@ System_TaskResult System_task()
     ) {
         context.monitoring.lastUpdateTime = Clock_getTicks();
         measureVDD();
-        updateBatteryLevel();
+
+        if (System_isRunningFromBackupBattery()) {
+            updateBatteryLevel();
+        }
     }
 
     if (!context.sleep.enabled) {
@@ -395,11 +402,11 @@ System_SleepResult System_sleep()
 {
 #if DEBUG_ENABLE_PRINT
     printf(
-        "SYS:SLP,T=%u,FT=%u,MSM=%u,SEC=%u\r\n",
+        "SYS:SLP,T=%u,FT=%u,MSM=%u,UTC=%lu\r\n",
         Clock_getTicks(),
         Clock_getFastTicks(),
         Clock_getMinutesSinceMidnight(),
-        Clock_getSeconds()
+        Clock_getUtcEpoch()
     );
 #endif
 

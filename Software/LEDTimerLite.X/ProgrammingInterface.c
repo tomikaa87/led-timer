@@ -26,7 +26,16 @@
 
 #include <xc.h>
 
-#define LOG_QUEUE_SIZE 10
+#define LOG_QUEUE_SIZE 20
+
+static const char* EventNames[] = {
+    "Startup",
+    "LDOPowerUp",
+    "LDOPowerDown",
+    "ButtonPress",
+    "EnterSleepMode",
+    "LeaveSleepMode"
+};
 
 typedef struct {
     PI_LogEvent event;
@@ -97,7 +106,8 @@ static void transmitLog(void)
             context.logQueueOut = 0;
         }
 
-        printf(";L%ld,%u:\r\n", entry.time, entry.event);
+//        printf(";L%ld,%u:\r\n", entry.time, entry.event);
+        printf(";L%ld,%s:\r\n", entry.time, EventNames[entry.event]);
     }
 }
 
