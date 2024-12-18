@@ -138,133 +138,125 @@ void updateBatteryLevel()
 
 void System_init()
 {
+    // Initialize the LED first to indicate if any of the following steps stuck
+
+    // GPIO: RC2 - LED
+    LATCbits.LATC2 = 1;                     // Drive high
+    ANSELCbits.ANSC2 = 0;                   // Pin is digital
+    TRISCbits.TRISC2 = 0;                   // Pin is output
+
     // Oscillator
-    OSCCON1 =
-        (0b110 << 4)                        // NOSC=HFINTOSC
-        | 0b0000;                           // NDIV=1
-    OSCEN =
-        (1 << 6)                            // HFOEN=1
-        | (1 << 4)                          // LFOEN=1
-        | (1 << 3)                          // SOSCEN=1
-        | (1 << 2);                         // ADOEN=1
-    OSCFRQ = 0b0110;                        // HFFRQ=16 (Mhz)
+    OSCCON1bits.NOSC = 0b110;               // HFINTOSC
+    OSCCON1bits.NDIV = 0;                   // Divider: 1
+    OSCFRQbits.HFFRQ = 0b0100;              // 8 MHz
+    OSCENbits.HFOEN = 1;                    // Enable HFINTOSC
+    OSCENbits.LFOEN = 1;                    // Enable LFINTOSC
+    OSCENbits.SOSCEN = 1;                   // Enable the secondary oscillator
+    OSCENbits.ADOEN = 1;                    // Enable the ADC oscillator
+    while (                                 // Wait for all the oscillators
+        !OSCSTAT1bits.HFOR
+        || !OSCSTAT1bits.LFOR
+        || !OSCSTAT1bits.SOR
+        || !OSCSTAT1bits.ADOR
+    ) {
+        continue;
+    }
 
     // Comparator
     CM1CON1 = 0b100100;                     // CxV(N/P) is unconnected
     CM2CON1 = 0b100100;
 
-    // GPIO
-    ANSELA = 0x37
-        & ~(1 << 2)                         // RA2 is digital
-#if !DEBUG_REDIRECT_EUSART
-        & ~(1 << 1)                         // RA1 is digital
-        & ~1                                // RA0 is digital
-#endif
-        ;
-
-    TRISA = 0x3F
-#if !DEBUG_REDIRECT_EUSART
-        & ~1                                // RAO is output
-#endif
-        ;
-
-    WPUA = 0x3F
-#if !DEBUG_REDIRECT_EUSART
-        & ~1                                // WPUA0=0
-#endif
-        ;
-
-    ANSELC = 0xFF
-        & ~(1 << 4)                         // RC4 is digital
-        & ~(1 << 3)                         // RC3 is digital
-        & ~(1 << 2)                         // RC2 is digital
-#if DEBUG_REDIRECT_EUSART
-        & ~(1 << 1)                         // RC1 is digital
-        & ~1                                // RC0 is digital
-#endif
-        ;
-
-    TRISC = 0xFF
-        & ~(1 << 4)                         // RC4 is output
-        & ~(1 << 2)                         // RC2 is output
-#if DEBUG_REDIRECT_EUSART
-        & ~1                                // RC0 is output
-#endif
-        ;
-
-    WPUC = 0xFF
-        & ~(1 << 4)                         // WPUC4=0
-        & ~(1 << 2)                         // WPUC2=0
-#if DEBUG_REDIRECT_EUSART
-        & ~1                                // WPUC0=0
-#endif
-        ;
-
-    // PPS
-#if DEBUG_REDIRECT_EUSART
-    RC0PPS = 0b10100;                       // RC0PPS=TX
-    RXPPS = 0b10001;                        // RXPPS=RC1
-#else
-    RA0PPS = 0b10100;                       // RA0PPS=TX
-    RXPPS = 0b00001;                        // RXPPS=RA1
-#endif
-    RC4PPS = 0b00010;                       // RC4PPS=PWM5
-
-    // IOC
-    IOCAN =
-        (1 << 2);                           // RA2 interrupt on negative edge
-    IOCAP =
-        (1 << 2);                           // RA2 interrupt on positive edge
-    IOCCN =
-        (1 << 3);                           // RC3 interrupt on negative edge
-
     // FVR
-    FVRCON =
-        (1 << 7)                            // FVREN=1
-        | 0b01;                             // ADCFVR=1x
-
-    // PWM5
-    PWM5CON = (1 << 7);                     // PWM5EN=1
-    PWMTMRS = 0b01;                         // P5TSEL=TMR2
+    FVRCONbits.ADFVR = 0b01;                // 1x gain
+    FVRCONbits.FVREN = 1;                   // Enable the module
+    while (!FVRCONbits.FVRRDY) {            // Wait for the module to be ready
+        continue;
+    }
 
     // ADC
-    ADCON0 =
-        (0b111111 << 2)                     // CHS=FVR
-        | 0b1;                              // ADON=1
-    ADCON1 =
-        (1 << 7)                            // ADFM=1
-        | (0b111 << 4);                     // ADCS=ADCRC
+    ADCON0bits.CHS = 0b111111;              // FVR
+    ADCON1bits.ADFM = 1;                    // Right-justified result
+    ADCON1bits.ADCS = 0b111;                // ADCRC
+    ADIF = 0;                               // Clear the interrupt flag
+    ADIE = 1;                               // Enable the interrupt
+    ADCON0bits.ADON = 1;                    // Enable the module
 
-    // Timer1
+    // GPIO: RA2 - LDO_SENSE
+    ANSELAbits.ANSA2 = 0;                   // Pin is digital
+    TRISAbits.TRISA2 = 1;                   // Pin is input
+    WPUAbits.WPUA2 = 1;                     // Enable pull-up
+    IOCANbits.IOCAN2 = 1;                   // Interrupt on negative edge
+    IOCAPbits.IOCAP2 = 1;                   // Interrupt on positive edge
+
+    // EUSART: 57600 Bps
+#if DEBUG_REDIRECT_EUSART
+    // GPIO: RC0 - TP1 (Debug-mode UART TX)
+    ANSELCbits.ANSC0 = 0;                   // Pin is digital
+    RC0PPS = 0b10100;                       // UART TX
+
+    // GPIO: RC1 - TP2 (Debug-mode UART RX)
+    ANSELCbits.ANSC1 = 0;                   // Pin is digital
+    RXPPS = 0b10001;                        // RC1
+    WPUCbits.WPUC1 = 1;                     // Enable weak pull-up
+#else
+    // GPIO: RA0 - ICSPDAT_TXD (Non-debug mode)
+    ANSELAbits.ANSA0 = 0;                   // Pin is digital
+    RA0PPSbits.RA0PPS = 0b10100;            // UART TX
+
+    // GPIO: RA1 - ICSPDAT_RXD (Non-debug mode)
+    ANSELAbits.ANSA1 = 0;                   // Pin is digital
+    RXPPSbits.RXPPS = 0b00001;              // RA1
+    WPUAbits.WPUA1 = 1;                     // Enable weak pull-up
+#endif
+    TX1STAbits.BRGH = 1;                    // High-speed BRG
+    BAUD1CONbits.BRG16 = 1;                 // 16-bit BRG
+    SP1BRGH = 0x00;                         // Actual: 57142.86 Bps (-0.79% error))
+    SP1BRGL = 0x22;
+    RCIF = 0;                               // Clear the RX interrupt flag
+    RCIE = 1;                               // Enable the RX interrupt
+    RC1STAbits.CREN = 1;                    // Enable continuous receive
+    TX1STAbits.TXEN = 1;                    // Enable the transmitter
+    RC1STAbits.SPEN = 1;                    // Enable the serial port
+
+    // GPIO: RC3 - SW
+    ANSELCbits.ANSC3 = 0;                   // Pin is digital
+    TRISCbits.TRISC3 = 0;                   // Pin is input
+    WPUCbits.WPUC3 = 1;                     // Enable weak pull-up
+    IOCCNbits.IOCCN3 = 1;                   // Interrupt on negative edge
+
+    // PWM5: RC4 - LED_EN_PWM, max PWM freq.: 10 kHz (BCR 321 limit)
+    ANSELCbits.ANSC4 = 0;                   // Pin is digital
+    PWMTMRSbits.P5TSEL = 0b01;              // Based on TMR2
+    PR2 = 0x3F;                             // 8-bits, 7812.5 Hz @ 8 MHz
+    PWM5DCHbits.PWM5DCH = 0b100000;                // DC = 0
+    PWM5DCLbits.PWM5DCL = 0;
+    TMR2IF = 0;
+    T2CONbits.T2CKPS = 0b01;                // 1:4
+    T2CONbits.TMR2ON = 1;                   // Enable the timer
+    while (!TMR2IF) {                       // Wait for the timer
+        continue;
+    }
+    TRISCbits.TRISC4 = 0;                   // Enable the output driver
+    RC4PPSbits.RC4PPS = 0b00010;            // Route PWM5 output
+    PWM5CONbits.PWM5EN = 1;                 // Enable PWM
+
+    // Timer1 : RTC timer (2s period)
+    T1CONbits.TMR1CS = 0b10;                // Clock: SOSC
+    T1CONbits.T1SOSC = 1;                   // Enable SOSC
+    T1CONbits.T1SYNC = 1;                   // No synchronization
+    TMR1H = 0;                              // Buffered until TMR1L is written
     TMR1L = 0;
-    TMR1H = 0;
-    T1CON =
-        (0b10 << 6)                         // TMR1CS=SOSC
-        | (1 << 3)                          // T1SOSC=1
-        | (1 << 2)                          // T1SYNC=off
-        | 1;                                // TMR1ON=1
+    TMR1IF = 0;                             // Clear the interrupt flag
+    TMR1IE = 1;                             // Enable the interrupt
+    T1CONbits.TMR1ON = 1;                   // Enable the module
 
-    // Timer2 : PWM clock, 62500 Hz (16 us) @ 16 MHz
-    PR2 = 0x3F;                             // 32768 Hz @ Fosc/4=4MHz
-    T2CON = 1 << 2;                         // TMR2ON=1
-
-    // Timer4 : 25000 Hz (10 ms) @ 16 MHz
+    // Timer4 : fast tick timer, 25000 Hz (10 ms) @ 16 MHz
     PR4 = 0xF9;
-    T4CON =
-        (0b1001 << 3)                       // T4OUTPS=10
-        | (1 << 2)                          // TMR4ON
-        | 0b10;                             // T4CKPS=16
-
-    // EUSART : 115200 bps @ 16 MHz
-    TX1STA =
-        (1 << 5)                            // TXEN=1
-        | (1 << 2);                         // BRGH=1
-    RC1STA =
-        (1 << 7)                            // SPEN=1
-        | (1 << 4);                         // CREN=1
-    BAUD1CON = 1 << 3;                      // BRG16=1
-    SP1BRGL = 0x22;                         // Actual: 114285.71 bps
-    SP1BRGH = 0x00;
+    T4CONbits.T4CKPS = 0b10;                // Prescaler: 1:16
+    T4CONbits.T4OUTPS = 0b0100;             // Postscaler: 1:5
+    TMR4IF = 0;                             // Clear the interrupt flag
+    TMR4IE = 1;                             // Enable the interrupt
+    T4CONbits.TMR4ON = 1;                   // Enable the module
 
     // PMD
     PMD0 =
@@ -298,17 +290,9 @@ void System_init()
         | 1;                                // DSMMD=1
 
     // Interrupts
-    PIE0 =
-        (1 << 4);                           // IOCIE=1
-    PIE1 =
-        (1 << 6)                            // ADIE=1
-        | (1 << 5)                          // RCIE=1
-        | 1;                                // TMR1IE=1
-    PIE2 =
-        (1 << 1);                           // TMR4IE=1
-    INTCON =
-        (1 << 7)                            // GIE=1
-        | (1 << 6);                         // PEIE=1
+    IOCIE = 1;                              // Enable IOC module
+    PEIE = 1;                               // Enable peripheral interrupts
+    GIE = 1;                                // Enable interrupts globally
 
     measureVDD();
 
@@ -318,6 +302,9 @@ void System_init()
     if (System_isRunningFromBackupBattery()) {
         updateBatteryLevel();
     }
+
+    // Turn of the indicator LED
+    LATCbits.LATC2 = 0;
 }
 
 System_TaskResult System_task()
@@ -339,16 +326,21 @@ System_TaskResult System_task()
     System_interruptContext.ldoSense.updated = false;
 
     if (
-        result.powerInputChanged
-        || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
-            >= Config_System_MonitoringUpdateIntervalTicks
+        (
+            result.powerInputChanged
+            || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+                >= Config_System_MonitoringUpdateIntervalTicks
+        )
+        && System_isRunningFromBackupBattery()
     ) {
         context.monitoring.lastUpdateTime = Clock_getTicks();
         measureVDD();
+        updateBatteryLevel();
+    }
 
-        if (System_isRunningFromBackupBattery()) {
-            updateBatteryLevel();
-        }
+    // Disable the PWM output if running on backup battery
+    if (result.powerInputChanged) {
+        PWM5CONbits.PWM5EN = System_isRunningFromBackupBattery() ? 0 : 1;
     }
 
     if (!context.sleep.enabled) {

@@ -20,14 +20,14 @@
 
 #pragma once
 
-#define _XTAL_FREQ                                          16000000
+#define _XTAL_FREQ                                          8000000
 
 #include "Types.h"
 
 /**
  * General
  */
-#define Config_FirmwareVersion                              "2.2.0"
+#define Config_FirmwareVersion                              "0.0.1"
 
 /**
  * Settings
