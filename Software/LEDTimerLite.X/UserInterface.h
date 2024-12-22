@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include <stdbool.h>
+#include <stdint.h>
+
 typedef enum
 {
     UI_ExternalEvent_SystemWakeUp =                     (1 << 0),
@@ -30,9 +33,26 @@ typedef enum
 } UI_ExternalEvent;
 
 void UserInterface_init(void);
-void UserInterface_task(void);
+
+/**
+ * Runs tasks like switching the output on button press
+ */
+void UserInterface_runTasks(void);
+
+/**
+ * Runs tasks that are allowed on backup battery, like blinking the status LED
+ */
+void UserInterface_runLightweightTasks(void);
+
+/**
+ * Indicates if a currently running tasks should block sleeping.
+ * @return True if a task is blocking sleep mode.
+ */
+bool UserInterface_hasPendingLightweightTasks(void);
+
 void UserInterface_buttonPressEvent(void);
-inline void UserInterface_setExternalEvent(UI_ExternalEvent event);
+
+inline void UserInterface_handleExternalEvent(UI_ExternalEvent event);
 
 
 

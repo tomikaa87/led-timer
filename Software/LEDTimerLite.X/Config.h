@@ -41,7 +41,7 @@
 #define Config_System_StartupAwakeLengthTicks               (6)
 #define Config_System_KeyPressWakeUpLengthTicks             (6)
 #define Config_System_PowerInputChangeWakeUpLengthTicks     (6)
-#define Config_System_MonitoringUpdateIntervalTicks         (2)
+#define Config_System_MonitoringUpdateIntervalTicks         (30)
 
 #define Config_System_VDDCalMilliVolts                      (3140ul)
 #define Config_System_VDDCalADCValue                        (332ul)
@@ -67,3 +67,8 @@
 #define Config_Keypad_RepeatTimeoutTicks                    (50)
 #define Config_Keypad_RepeatIntervalTicks                   (10)
 #define Config_Keypad_DeBounceCoolDownTicks                 (5)
+
+/**
+ * Peripherals
+ */
+#define INDICATOR_LED_OUTPUT                                LATC2
