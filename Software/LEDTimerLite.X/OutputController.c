@@ -225,7 +225,7 @@ void OutputController_toggle()
     OutputController_updateState();
 }
 
-OutputController_TaskResult OutputController_task()
+OutputController_TaskResult OutputController_runTasks()
 {
     context.switchedOnBySchedule = isSwitchedOnBySchedule();
 

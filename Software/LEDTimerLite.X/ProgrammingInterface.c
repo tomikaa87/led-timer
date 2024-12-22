@@ -61,7 +61,7 @@ void ProgrammingInterface_init(void)
 
 }
 
-void ProgrammingInterface_task(void)
+void ProgrammingInterface_runTasks(void)
 {
     transmitLog();
 }

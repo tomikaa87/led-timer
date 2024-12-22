@@ -56,7 +56,7 @@ inline Clock_Ticks Clock_getTicks(void);
 inline Clock_Ticks Clock_getFastTicks(void);
 inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);
 inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since);
-void Clock_task(void);
+void Clock_runTasks(void);
 void Clock_setDate(YearsFrom1970 year, uint8_t month, uint8_t day);
 inline YearsFrom1970 Clock_getYear(void);
 inline uint8_t Clock_getMonth(void);

@@ -40,7 +40,7 @@ typedef enum {
  * the saved schedule.
  * @return Result of the task representing internal state changes
  */
-OutputController_TaskResult OutputController_task(void);
+OutputController_TaskResult OutputController_runTasks(void);
 
 /**
  * Returns the output state in case there is external power

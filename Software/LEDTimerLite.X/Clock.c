@@ -133,7 +133,7 @@ inline Clock_Ticks Clock_getElapsedFastTicks(Clock_Ticks since)
     return (Clock_Ticks)abs((int16_t)Clock_interruptContext.fastTicks - (int16_t)since);
 }
 
-void Clock_task()
+void Clock_runTasks()
 {
     if (Clock_interruptContext.updateCalendar) {
         Clock_interruptContext.updateCalendar = false;
