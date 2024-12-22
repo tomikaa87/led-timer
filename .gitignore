@@ -79,3 +79,4 @@ fp-info-cache
 # Exported BOM files
 *.xml
 *.csv
+Software/LEDTimerLite.X/queuelogs/debugtool.txt
