@@ -58,52 +58,58 @@ static struct MainContext
 {
     volatile uint8_t adcConversionFinished : 1;
     volatile uint8_t buttonPressed : 1;
+    volatile uint8_t ldoSenseChanged : 1;
 } context = {
     .adcConversionFinished = 0,
-    .buttonPressed = 0
+    .buttonPressed = 0,
+    .ldoSenseChanged = 0
 };
 
 void __interrupt() isr(void)
 {
+    // Timer1 (RTC)
+    if (TMR1IE && TMR1IF) {
+        TMR1IF = 0;
+        Clock_handleRTCTimerInterrupt();
+    }
+
+    // Timer4 (FastTick)
+    if (TMR4IE && TMR4IF) {
+        TMR4IF = 0;
+        Clock_handleFastTimerInterrupt();
+    }
+
+    // ADC
+    if (ADIE && ADIF) {
+        ADIF = 0;
+        System_handleADCInterrupt(((uint16_t)ADRESH) << 8 | ADRESL);
+        context.adcConversionFinished = 1;
+    }
+
+    // UART RC (Programming Interface)
+    if (RCIE && RCIF) {
+        char c = RCREG;
+        ProgrammingInterface_processInputChar(c);
+    }
+
+    // GPIO Interrupt-on-change
     if (IOCIE && IOCIF) {
         // RC3 IOC - SW
         if (IOCCF3) {
             IOCCF3 = 0;
             context.buttonPressed = 1;
-            System_handleExternalWakeUp();
+//            System_handleExternalWakeUp();
             ProgrammingInterface_logEvent(PI_LOG_ButtonPress);
         }
 
         // RA2 IOC - LDO_SENSE
         if (IOCAF2) {
             IOCAF2 = 0;
-            System_handleLDOSenseInterrupt();
+//            System_handleLDOSenseInterrupt();
+            context.ldoSenseChanged = 1;
             ProgrammingInterface_logEvent(
                 RA2 == 1 ? PI_LOG_LDOPowerDown : PI_LOG_LDOPowerUp
             );
-        }
-    }
-
-    if (PEIE) {
-        if (ADIE && ADIF) {
-            ADIF = 0;
-            System_handleADCInterrupt(((uint16_t)ADRESH) << 8 | ADRESL);
-            context.adcConversionFinished = 1;
-        }
-
-        if (TMR4IE & TMR4IF) {
-            TMR4IF = 0;
-            Clock_handleFastTimerInterrupt();
-        }
-
-        if (TMR1IE & TMR1IF) {
-            TMR1IF = 0;
-            Clock_handleRTCTimerInterrupt();
-        }
-
-        if (RCIE && RCIF) {
-            char c = RCREG;
-            ProgrammingInterface_processInputChar(c);
         }
     }
 }
@@ -141,10 +147,63 @@ inline static void showStartupScreen()
     }
 }
 
+void main(void)
+{
+    System_init();
+
+    Settings_init();
+    Settings_load();
+
+    ProgrammingInterface_init();
+    ProgrammingInterface_logEvent(PI_LOG_Startup);
+
+    UserInterface_init();
+
+    while (true) {
+        if (System_isRunningFromBackupBattery()) {
+            // Do only minimal number of tasks to save power
+
+            // Block sleep if UI has pending lightweight tasks
+            if (!UserInterface_hasPendingLightweightTasks()) {
+                System_prepareForSleepMode();
+                SLEEP();
+                System_runTasksAfterWakeUp();
+            }
+        } else {
+            // We have external power, do every task
+
+            Clock_runTasks();
+
+            if (OutputController_runTasks() == OutputController_TaskResult_OutputStateChanged) {
+                UserInterface_handleExternalEvent(UI_ExternalEvent_OutputStateChanged);
+            }
+
+            UserInterface_runTasks();
+
+            ProgrammingInterface_runTasks();
+        }
+
+        // Handle button press
+        if (context.buttonPressed) {
+            context.buttonPressed = 0;
+            UserInterface_buttonPressEvent();
+        }
+
+        // Handle LDO sense changes
+        if (context.ldoSenseChanged) {
+            context.ldoSenseChanged = 0;
+            UserInterface_handleExternalEvent(UI_ExternalEvent_PowerInputChanged);
+        }
+
+        UserInterface_runLightweightTasks();
+    }
+}
+
+#if 0
 /*
                          Main application
  */
-void main(void)
+void main_(void)
 {
     System_init();
 
@@ -162,6 +221,8 @@ void main(void)
 
     bool runHeavyTasks = true;
 
+    System_handleLDOSenseInterrupt();
+
     System_TaskResult systemTaskResult = {
         .action = System_TaskResult_NoActionNeeded,
         .powerInputChanged = false
@@ -177,7 +238,7 @@ void main(void)
         }
 #endif
 
-        Clock_task();
+        Clock_runTasks();
 
         if (runHeavyTasks) {
             // Handle button press
@@ -190,25 +251,25 @@ void main(void)
             systemTaskResult = System_task();
 
             if (systemTaskResult.powerInputChanged) {
-                UserInterface_setExternalEvent(UI_ExternalEvent_PowerInputChanged);
+                UserInterface_handleExternalEvent(UI_ExternalEvent_PowerInputChanged);
             }
 
             if (context.adcConversionFinished) {
                 context.adcConversionFinished = false;
-                UserInterface_setExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
+                UserInterface_handleExternalEvent(UI_ExternalEvent_BatteryLevelMeasurementFinished);
             }
 
             if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
-                UserInterface_setExternalEvent(UI_ExternalEvent_SystemGoingToSleep);
+                UserInterface_handleExternalEvent(UI_ExternalEvent_SystemGoingToSleep);
             }
 
-            ProgrammingInterface_task();
+            ProgrammingInterface_runTasks();
 
-            UserInterface_task();
+            UserInterface_runTasks();
         }
 
-        if (OutputController_task() == OutputController_TaskResult_OutputStateChanged) {
-            UserInterface_setExternalEvent(UI_ExternalEvent_OutputStateChanged);
+        if (OutputController_runTasks() == OutputController_TaskResult_OutputStateChanged) {
+            UserInterface_handleExternalEvent(UI_ExternalEvent_OutputStateChanged);
         }
 
         if (systemTaskResult.action == System_TaskResult_EnterSleepMode) {
@@ -228,7 +289,7 @@ void main(void)
                 sleepResult == System_SleepResult_WakeUpFromExternalSource;
 
             if (runHeavyTasks) {
-                UserInterface_setExternalEvent(UI_ExternalEvent_SystemWakeUp);
+                UserInterface_handleExternalEvent(UI_ExternalEvent_SystemWakeUp);
 #if DEBUG_ENABLE
                 ++_DebugState.heavyTaskUpdateValue;
 #endif
@@ -239,6 +300,7 @@ void main(void)
         }
     }
 }
+#endif
 /**
  End of File
 */

@@ -58,6 +58,10 @@ volatile uint16_t _System_adcResult = 0;
 #define DEBUG_ENABLE_PRINT 1
 #define DEBUG_REDIRECT_EUSART 1
 
+static void setupAdcAndFvr(void);
+static void prepareSleepMode(void);
+static void onWakeUp(void);
+
 System_InterruptContext System_interruptContext = {
     .adc = {
         .result = 0,
@@ -82,6 +86,8 @@ static struct SystemContext
     {
         Clock_Ticks lastUpdateTime;
         uint8_t batteryLevel;               // Estimated battery level: 0..10
+        bool initialMeasurementDone;
+        bool measurementRunning;
     } monitoring;
 } context = {
     .sleep = {
@@ -92,6 +98,8 @@ static struct SystemContext
     .monitoring = {
         .lastUpdateTime = 0,
         .batteryLevel = 0,
+        .initialMeasurementDone = 0,
+        .measurementRunning = 0
     }
 };
 
@@ -150,14 +158,10 @@ void System_init()
     OSCCON1bits.NDIV = 0;                   // Divider: 1
     OSCFRQbits.HFFRQ = 0b0100;              // 8 MHz
     OSCENbits.HFOEN = 1;                    // Enable HFINTOSC
-    OSCENbits.LFOEN = 1;                    // Enable LFINTOSC
     OSCENbits.SOSCEN = 1;                   // Enable the secondary oscillator
-    OSCENbits.ADOEN = 1;                    // Enable the ADC oscillator
     while (                                 // Wait for all the oscillators
         !OSCSTAT1bits.HFOR
-        || !OSCSTAT1bits.LFOR
-        || !OSCSTAT1bits.SOR
-        || !OSCSTAT1bits.ADOR
+//        || !OSCSTAT1bits.SOR
     ) {
         continue;
     }
@@ -165,21 +169,6 @@ void System_init()
     // Comparator
     CM1CON1 = 0b100100;                     // CxV(N/P) is unconnected
     CM2CON1 = 0b100100;
-
-    // FVR
-    FVRCONbits.ADFVR = 0b01;                // 1x gain
-    FVRCONbits.FVREN = 1;                   // Enable the module
-    while (!FVRCONbits.FVRRDY) {            // Wait for the module to be ready
-        continue;
-    }
-
-    // ADC
-    ADCON0bits.CHS = 0b111111;              // FVR
-    ADCON1bits.ADFM = 1;                    // Right-justified result
-    ADCON1bits.ADCS = 0b111;                // ADCRC
-    ADIF = 0;                               // Clear the interrupt flag
-    ADIE = 1;                               // Enable the interrupt
-    ADCON0bits.ADON = 1;                    // Enable the module
 
     // GPIO: RA2 - LDO_SENSE
     ANSELAbits.ANSA2 = 0;                   // Pin is digital
@@ -220,7 +209,7 @@ void System_init()
 
     // GPIO: RC3 - SW
     ANSELCbits.ANSC3 = 0;                   // Pin is digital
-    TRISCbits.TRISC3 = 0;                   // Pin is input
+    TRISCbits.TRISC3 = 1;                   // Pin is input
     WPUCbits.WPUC3 = 1;                     // Enable weak pull-up
     IOCCNbits.IOCCN3 = 1;                   // Interrupt on negative edge
 
@@ -228,7 +217,7 @@ void System_init()
     ANSELCbits.ANSC4 = 0;                   // Pin is digital
     PWMTMRSbits.P5TSEL = 0b01;              // Based on TMR2
     PR2 = 0x3F;                             // 8-bits, 7812.5 Hz @ 8 MHz
-    PWM5DCHbits.PWM5DCH = 0b100000;                // DC = 0
+    PWM5DCHbits.PWM5DCH = 0;                // DC = 0
     PWM5DCLbits.PWM5DCL = 0;
     TMR2IF = 0;
     T2CONbits.T2CKPS = 0b01;                // 1:4
@@ -240,23 +229,25 @@ void System_init()
     RC4PPSbits.RC4PPS = 0b00010;            // Route PWM5 output
     PWM5CONbits.PWM5EN = 1;                 // Enable PWM
 
-    // Timer1 : RTC timer (2s period)
-    T1CONbits.TMR1CS = 0b10;                // Clock: SOSC
-    T1CONbits.T1SOSC = 1;                   // Enable SOSC
-    T1CONbits.T1SYNC = 1;                   // No synchronization
-    TMR1H = 0;                              // Buffered until TMR1L is written
+    // Timer1 : RTC (2s period)
+    TMR1H = 0;
     TMR1L = 0;
-    TMR1IF = 0;                             // Clear the interrupt flag
-    TMR1IE = 1;                             // Enable the interrupt
-    T1CONbits.TMR1ON = 1;                   // Enable the module
+    TMR1IF = 0;
+    TMR1IE = 1;
+    T1CON =
+        (0b10 << 6)                         // TMR1CS=SOSC
+        | (1 << 3)                          // T1SOSC=1
+        | (1 << 2)                          // nT1SYNC=1
+        | 1;                                // TMR1ON=1
 
     // Timer4 : fast tick timer, 25000 Hz (10 ms) @ 16 MHz
     PR4 = 0xF9;
-    T4CONbits.T4CKPS = 0b10;                // Prescaler: 1:16
-    T4CONbits.T4OUTPS = 0b0100;             // Postscaler: 1:5
     TMR4IF = 0;                             // Clear the interrupt flag
     TMR4IE = 1;                             // Enable the interrupt
-    T4CONbits.TMR4ON = 1;                   // Enable the module
+    T4CON =
+        (0b0100 << 3)                       // Postscaler: 1:5
+        | (1 << 2)                          // TMR4ON=1
+        | 0b10;                             // Prescaler: 1:16
 
     // PMD
     PMD0 =
@@ -266,7 +257,8 @@ void System_init()
         | (1 << 6)                          // TMR6MD=1
         | (1 << 5)                          // TMR5MD=1
         | (1 << 3)                          // TMR3MD=1
-        | 1;                                // TMR0MD=1
+        | 1                                 // TMR0MD=1
+        ;
     PMD2 =
         (1 << 6)                            // DACMD=1
         | (1 << 2)                          // CMP2MD=1
@@ -294,16 +286,20 @@ void System_init()
     PEIE = 1;                               // Enable peripheral interrupts
     GIE = 1;                                // Enable interrupts globally
 
-    measureVDD();
-
-    // Wait for the initial measurement to avoid invalid readings after startup
-    while (!System_interruptContext.adc.updated);
-
     if (System_isRunningFromBackupBattery()) {
+        setupAdcAndFvr();
+
+        measureVDD();
+
+        // Wait for the initial measurement to avoid invalid readings after startup
+        while (!System_interruptContext.adc.updated);
+
         updateBatteryLevel();
+
+        context.monitoring.initialMeasurementDone = 1;
     }
 
-    // Turn of the indicator LED
+    // Turn off the indicator LED
     LATCbits.LATC2 = 0;
 }
 
@@ -325,51 +321,71 @@ System_TaskResult System_task()
 
     System_interruptContext.ldoSense.updated = false;
 
-    if (
-        (
-            result.powerInputChanged
-            || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
-                >= Config_System_MonitoringUpdateIntervalTicks
-        )
-        && System_isRunningFromBackupBattery()
-    ) {
-        context.monitoring.lastUpdateTime = Clock_getTicks();
-        measureVDD();
-        updateBatteryLevel();
-    }
+//    if (
+//        (
+//            result.powerInputChanged
+//            || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+//                >= Config_System_MonitoringUpdateIntervalTicks
+//        )
+//        && System_isRunningFromBackupBattery()
+//    ) {
+//        printf("Measuring Vbat\r\n");
+//
+//
+//
+//        measureVDD();
+//        updateBatteryLevel();
+//
+//        context.monitoring.lastUpdateTime = Clock_getTicks();
+//    }
 
     // Disable the PWM output if running on backup battery
-    if (result.powerInputChanged) {
-        PWM5CONbits.PWM5EN = System_isRunningFromBackupBattery() ? 0 : 1;
-    }
+//    if (result.powerInputChanged) {
+//        if (System_isRunningFromBackupBattery()) {
+//            printf("Disabling peripherals\r\n");
+//
+//            PWM5CONbits.PWM5EN = 0;
+////
+////            OSCENbits.ADOEN = 0;
+////
+////            ADCMD = 1;
+////            FVRMD = 1;
+//        } else {
+//            printf("Enabling PWM\r\n");
+//            PWM5CONbits.PWM5EN = 1;
+//        }
+//    }
 
     if (!context.sleep.enabled) {
-        Clock_Ticks elapsedSinceWakeUp
-            = Clock_getElapsedTicks(context.sleep.lastWakeUpTime);
+//        Clock_Ticks elapsedSinceWakeUp
+//            = Clock_getElapsedTicks(context.sleep.lastWakeUpTime);
 
         switch (context.sleep.wakeUpReason) {
             default:
-            case System_WakeUpReason_None:
                 context.sleep.enabled = System_isRunningFromBackupBattery();
                 break;
 
-            case System_WakeUpReason_Startup:
-                if (elapsedSinceWakeUp >= Config_System_StartupAwakeLengthTicks) {
-                    context.sleep.enabled = System_isRunningFromBackupBattery();
-                }
-                break;
-
-            case System_WakeUpReason_KeyPress:
-                if (elapsedSinceWakeUp >= Config_System_KeyPressWakeUpLengthTicks) {
-                    context.sleep.enabled = System_isRunningFromBackupBattery();
-                }
-                break;
-
-            case System_WakeUpReason_PowerInputChanged:
-                if (elapsedSinceWakeUp >= Config_System_PowerInputChangeWakeUpLengthTicks) {
-                    context.sleep.enabled = System_isRunningFromBackupBattery();
-                }
-                break;
+//            case System_WakeUpReason_None:
+//                context.sleep.enabled = System_isRunningFromBackupBattery();
+//                break;
+//
+//            case System_WakeUpReason_Startup:
+//                if (elapsedSinceWakeUp >= Config_System_StartupAwakeLengthTicks) {
+//                    context.sleep.enabled = System_isRunningFromBackupBattery();
+//                }
+//                break;
+//
+//            case System_WakeUpReason_KeyPress:
+//                if (elapsedSinceWakeUp >= Config_System_KeyPressWakeUpLengthTicks) {
+//                    context.sleep.enabled = System_isRunningFromBackupBattery();
+//                }
+//                break;
+//
+//            case System_WakeUpReason_PowerInputChanged:
+//                if (elapsedSinceWakeUp >= Config_System_PowerInputChangeWakeUpLengthTicks) {
+//                    context.sleep.enabled = System_isRunningFromBackupBattery();
+//                }
+//                break;
         }
     } else {
         result.action = System_TaskResult_EnterSleepMode;
@@ -402,11 +418,8 @@ System_SleepResult System_sleep()
     );
 #endif
 
-    // Send out all the data before going to sleep
-    while (UART1MD == 0 && TRMT == 0);
-
     // Disable the FVR to conserve power
-    FVRCONbits.FVREN = 0;
+//    FVRCONbits.FVREN = 0;
 
     context.sleep.wakeUpReason = System_WakeUpReason_None;
 
@@ -417,11 +430,15 @@ System_SleepResult System_sleep()
     UI_updateDebugDisplay();
 #endif
 
+    prepareSleepMode();
+
     SLEEP();
+
+    onWakeUp();
 
     // The next instruction will always be executed before the ISR
 
-    FVRCONbits.FVREN = 1;
+//    FVRCONbits.FVREN = 1;
 
     // Clear the flag so the next task() call can update it properly
     context.sleep.enabled = false;
@@ -469,4 +486,147 @@ uint16_t System_getVBatMilliVolts()
 inline uint8_t System_getBatteryLevel()
 {
     return context.monitoring.batteryLevel;
+}
+
+static void setupAdcAndFvr()
+{
+    OSCENbits.ADOEN = 1;
+
+    ADCMD = 0;
+    FVRMD = 0;
+
+    // FVR
+    FVRCONbits.ADFVR = 0b01;                // 1x gain
+    FVRCONbits.FVREN = 1;                   // Enable the module
+    while (!FVRCONbits.FVRRDY) {            // Wait for the module to be ready
+        continue;
+    }
+
+    // ADC
+    ADCON0bits.CHS = 0b111111;              // FVR
+    ADCON1bits.ADFM = 1;                    // Right-justified result
+    ADCON1bits.ADCS = 0b111;                // ADCRC
+    ADIF = 0;                               // Clear the interrupt flag
+    ADIE = 1;                               // Enable the interrupt
+    ADCON0bits.ADON = 1;                    // Enable the module
+}
+
+static void prepareSleepMode()
+{
+//    printf("prepareSleepMode()\r\n");
+
+    if (System_isRunningFromBackupBattery()) {
+//        printf("Disabling peripherals\r\n");
+
+        PWM5CONbits.PWM5EN = 0;
+
+        OSCENbits.ADOEN = 0;
+
+        ADCMD = 1;
+        FVRMD = 1;
+    }
+
+    // Send out all the data before going to sleep
+    while (UART1MD == 0 && TRMT == 0);
+}
+
+static void onWakeUp()
+{
+//    printf("onWakeUp()\r\n");
+
+    if (System_isRunningFromBackupBattery()) {
+        if (
+            !context.monitoring.initialMeasurementDone
+            || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+                >= Config_System_MonitoringUpdateIntervalTicks
+        ) {
+//            printf("Measuring Vbat\r\n");
+
+            setupAdcAndFvr();
+            measureVDD();
+            // FIXME
+            while (!System_interruptContext.adc.updated);
+            updateBatteryLevel();
+
+            context.monitoring.lastUpdateTime = Clock_getTicks();
+            context.monitoring.initialMeasurementDone = 1;
+        }
+    } else{
+        printf("Enabling PWM\r\n");
+        PWM5CONbits.PWM5EN = 1;
+    }
+}
+
+void System_prepareForSleepMode(void)
+{
+#if DEBUG_ENABLE_PRINT
+    printf("System_prepareForSleepMode: t=%lld, ft=%d\r\n", Clock_getUtcEpoch(), Clock_getFastTicks());
+#endif
+
+    if (
+        !context.monitoring.initialMeasurementDone
+        || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+            >= Config_System_MonitoringUpdateIntervalTicks
+    ) {
+#if DEBUG_ENABLE_PRINT
+        printf("System_prepareForSleepMode: starting VDD measurement\r\n");
+#endif
+
+        // Start the VDD measurement. The ADC interrupt will wake up the CPU and
+        // the result will be stored.
+        setupAdcAndFvr();
+        measureVDD();
+    } else {
+        // Don't interrupt an ongoing acquisition
+        if (!ADCON0bits.ADGO) {
+#if DEBUG_ENABLE_PRINT
+            printf("System_prepareForSleepMode: turning off ADC and FVR\r\n");
+#endif
+
+            // Disable ADC RC oscillator
+            OSCENbits.ADOEN = 0;
+
+            // Disable unused peripherals
+            ADCMD = 1;
+            FVRMD = 1;
+        } else {
+#if DEBUG_ENABLE_PRINT
+            printf("System_prepareForSleepMode: ADC acquisition in progress\r\n");
+#endif
+        }
+    }
+
+    // Disable PWM output
+    PWM5CONbits.PWM5EN = 0;
+
+    // Send out all the data before going to sleep
+    while (UART1MD == 0 && TRMT == 0);
+}
+
+void System_runTasksAfterWakeUp(void)
+{
+    // Wait for the oscillator to stabilize
+    while (OSCCON3bits.ORDY == 0 || OSCSTAT1bits.HFOR == 0);
+
+#if DEBUG_ENABLE_PRINT
+    printf("System_runTasksAfterWakeUp: t=%lld, ft=%d\r\n", Clock_getUtcEpoch(), Clock_getFastTicks());
+#endif
+
+    if (System_interruptContext.adc.updated) {
+#if DEBUG_ENABLE_PRINT
+        printf("System_runTasksAfterWakeUp: VDD measurement finished\r\n");
+#endif
+        updateBatteryLevel();
+
+        System_interruptContext.adc.updated = false;
+        context.monitoring.lastUpdateTime = Clock_getTicks();
+        context.monitoring.initialMeasurementDone = 1;
+    }
+
+    if (!System_isRunningFromBackupBattery()) {
+#if DEBUG_ENABLE_PRINT
+        printf("System_runTasksAfterWakeUp: enabling PWM output\r\n");
+#endif
+        PWM5CONbits.PWM5EN = 1;
+    }
 }

@@ -145,3 +145,7 @@ uint16_t System_getVBatMilliVolts(void);
  * @return A value from 0 to 10.
  */
 inline uint8_t System_getBatteryLevel(void);
+
+void System_prepareForSleepMode(void);
+
+void System_runTasksAfterWakeUp(void);
