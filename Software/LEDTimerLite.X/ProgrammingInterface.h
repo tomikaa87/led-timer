@@ -31,5 +31,17 @@ typedef enum {
 
 void ProgrammingInterface_init(void);
 void ProgrammingInterface_runTasks(void);
+
+/**
+ * Puts the log event into the event ring buffer to be processed later.
+ * Can be called from an interrupt.
+ * @param event Log event type
+ */
 void ProgrammingInterface_logEvent(PI_LogEvent event);
+
+/**
+ * Puts the character into the input ring buffer to be processed later.
+ * Can be called from an interrupt.
+ * @param c Character to be buffered
+ */
 void ProgrammingInterface_processInputChar(char c);
