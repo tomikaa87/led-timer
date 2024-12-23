@@ -47,11 +47,57 @@ typedef struct {
 /*
  * Packet format
  *
+ * *TYPE;
+ * *TYPE:FIELD1:FIELDN;
+ *
  * Tokens
  *  [*]: Reset parser, for synchronization purposes
  *  [;]: Packet type delimiter, end of packet indicator
  *  [:]: Packet field delimiter
  *  [0-9A-Z]: Field value
+ *
+ * Packets
+ *  Legend:
+ *      [x<len>]: [len] number of hex numbers
+ *
+ *  TIME(               Set the time
+ *      HOUR[x2],       00-17
+ *      MIN[x2],        00-3C
+ *      SEC[x2],        00-3C
+ *      ZONE            00-6F (15-minute slots, -14:00 .. 14:00, 0:00 is 38)
+ *  )
+ *
+ *  DATE(               Set the date
+ *      YEAR[x4],       0000-FFFF (years from 1970)
+ *      MONTH[x1],      0-B
+ *      DAY[x2]         00-1F
+ *  )
+ *
+ *  SCHOFF(             Turn off a schedule
+ *      INDEX[x1],      0-7
+ *  )
+ *
+ *  SCHINT(             Set interval schedule
+ *      INDEX[x1],      0-7
+ *      ON_TYPE[x1],    0-2 (0: time, 1: sunrise, 2: sunset)
+ *      ON_OFFS[x1],    0-7 (15-minute slots, -60 .. 60, 0 is 3)
+ *      ON_TIME_H[x2],  00-17
+ *      ON_TIME_M[x2],  00-3C
+ *      OFF_TYPE[x1],   0-2 (0: time, 1: sunrise, 2: sunset)
+ *      OFF_OFFS[x1],   0-7 (15-minute slots, -60 .. 60, 0 is 3)
+ *      OFF_TIME_H[x2], 00-17
+ *      OFF_TIME_M[x2]  00-3C
+ *  )
+ *
+ *  SCHSEG(             // Set segment schedule
+ *      INDEX[x1],      0-7
+ *      DATA_0[x2],     00-FF
+ *      DATA_1[x2],     00-FF
+ *      DATA_2[x2],     00-FF
+ *      DATA_3[x2],     00-FF
+ *      DATA_4[x2],     00-FF
+ *      DATA_5[x2]      00-FF
+ *  )
  */
 
 typedef enum {
@@ -108,6 +154,11 @@ bool isAllowedToken(const char c) {
     return false;
 }
 
+static void handleReset()
+{
+
+}
+
 static void handlePacketType(const char* type)
 {
     printf("handlePacketType: %s\r\n", type);
@@ -116,6 +167,11 @@ static void handlePacketType(const char* type)
 static void handleFieldValue(const char* value)
 {
     printf("handleFieldValue: %s\r\n", value);
+}
+
+static void handleEndOfPacket()
+{
+
 }
 
 static void handleInputChar(const char c)
@@ -131,6 +187,7 @@ static void handleInputChar(const char c)
             if (c == '*') {
                 context.state = PPS_READ_PACKET_TYPE;
                 context.bufferIndex = 0;
+                handleReset();
             }
             break;
 
@@ -150,6 +207,7 @@ static void handleInputChar(const char c)
             if (c == ':') {
                 if (context.bufferIndex == 0) {
                     context.state = PPS_RESET;
+                    handleReset();
                 } else {
                     if (context.state == PPS_READ_PACKET_TYPE) {
                         handlePacketType(context.buffer);
@@ -167,9 +225,12 @@ static void handleInputChar(const char c)
                         handleFieldValue(context.buffer);
                     }
                 }
+                handleEndOfPacket();
                 context.state = PPS_RESET;
+                handleReset();
             } else if (c == '*') {
                 context.state = PPS_RESET;
+                handleReset();
             } else if (context.bufferIndex < sizeof(context.buffer) - 1) {
                 context.buffer[context.bufferIndex++] = c;
                 context.buffer[context.bufferIndex] = '\0';
