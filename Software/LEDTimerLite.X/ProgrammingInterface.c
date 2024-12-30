@@ -106,6 +106,10 @@ typedef struct {
  *      DATA_5[x2]      00-FF
  *  )
  *
+ *  OUTPUT(
+ *      ON[x1]          0: off, 1: on
+ *  )
+ *
  * Response packets
  *
  *  OK()
@@ -122,12 +126,26 @@ typedef enum {
 typedef enum {
     PP_NONE,
 
-    PP_TIME,
+    PP_ENUM_FIRST,
+
+    PP_TIME = PP_ENUM_FIRST,
     PP_DATE,
     PP_SCHOFF,
     PP_SCHINT,
-    PP_SCHSEG
+    PP_SCHSEG,
+    PP_OUTPUT,
+
+    PP_ENUM_MAX
 } PacketProcessor;
+
+static uint8_t FieldCounts[PP_ENUM_MAX - PP_ENUM_FIRST] = {
+    4,      // PP_TIME
+    3,      // PP_DATE
+    1,      // PP_SCHOFF
+    9,      // PP_SCHINT
+    7,      // PP_SCHSEG
+    1,      // PP_OUTPUT
+};
 
 static struct Context {
     volatile LogEntry logQueue[LOG_QUEUE_SIZE];
@@ -216,6 +234,8 @@ static HPT_Result handlePacketType(const char* type)
         context.selectedProcessor = PP_SCHINT;
     } else if (strncmp(type, "SCHSEG", 7) == 0) {
         context.selectedProcessor = PP_SCHSEG;
+    } else if (strncmp(type, "OUTPUT", 7) == 0) {
+        context.selectedProcessor = PP_OUTPUT;
     } else {
         return HPT_UNKNOWN_TYPE;
     }
@@ -246,7 +266,7 @@ typedef enum {
 
 static HFV_Result handleFieldValue(const char* value)
 {
-    if (++context.fieldIndex > PACKET_HANDLER_MAX_FIELDS) {
+    if (++context.fieldIndex >= PACKET_HANDLER_MAX_FIELDS) {
         return HFV_TOO_MANY_FIELDS;
     }
 
@@ -259,7 +279,7 @@ static bool processFieldValueOrWriteError()
         case HFV_NO_ERROR:
             return true;
         case HFV_TOO_MANY_FIELDS:
-            writeError(PI_ERR_TOO_MANY_FIELDS);
+            writeError(PI_ERR_FIELD_BUFFER_FULL);
             break;
         case HFV_INVALID_FIELD_VALUE:
             writeError(PI_ERR_INVALID_FIELD_VALUE);
@@ -273,6 +293,16 @@ static bool processFieldValueOrWriteError()
 
 static void handleEndOfPacket()
 {
+    if (context.selectedProcessor < PP_ENUM_FIRST || context.selectedProcessor >= PP_ENUM_MAX) {
+        writeError(PI_ERR_INTERNAL_ERROR);
+        return;
+    }
+
+    if (context.fieldIndex != FieldCounts[context.selectedProcessor - PP_ENUM_FIRST]) {
+        writeError(PI_ERR_FIELD_COUNT_MISMATCH);
+        return;
+    }
+
     writeOK();
 }
 
@@ -333,7 +363,9 @@ static void handleInputChar(const char c)
             } else if (c == ';') {
                 if (context.bufferIndex > 0) {
                     if (context.state == PPS_READ_PACKET_TYPE) {
-                        processPacketTypeOrWriteError();
+                        if (processPacketTypeOrWriteError()) {
+                            handleEndOfPacket();
+                        }
                     } else {
                         if (processFieldValueOrWriteError()) {
                             handleEndOfPacket();
