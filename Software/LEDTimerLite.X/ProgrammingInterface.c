@@ -22,12 +22,17 @@
 
 #include "Clock.h"
 
+#include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <xc.h>
 
 #define LOG_QUEUE_SIZE 20
 #define INPUT_BUFFER_SIZE 20
+
+#define PACKET_HANDLER_BUFFER_SIZE 10
+#define PACKET_HANDLER_MAX_FIELDS 10
 
 static const char* EventNames[] = {
     "Startup",
@@ -52,13 +57,15 @@ typedef struct {
  *
  * Tokens
  *  [*]: Reset parser, for synchronization purposes
- *  [;]: Packet type delimiter, end of packet indicator
- *  [:]: Packet field delimiter
+ *  [;]: End of packet indicator
+ *  [:]: Packet type and field delimiter
  *  [0-9A-Z]: Field value
  *
- * Packets
+ * Request packets
  *  Legend:
  *      [x<len>]: [len] number of hex numbers
+ *      PACKET_TYPE(FIELD1[type], ..., FIELDN[type]): *PACKET_TYPE:FIELD1:...:FIELDN;
+ *      PACKET_TYPE(): *PACKET_TYPE;
  *
  *  TIME(               Set the time
  *      HOUR[x2],       00-17
@@ -98,6 +105,12 @@ typedef struct {
  *      DATA_4[x2],     00-FF
  *      DATA_5[x2]      00-FF
  *  )
+ *
+ * Response packets
+ *
+ *  OK()
+ *  ERR(CODE[x2])       00-FF
+ *
  */
 
 typedef enum {
@@ -105,6 +118,16 @@ typedef enum {
     PPS_READ_PACKET_TYPE,
     PPS_READ_FIELD
 } PacketParserState;
+
+typedef enum {
+    PP_NONE,
+
+    PP_TIME,
+    PP_DATE,
+    PP_SCHOFF,
+    PP_SCHINT,
+    PP_SCHSEG
+} PacketProcessor;
 
 static struct Context {
     volatile LogEntry logQueue[LOG_QUEUE_SIZE];
@@ -119,8 +142,11 @@ static struct Context {
     volatile uint8_t inputBufferCount;
 
     PacketParserState state;
-    char buffer[11];
+    char buffer[PACKET_HANDLER_BUFFER_SIZE];
     uint8_t bufferIndex;
+
+    PacketProcessor selectedProcessor;
+    uint8_t fieldIndex;
 } context = {
     .logQueueIn = 0,
     .logQueueOut = 0,
@@ -132,7 +158,19 @@ static struct Context {
     .state = PPS_RESET,
     .buffer = {0,},
     .bufferIndex = 0,
+    .selectedProcessor = PP_NONE,
+    .fieldIndex = 0
 };
+
+void writeOK()
+{
+    printf("*OK;\r\n");
+}
+
+void writeError(const uint8_t code)
+{
+    printf("*ERR:%02X;\r\n", code);
+}
 
 bool isAllowedToken(const char c) {
     if (c == '*') {
@@ -156,28 +194,93 @@ bool isAllowedToken(const char c) {
 
 static void handleReset()
 {
-
+    context.bufferIndex = 0;
+    context.state = PPS_RESET;
+    context.selectedProcessor = PP_NONE;
 }
 
-static void handlePacketType(const char* type)
+typedef enum {
+    HPT_NO_ERROR,
+    HPT_UNKNOWN_TYPE
+} HPT_Result;
+
+static HPT_Result handlePacketType(const char* type)
 {
-    printf("handlePacketType: %s\r\n", type);
+    if (strncmp(type, "TIME", 5) == 0) {
+        context.selectedProcessor = PP_TIME;
+    } else if (strncmp(type, "DATE", 5) == 0) {
+        context.selectedProcessor = PP_DATE;
+    } else if (strncmp(type, "SCHOFF", 7) == 0) {
+        context.selectedProcessor = PP_SCHOFF;
+    } else if (strncmp(type, "SCHINT", 7) == 0) {
+        context.selectedProcessor = PP_SCHINT;
+    } else if (strncmp(type, "SCHSEG", 7) == 0) {
+        context.selectedProcessor = PP_SCHSEG;
+    } else {
+        return HPT_UNKNOWN_TYPE;
+    }
+
+    context.fieldIndex = 0;
+
+    return HPT_NO_ERROR;
 }
 
-static void handleFieldValue(const char* value)
+static bool processPacketTypeOrWriteError()
 {
-    printf("handleFieldValue: %s\r\n", value);
+    switch (handlePacketType(context.buffer)) {
+        case HPT_NO_ERROR:
+            return true;
+        case HPT_UNKNOWN_TYPE:
+            writeError(PI_ERR_UNKNOWN_PACKET_TYPE);
+            break;
+    }
+
+    return false;
+}
+
+typedef enum {
+    HFV_NO_ERROR,
+    HFV_TOO_MANY_FIELDS,
+    HFV_INVALID_FIELD_VALUE
+} HFV_Result;
+
+static HFV_Result handleFieldValue(const char* value)
+{
+    if (++context.fieldIndex > PACKET_HANDLER_MAX_FIELDS) {
+        return HFV_TOO_MANY_FIELDS;
+    }
+
+    return HFV_NO_ERROR;
+}
+
+static bool processFieldValueOrWriteError()
+{
+    switch (handleFieldValue(context.buffer)) {
+        case HFV_NO_ERROR:
+            return true;
+        case HFV_TOO_MANY_FIELDS:
+            writeError(PI_ERR_TOO_MANY_FIELDS);
+            break;
+        case HFV_INVALID_FIELD_VALUE:
+            writeError(PI_ERR_INVALID_FIELD_VALUE);
+            break;
+        default:
+            break;
+    }
+
+    return false;
 }
 
 static void handleEndOfPacket()
 {
-
+    writeOK();
 }
 
 static void handleInputChar(const char c)
 {
     if (!isAllowedToken(c)) {
-        context.state = PPS_RESET;
+        writeError(PI_ERR_INVALID_INPUT_CHAR);
+        handleReset();
         return;
     }
 
@@ -185,9 +288,8 @@ static void handleInputChar(const char c)
         // RESET -(*)-> READ_PACKET_TYPE
         case PPS_RESET:
             if (c == '*') {
-                context.state = PPS_READ_PACKET_TYPE;
-                context.bufferIndex = 0;
                 handleReset();
+                context.state = PPS_READ_PACKET_TYPE;
             }
             break;
 
@@ -206,34 +308,55 @@ static void handleInputChar(const char c)
         case PPS_READ_FIELD:
             if (c == ':') {
                 if (context.bufferIndex == 0) {
-                    context.state = PPS_RESET;
+                    if (context.state == PPS_READ_PACKET_TYPE) {
+                        writeError(PI_ERR_MISSING_PACKET_TYPE);
+                    } else {
+                        writeError(PI_ERR_MISSING_FIELD_VALUE);
+                    }
                     handleReset();
                 } else {
+                    bool handled = false;
+
                     if (context.state == PPS_READ_PACKET_TYPE) {
-                        handlePacketType(context.buffer);
+                        handled = processPacketTypeOrWriteError();
                     } else {
-                        handleFieldValue(context.buffer);
+                        handled = processFieldValueOrWriteError();
                     }
-                    context.state = PPS_READ_FIELD;
-                    context.bufferIndex = 0;
+
+                    if (handled) {
+                        context.state = PPS_READ_FIELD;
+                        context.bufferIndex = 0;
+                    } else {
+                        handleReset();
+                    }
                 }
             } else if (c == ';') {
                 if (context.bufferIndex > 0) {
                     if (context.state == PPS_READ_PACKET_TYPE) {
-                        handlePacketType(context.buffer);
+                        processPacketTypeOrWriteError();
                     } else {
-                        handleFieldValue(context.buffer);
+                        if (processFieldValueOrWriteError()) {
+                            handleEndOfPacket();
+                        }
+                    }
+                } else {
+                    if (context.state == PPS_READ_PACKET_TYPE) {
+                        writeError(PI_ERR_MISSING_PACKET_TYPE);
+                    } else {
+                        writeError(PI_ERR_MISSING_FIELD_VALUE);
                     }
                 }
-                handleEndOfPacket();
-                context.state = PPS_RESET;
                 handleReset();
             } else if (c == '*') {
-                context.state = PPS_RESET;
                 handleReset();
-            } else if (context.bufferIndex < sizeof(context.buffer) - 1) {
-                context.buffer[context.bufferIndex++] = c;
-                context.buffer[context.bufferIndex] = '\0';
+            } else {
+                if (context.bufferIndex < sizeof(context.buffer) - 1) {
+                    context.buffer[context.bufferIndex++] = c;
+                    context.buffer[context.bufferIndex] = '\0';
+                } else {
+                    writeError(PI_ERR_BUFFER_FULL);
+                    handleReset();
+                }
             }
             break;
     }

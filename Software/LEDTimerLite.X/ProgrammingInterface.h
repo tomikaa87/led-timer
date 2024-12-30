@@ -29,6 +29,16 @@ typedef enum {
     PI_LOG_LeaveSleepMode
 } PI_LogEvent;
 
+typedef enum {
+    PI_ERR_INVALID_INPUT_CHAR,
+    PI_ERR_MISSING_PACKET_TYPE,
+    PI_ERR_UNKNOWN_PACKET_TYPE,
+    PI_ERR_MISSING_FIELD_VALUE,
+    PI_ERR_INVALID_FIELD_VALUE,
+    PI_ERR_TOO_MANY_FIELDS,
+    PI_ERR_BUFFER_FULL
+} PI_Error;
+
 void ProgrammingInterface_init(void);
 void ProgrammingInterface_runTasks(void);
 

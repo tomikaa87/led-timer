@@ -10,3 +10,7 @@ nbproject/private
 **/disassembly
 .ca/
 **/.vscode/
+**/_build
+**/cmake
+**/out
+**/defmplabxtrace.*
