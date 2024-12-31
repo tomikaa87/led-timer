@@ -71,7 +71,7 @@ typedef struct {
  *      HOUR[x2],       00-17
  *      MIN[x2],        00-3C
  *      SEC[x2],        00-3C
- *      ZONE            00-6F (15-minute slots, -14:00 .. 14:00, 0:00 is 38)
+ *      ZONE[x2]        00-6F (15-minute slots, -14:00 .. 14:00, 0:00 is 38)
  *  )
  *
  *  DATE(               Set the date
@@ -138,6 +138,21 @@ typedef enum {
     PP_ENUM_MAX
 } PacketProcessor;
 
+typedef union {
+    struct Time {
+        uint8_t hour;
+        uint8_t minute;
+        uint8_t second;
+        uint8_t timeZone;
+    } time;
+
+    struct Date {
+        uint16_t year;
+        uint8_t month;
+        uint8_t day;
+    } date;
+} ReceivedArguments;
+
 static uint8_t FieldCounts[PP_ENUM_MAX - PP_ENUM_FIRST] = {
     4,      // PP_TIME
     3,      // PP_DATE
@@ -165,6 +180,7 @@ static struct Context {
 
     PacketProcessor selectedProcessor;
     uint8_t fieldIndex;
+    ReceivedArguments receivedArguments;
 } context = {
     .logQueueIn = 0,
     .logQueueOut = 0,
@@ -258,6 +274,130 @@ static bool processPacketTypeOrWriteError()
     return false;
 }
 
+static uint8_t hexCharToU8(const char c)
+{
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    }
+    if (c >= 'A' && c <= 'F') {
+        return c - 'A' + 10;
+    }
+    if (c >= 'a' && c <= 'f') {
+        return c - 'a' + 10;
+    }
+    return 0xFF;
+}
+
+static bool fromHex(const char* s, const uint8_t maxLength, uint16_t* out)
+{
+    if (maxLength == 0 || maxLength > 4) {
+        return false;
+    }
+
+    uint8_t nibbles = strlen(s);
+    if (nibbles == 0 || nibbles > maxLength) {
+        return false;
+    }
+
+    uint16_t value = 0;
+
+    for (uint8_t i = 0; i < nibbles; i++) {
+        uint8_t nibble = hexCharToU8(s[nibbles - i - 1]);
+        if (nibble == 0xFF) {
+            return false;
+        }
+
+        value |= (uint16_t)nibble << (i * 4);
+    }
+
+    *out = value;
+
+    return true;
+}
+
+static bool hexToU4(const char* s, uint8_t* out)
+{
+    uint8_t nibble = hexCharToU8(*s);
+    if (nibble == 0xFF) {
+        return false;
+    }
+    *out = nibble;
+
+    return true;
+}
+
+static inline bool hexToU8(const char* s, uint8_t* out)
+{
+    return fromHex(s, 2, (uint16_t*)out);
+}
+
+static inline bool hexToU16(const char* s, uint16_t* out)
+{
+    return fromHex(s, 4, out);
+}
+
+static bool handleTimeFieldValue(const char* value)
+{
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU8(value, &context.receivedArguments.time.hour)
+            && context.receivedArguments.time.hour <= 23
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 1) {
+        if (
+            hexToU8(value, &context.receivedArguments.time.minute)
+            && context.receivedArguments.time.minute <= 59
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 2) {
+        if (
+            hexToU8(value, &context.receivedArguments.time.second)
+            && context.receivedArguments.time.second <= 59
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 3) {
+        if (
+            hexToU8(value, &context.receivedArguments.time.timeZone)
+            && context.receivedArguments.time.timeZone <= 0x6F
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool handleDateFieldValue(const char* value) {
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU16(value, &context.receivedArguments.date.year)
+            && context.receivedArguments.date.year >= 2024
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 1) {
+        if (
+            hexToU4(value, &context.receivedArguments.date.month)
+            && context.receivedArguments.date.month < 0x0C
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 2) {
+        if (
+            hexToU8(value, &context.receivedArguments.date.day)
+            && context.receivedArguments.date.day < 0x1F
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 typedef enum {
     HFV_NO_ERROR,
     HFV_TOO_MANY_FIELDS,
@@ -266,9 +406,34 @@ typedef enum {
 
 static HFV_Result handleFieldValue(const char* value)
 {
-    if (++context.fieldIndex >= PACKET_HANDLER_MAX_FIELDS) {
+    if ((context.fieldIndex + 1) >= PACKET_HANDLER_MAX_FIELDS) {
         return HFV_TOO_MANY_FIELDS;
     }
+
+    switch (context.selectedProcessor) {
+        case PP_TIME:
+            if (!handleTimeFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_DATE:
+            if (!handleDateFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_SCHOFF:
+            break;
+        case PP_SCHINT:
+            break;
+        case PP_SCHSEG:
+            break;
+        case PP_OUTPUT:
+            break;
+        default:
+            return HFV_INVALID_FIELD_VALUE;
+    }
+
+    ++context.fieldIndex;
 
     return HFV_NO_ERROR;
 }
