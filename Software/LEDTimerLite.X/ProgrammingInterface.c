@@ -80,8 +80,9 @@ typedef struct {
  *      DAY[x2]         00-1F
  *  )
  *
- *  SCHOFF(             Turn off a schedule
+ *  SCHSET(             Turn a schedule on or off
  *      INDEX[x1],      0-7
+ *      STATE[x1]       0: off, 1: on
  *  )
  *
  *  SCHINT(             Set interval schedule
@@ -130,7 +131,7 @@ typedef enum {
 
     PP_TIME = PP_ENUM_FIRST,
     PP_DATE,
-    PP_SCHOFF,
+    PP_SCHSET,
     PP_SCHINT,
     PP_SCHSEG,
     PP_OUTPUT,
@@ -151,12 +152,38 @@ typedef union {
         uint8_t month;
         uint8_t day;
     } date;
+
+    struct ScheduleOff {
+        uint8_t index;
+        uint8_t state;
+    } scheduleSet;
+
+    struct ScheduleInterval {
+        uint8_t index;
+        uint8_t onType;
+        uint8_t onOffset;
+        uint8_t onTimeH;
+        uint8_t onTimeM;
+        uint8_t offType;
+        uint8_t offOffset;
+        uint8_t offTimeH;
+        uint8_t offTimeM;
+    } scheduleInterval;
+
+    struct ScheduleSegment {
+        uint8_t index;
+        uint8_t data[6];
+    } scheduleSegment;
+
+    struct Output {
+        uint8_t on;
+    } output;
 } ReceivedArguments;
 
 static uint8_t FieldCounts[PP_ENUM_MAX - PP_ENUM_FIRST] = {
     4,      // PP_TIME
     3,      // PP_DATE
-    1,      // PP_SCHOFF
+    2,      // PP_SCHSET
     9,      // PP_SCHINT
     7,      // PP_SCHSEG
     1,      // PP_OUTPUT
@@ -198,12 +225,12 @@ static struct Context {
 
 void writeOK()
 {
-    printf("*OK;\r\n");
+    printf("*OK;\n");
 }
 
 void writeError(const uint8_t code)
 {
-    printf("*ERR:%02X;\r\n", code);
+    printf("*ERR:%02X;\n", code);
 }
 
 bool isAllowedToken(const char c) {
@@ -244,8 +271,8 @@ static HPT_Result handlePacketType(const char* type)
         context.selectedProcessor = PP_TIME;
     } else if (strncmp(type, "DATE", 5) == 0) {
         context.selectedProcessor = PP_DATE;
-    } else if (strncmp(type, "SCHOFF", 7) == 0) {
-        context.selectedProcessor = PP_SCHOFF;
+    } else if (strncmp(type, "SCHSET", 7) == 0) {
+        context.selectedProcessor = PP_SCHSET;
     } else if (strncmp(type, "SCHINT", 7) == 0) {
         context.selectedProcessor = PP_SCHINT;
     } else if (strncmp(type, "SCHSEG", 7) == 0) {
@@ -294,7 +321,7 @@ static bool fromHex(const char* s, const uint8_t maxLength, uint16_t* out)
         return false;
     }
 
-    uint8_t nibbles = strlen(s);
+    uint8_t nibbles = (uint8_t)strlen(s);
     if (nibbles == 0 || nibbles > maxLength) {
         return false;
     }
@@ -398,6 +425,129 @@ static bool handleDateFieldValue(const char* value) {
     return false;
 }
 
+static bool handleScheduleSetFieldValue(const char* value)
+{
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU8(value, &context.receivedArguments.scheduleSet.index)
+            && context.receivedArguments.scheduleSet.index <= 7
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 1) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleSet.state)
+            && context.receivedArguments.scheduleSet.state <= 1
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool handleScheduleIntervalFieldValue(const char* value)
+{
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleInterval.index)
+            && context.receivedArguments.scheduleInterval.index <= 7
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 1) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleInterval.onType)
+            && context.receivedArguments.scheduleInterval.onType <= 0x2
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 2) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleInterval.onOffset)
+            && context.receivedArguments.scheduleInterval.onOffset <= 0x7
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 3) {
+        if (
+            hexToU8(value, &context.receivedArguments.scheduleInterval.onTimeH)
+            && context.receivedArguments.scheduleInterval.onTimeH <= 0x17
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 4) {
+        if (
+            hexToU8(value, &context.receivedArguments.scheduleInterval.onTimeM)
+            && context.receivedArguments.scheduleInterval.onTimeM <= 0x3C
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 5) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleInterval.offType)
+            && context.receivedArguments.scheduleInterval.offType <= 0x2
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 6) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleInterval.offOffset)
+            && context.receivedArguments.scheduleInterval.offOffset <= 0x7
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 7) {
+        if (
+            hexToU8(value, &context.receivedArguments.scheduleInterval.offTimeH)
+            && context.receivedArguments.scheduleInterval.offTimeH <= 0x17
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex == 8) {
+        if (
+            hexToU8(value, &context.receivedArguments.scheduleInterval.offTimeM)
+            && context.receivedArguments.scheduleInterval.offTimeM <= 0x3C
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool handleScheduleSegmentFieldValue(const char* value)
+{
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU4(value, &context.receivedArguments.scheduleSegment.index)
+            && context.receivedArguments.scheduleInterval.index <= 7
+        ) {
+            return true;
+        }
+    } else if (context.fieldIndex >= 1 && context.fieldIndex <= 6) {
+        if (hexToU8(value, &context.receivedArguments.scheduleSegment.data[context.fieldIndex - 1])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool handleOutputFieldValue(const char* value)
+{
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU4(value, &context.receivedArguments.output.on)
+            && context.receivedArguments.output.on <= 1
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 typedef enum {
     HFV_NO_ERROR,
     HFV_TOO_MANY_FIELDS,
@@ -421,13 +571,25 @@ static HFV_Result handleFieldValue(const char* value)
                 return HFV_INVALID_FIELD_VALUE;
             }
             break;
-        case PP_SCHOFF:
+        case PP_SCHSET:
+            if (!handleScheduleSetFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
             break;
         case PP_SCHINT:
+            if (!handleScheduleIntervalFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
             break;
         case PP_SCHSEG:
+            if (!handleScheduleSegmentFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
             break;
         case PP_OUTPUT:
+            if (!handleOutputFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
             break;
         default:
             return HFV_INVALID_FIELD_VALUE;
