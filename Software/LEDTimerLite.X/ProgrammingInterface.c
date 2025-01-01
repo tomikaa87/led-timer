@@ -95,11 +95,11 @@ typedef struct {
  *  SCHINT(             Set interval schedule
  *      INDEX[x1],      0-7
  *      ON_TYPE[x1],    0-2 (0: time, 1: sunrise, 2: sunset)
- *      ON_OFFS[x1],    0-8 (15-minute slots, -60 .. 60, 0 is 4)
+ *      ON_SUNOFFS[x1], 0-8 (15-minute slots, -60 .. 60, 0 is 4)
  *      ON_TIME_H[x2],  00-17
  *      ON_TIME_M[x2],  00-3C
  *      OFF_TYPE[x1],   0-2 (0: time, 1: sunrise, 2: sunset)
- *      OFF_OFFS[x1],   0-8 (15-minute slots, -60 .. 60, 0 is 4)
+ *      OFF_SUNOFFS[x1],0-8 (15-minute slots, -60 .. 60, 0 is 4)
  *      OFF_TIME_H[x2], 00-17
  *      OFF_TIME_M[x2]  00-3C
  *  )
@@ -175,11 +175,11 @@ typedef union {
     struct ScheduleIntervalArgs {
         uint8_t index;
         uint8_t onType;
-        uint8_t onOffset;
+        uint8_t onSunOffset;
         uint8_t onTimeH;
         uint8_t onTimeM;
         uint8_t offType;
-        uint8_t offOffset;
+        uint8_t offSunOffset;
         uint8_t offTimeH;
         uint8_t offTimeM;
     } scheduleInterval;
@@ -894,8 +894,8 @@ static bool handleScheduleIntervalFieldValue(const char* value)
         }
     } else if (context.fieldIndex == 2) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.onOffset)
-            && context.receivedArguments.scheduleInterval.onOffset <= 0x8
+            hexToU4(value, &context.receivedArguments.scheduleInterval.onSunOffset)
+            && context.receivedArguments.scheduleInterval.onSunOffset <= 0x8
         ) {
             return true;
         }
@@ -922,8 +922,8 @@ static bool handleScheduleIntervalFieldValue(const char* value)
         }
     } else if (context.fieldIndex == 6) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.offOffset)
-            && context.receivedArguments.scheduleInterval.offOffset <= 0x8
+            hexToU4(value, &context.receivedArguments.scheduleInterval.offSunOffset)
+            && context.receivedArguments.scheduleInterval.offSunOffset <= 0x8
         ) {
             return true;
         }
@@ -978,12 +978,12 @@ static bool executeScheduleIntervalCommand()
         &Settings_data.scheduler.intervals[context.receivedArguments.scheduleInterval.index];
 
     sch->onSwitch.type = context.receivedArguments.scheduleInterval.onType;
-    sch->onSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.onOffset - 4) * 15;
+    sch->onSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.onSunOffset - 4) * 15;
     sch->onSwitch.timeHour = context.receivedArguments.scheduleInterval.onTimeH;
     sch->onSwitch.timeMinute = context.receivedArguments.scheduleInterval.onTimeM;
 
     sch->offSwitch.type = context.receivedArguments.scheduleInterval.offType;
-    sch->offSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.offOffset - 4) * 15;
+    sch->offSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.offSunOffset - 4) * 15;
     sch->offSwitch.timeHour = context.receivedArguments.scheduleInterval.offTimeH;
     sch->offSwitch.timeMinute = context.receivedArguments.scheduleInterval.offTimeM;
 
