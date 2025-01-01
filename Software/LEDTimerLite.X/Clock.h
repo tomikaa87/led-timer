@@ -51,7 +51,7 @@ typedef volatile struct
 }
 
 inline Clock_Time Clock_getMinutesSinceMidnight(void);
-void Clock_setTime(uint8_t hour, uint8_t minute);
+void Clock_setTime(uint8_t hour, uint8_t minute, uint8_t seconds);
 inline Clock_Ticks Clock_getTicks(void);
 inline Clock_Ticks Clock_getFastTicks(void);
 inline Clock_Ticks Clock_getElapsedTicks(Clock_Ticks since);

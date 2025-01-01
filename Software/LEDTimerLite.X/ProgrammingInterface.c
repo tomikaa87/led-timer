@@ -22,6 +22,8 @@
 
 #include "Clock.h"
 #include "OutputController.h"
+#include "Settings.h"
+#include "Types.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -89,17 +91,16 @@ typedef struct {
  *  SCHINT(             Set interval schedule
  *      INDEX[x1],      0-7
  *      ON_TYPE[x1],    0-2 (0: time, 1: sunrise, 2: sunset)
- *      ON_OFFS[x1],    0-7 (15-minute slots, -60 .. 60, 0 is 3)
+ *      ON_OFFS[x1],    0-8 (15-minute slots, -60 .. 60, 0 is 4)
  *      ON_TIME_H[x2],  00-17
  *      ON_TIME_M[x2],  00-3C
  *      OFF_TYPE[x1],   0-2 (0: time, 1: sunrise, 2: sunset)
- *      OFF_OFFS[x1],   0-7 (15-minute slots, -60 .. 60, 0 is 3)
+ *      OFF_OFFS[x1],   0-8 (15-minute slots, -60 .. 60, 0 is 4)
  *      OFF_TIME_H[x2], 00-17
  *      OFF_TIME_M[x2]  00-3C
  *  )
  *
  *  SCHSEG(             // Set segment schedule
- *      INDEX[x1],      0-7
  *      DATA_0[x2],     00-FF
  *      DATA_1[x2],     00-FF
  *      DATA_2[x2],     00-FF
@@ -108,9 +109,11 @@ typedef struct {
  *      DATA_5[x2]      00-FF
  *  )
  *
- *  OUTPUT(
+ *  OUTPUT(             // Set the output override state
  *      ON[x1]          0: off, 1: on
  *  )
+ *
+ *  SAVE()              // Save settings
  *
  * Response packets
  *
@@ -132,10 +135,12 @@ typedef enum {
 
     PP_TIME = PP_ENUM_FIRST,
     PP_DATE,
+    // TODO add command for main schedule type switch
     PP_SCHSET,
     PP_SCHINT,
     PP_SCHSEG,
     PP_OUTPUT,
+    PP_SAVE,
 
     PP_ENUM_MAX
 } PacketProcessor;
@@ -172,7 +177,6 @@ typedef union {
     } scheduleInterval;
 
     struct ScheduleSegmentArgs {
-        uint8_t index;
         uint8_t data[6];
     } scheduleSegment;
 
@@ -186,8 +190,9 @@ static uint8_t FieldCounts[PP_ENUM_MAX - PP_ENUM_FIRST] = {
     3,      // PP_DATE
     2,      // PP_SCHSET
     9,      // PP_SCHINT
-    7,      // PP_SCHSEG
+    6,      // PP_SCHSEG
     1,      // PP_OUTPUT
+    0,      // PP_SAVE
 };
 
 static struct Context {
@@ -280,6 +285,8 @@ static HPT_Result handlePacketType(const char* type)
         context.selectedProcessor = PP_SCHSEG;
     } else if (strncmp(type, "OUTPUT", 7) == 0) {
         context.selectedProcessor = PP_OUTPUT;
+    } else if (strncmp(type, "SAVE", 5) == 0) {
+        context.selectedProcessor = PP_SAVE;
     } else {
         return HPT_UNKNOWN_TYPE;
     }
@@ -449,7 +456,13 @@ static bool processFieldValueOrWriteError()
 
 #pragma region End-of-packet handling
 
+static bool executeTimeCommand();
+static bool executeDateCommand();
+static bool executeScheduleSetCommand();
+static bool executeScheduleIntervalCommand();
+static bool executeScheduleSegmentCommand();
 static bool executeOutputCommand();
+static bool executeSaveCommand();
 
 static void handleEndOfPacket()
 {
@@ -465,15 +478,51 @@ static void handleEndOfPacket()
 
     switch (context.selectedProcessor) {
         case PP_TIME:
+            if (!executeTimeCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
+            break;
+
         case PP_DATE:
+            if (!executeDateCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
+            break;
+
         case PP_SCHSET:
+            if (!executeScheduleSetCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
+            break;
+
         case PP_SCHINT:
+            if (!executeScheduleIntervalCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
+            break;
+
         case PP_SCHSEG:
+            if (!executeScheduleSegmentCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
             break;
 
         case PP_OUTPUT:
             if (!executeOutputCommand()) {
                 writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
+            break;
+
+        case PP_SAVE:
+            if (!executeSaveCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
             }
             break;
 
@@ -739,6 +788,30 @@ static bool handleDateFieldValue(const char* value)
     return false;
 }
 
+static bool executeTimeCommand()
+{
+    Clock_setTime(
+        context.receivedArguments.time.hour,
+        context.receivedArguments.time.minute,
+        context.receivedArguments.time.second
+    );
+
+    // TODO timezone
+
+    return true;
+}
+
+static bool executeDateCommand()
+{
+    Clock_setDate(
+        context.receivedArguments.date.year - 1970,
+        context.receivedArguments.date.month + 1,
+        context.receivedArguments.date.day + 1
+    );
+
+    return true;
+}
+
 #pragma endregion
 
 #pragma region Scheduler commands
@@ -783,7 +856,7 @@ static bool handleScheduleIntervalFieldValue(const char* value)
     } else if (context.fieldIndex == 2) {
         if (
             hexToU4(value, &context.receivedArguments.scheduleInterval.onOffset)
-            && context.receivedArguments.scheduleInterval.onOffset <= 0x7
+            && context.receivedArguments.scheduleInterval.onOffset <= 0x8
         ) {
             return true;
         }
@@ -811,7 +884,7 @@ static bool handleScheduleIntervalFieldValue(const char* value)
     } else if (context.fieldIndex == 6) {
         if (
             hexToU4(value, &context.receivedArguments.scheduleInterval.offOffset)
-            && context.receivedArguments.scheduleInterval.offOffset <= 0x7
+            && context.receivedArguments.scheduleInterval.offOffset <= 0x8
         ) {
             return true;
         }
@@ -836,20 +909,50 @@ static bool handleScheduleIntervalFieldValue(const char* value)
 
 static bool handleScheduleSegmentFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
-        if (
-            hexToU4(value, &context.receivedArguments.scheduleSegment.index)
-            && context.receivedArguments.scheduleInterval.index <= 7
-        ) {
-            return true;
-        }
-    } else if (context.fieldIndex >= 1 && context.fieldIndex <= 6) {
+    if (context.fieldIndex >= 0 && context.fieldIndex <= 6) {
         if (hexToU8(value, &context.receivedArguments.scheduleSegment.data[context.fieldIndex - 1])) {
             return true;
         }
     }
 
     return false;
+}
+
+static bool executeScheduleSetCommand()
+{
+    Settings_data.scheduler.intervals[context.receivedArguments.scheduleSet.index].active
+        = context.receivedArguments.scheduleSet.state;
+
+    return true;
+}
+
+static bool executeScheduleIntervalCommand()
+{
+    struct IntervalScheduler* sch =
+        &Settings_data.scheduler.intervals[context.receivedArguments.scheduleInterval.index];
+
+    sch->onSwitch.type = context.receivedArguments.scheduleInterval.onType;
+    sch->onSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.onOffset - 4) * 15;
+    sch->onSwitch.timeHour = context.receivedArguments.scheduleInterval.onTimeH;
+    sch->onSwitch.timeMinute = context.receivedArguments.scheduleInterval.onTimeM;
+
+    sch->offSwitch.type = context.receivedArguments.scheduleInterval.offType;
+    sch->offSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.offOffset - 4) * 15;
+    sch->offSwitch.timeHour = context.receivedArguments.scheduleInterval.offTimeH;
+    sch->offSwitch.timeMinute = context.receivedArguments.scheduleInterval.offTimeM;
+
+    return true;
+}
+
+static bool executeScheduleSegmentCommand()
+{
+    memcpy(
+        Settings_data.scheduler.segmentData,
+        context.receivedArguments.scheduleSegment.data,
+        sizeof(ScheduleSegmentData)
+    );
+
+    return true;
 }
 
 #pragma endregion
@@ -873,6 +976,17 @@ static bool handleOutputFieldValue(const char* value)
 static bool executeOutputCommand()
 {
     OutputController_setOverrideState(context.receivedArguments.output.on);
+    return true;
+}
+
+#pragma endregion
+
+#pragma region Settings control commands
+
+static bool executeSaveCommand()
+{
+    Settings_save();
+
     return true;
 }
 

@@ -22,6 +22,7 @@
 #include "Settings.h"
 #include "SunsetSunrise.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <xc.h>
 
@@ -92,7 +93,7 @@ inline Clock_Time Clock_getMinutesSinceMidnight()
     return (Clock_Time)context.hour * 60 + context.minute;
 }
 
-void Clock_setTime(const uint8_t hour, const uint8_t minute)
+void Clock_setTime(const uint8_t hour, const uint8_t minute, const uint8_t seconds)
 {
     context.hour = hour;
     context.minute = minute;
@@ -100,6 +101,7 @@ void Clock_setTime(const uint8_t hour, const uint8_t minute)
     struct tm time = {};
     time.tm_hour = context.hour;
     time.tm_min = context.minute;
+    time.tm_sec = seconds;
     time.tm_mday = context.day;
     time.tm_mon = context.month - 1;
     time.tm_year = (int)context.year + 70;
@@ -167,7 +169,7 @@ void Clock_setDate(
     const uint8_t month,
     const uint8_t day
 ) {
-    if (month > 12 || day > 31) {
+    if (month == 0 || month > 12 || day == 0 || day > 31) {
         return;
     }
 
