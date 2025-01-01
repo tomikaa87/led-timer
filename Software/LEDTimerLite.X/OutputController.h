@@ -30,6 +30,13 @@
  */
 void OutputController_toggle(void);
 
+/**
+ * Sets the output state temporarily without altering the schedule.
+ *
+ * @param on If true, the output is turned on.
+ */
+void OutputController_setOverrideState(bool on);
+
 typedef enum {
     OutputController_TaskResult_StateUnchanged,
     OutputController_TaskResult_OutputStateChanged

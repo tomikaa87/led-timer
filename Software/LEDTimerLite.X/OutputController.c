@@ -225,6 +225,16 @@ void OutputController_toggle()
     OutputController_updateState();
 }
 
+void OutputController_setOverrideState(const bool on)
+{
+#if DEBUG_ENABLE_PRINT
+    puts("OC:set");
+#endif
+
+    context.outputOverride = on;
+    OutputController_updateState();
+}
+
 OutputController_TaskResult OutputController_runTasks()
 {
     context.switchedOnBySchedule = isSwitchedOnBySchedule();

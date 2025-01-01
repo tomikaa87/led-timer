@@ -21,6 +21,7 @@
 #include "ProgrammingInterface.h"
 
 #include "Clock.h"
+#include "OutputController.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -140,25 +141,25 @@ typedef enum {
 } PacketProcessor;
 
 typedef union {
-    struct Time {
+    struct TimeArgs {
         uint8_t hour;
         uint8_t minute;
         uint8_t second;
         uint8_t timeZone;
     } time;
 
-    struct Date {
+    struct DateArgs {
         uint16_t year;
         uint8_t month;
         uint8_t day;
     } date;
 
-    struct ScheduleOff {
+    struct ScheduleOffArgs {
         uint8_t index;
         uint8_t state;
     } scheduleSet;
 
-    struct ScheduleInterval {
+    struct ScheduleIntervalArgs {
         uint8_t index;
         uint8_t onType;
         uint8_t onOffset;
@@ -170,12 +171,12 @@ typedef union {
         uint8_t offTimeM;
     } scheduleInterval;
 
-    struct ScheduleSegment {
+    struct ScheduleSegmentArgs {
         uint8_t index;
         uint8_t data[6];
     } scheduleSegment;
 
-    struct Output {
+    struct OutputArgs {
         uint8_t on;
     } output;
 } ReceivedArguments;
@@ -225,12 +226,12 @@ static struct Context {
 
 void writeOK()
 {
-    printf("*OK;\n");
+    printf("*OK;\r\n");
 }
 
 void writeError(const uint8_t code)
 {
-    printf("*ERR:%02X;\n", code);
+    printf("*ERR:%02X;\r\n", code);
 }
 
 bool isAllowedToken(const char c) {
@@ -363,6 +364,318 @@ static inline bool hexToU16(const char* s, uint16_t* out)
     return fromHex(s, 4, out);
 }
 
+#pragma region Command field processing
+
+static bool handleTimeFieldValue(const char* value);
+static bool handleDateFieldValue(const char* value);
+
+static bool handleScheduleSetFieldValue(const char* value);
+static bool handleScheduleIntervalFieldValue(const char* value);
+static bool handleScheduleSegmentFieldValue(const char* value);
+
+static bool handleOutputFieldValue(const char* value);
+
+typedef enum {
+    HFV_NO_ERROR,
+    HFV_TOO_MANY_FIELDS,
+    HFV_INVALID_FIELD_VALUE
+} HFV_Result;
+
+static HFV_Result handleFieldValue(const char* value)
+{
+    if ((context.fieldIndex + 1) >= PACKET_HANDLER_MAX_FIELDS) {
+        return HFV_TOO_MANY_FIELDS;
+    }
+
+    switch (context.selectedProcessor) {
+        case PP_TIME:
+            if (!handleTimeFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_DATE:
+            if (!handleDateFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_SCHSET:
+            if (!handleScheduleSetFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_SCHINT:
+            if (!handleScheduleIntervalFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_SCHSEG:
+            if (!handleScheduleSegmentFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_OUTPUT:
+            if (!handleOutputFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        default:
+            return HFV_INVALID_FIELD_VALUE;
+    }
+
+    ++context.fieldIndex;
+
+    return HFV_NO_ERROR;
+}
+
+static bool processFieldValueOrWriteError()
+{
+    switch (handleFieldValue(context.buffer)) {
+        case HFV_NO_ERROR:
+            return true;
+        case HFV_TOO_MANY_FIELDS:
+            writeError(PI_ERR_FIELD_BUFFER_FULL);
+            break;
+        case HFV_INVALID_FIELD_VALUE:
+            writeError(PI_ERR_INVALID_FIELD_VALUE);
+            break;
+        default:
+            break;
+    }
+
+    return false;
+}
+
+#pragma endregion
+
+#pragma region End-of-packet handling
+
+static bool executeOutputCommand();
+
+static void handleEndOfPacket()
+{
+    if (context.selectedProcessor < PP_ENUM_FIRST || context.selectedProcessor >= PP_ENUM_MAX) {
+        writeError(PI_ERR_INTERNAL_ERROR);
+        return;
+    }
+
+    if (context.fieldIndex != FieldCounts[context.selectedProcessor - PP_ENUM_FIRST]) {
+        writeError(PI_ERR_FIELD_COUNT_MISMATCH);
+        return;
+    }
+
+    switch (context.selectedProcessor) {
+        case PP_TIME:
+        case PP_DATE:
+        case PP_SCHSET:
+        case PP_SCHINT:
+        case PP_SCHSEG:
+            break;
+
+        case PP_OUTPUT:
+            if (!executeOutputCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+            }
+            break;
+
+        default:
+            writeError(PI_ERR_INTERNAL_ERROR);
+            return;
+    }
+
+    writeOK();
+}
+
+#pragma endregion
+
+#pragma region Input processing
+
+static void handleInputChar(const char c)
+{
+    if (!isAllowedToken(c)) {
+        writeError(PI_ERR_INVALID_INPUT_CHAR);
+        handleReset();
+        return;
+    }
+
+    switch (context.state) {
+        // RESET -(*)-> READ_PACKET_TYPE
+        case PPS_RESET:
+            if (c == '*') {
+                handleReset();
+                context.state = PPS_READ_PACKET_TYPE;
+            }
+            break;
+
+        // READ_PACKET_TYPE -(*)-> RESET
+        // READ_PACKET_TYPE -(:, buf > 0)-> handlePacketType -> READ_FIELD
+        // READ_PACKET_TYPE -(:)-> RESET
+        // READ_PACKET_TYPE -(;, buf > 0)-> handlePacketType -> RESET
+        // READ_PACKET_TYPE -(;)-> RESET
+
+        // READ_FIELD -(*)-> RESET
+        // READ_FIELD -(:, buf > 0)-> handleFieldValue -> READ_FIELD
+        // READ_FIELD -(:)-> RESET
+        // READ_FIELD -(;, buf > 0)-> handleFieldValue -> RESET
+        // READ_FIELD -(;)-> RESET
+        case PPS_READ_PACKET_TYPE:
+        case PPS_READ_FIELD:
+            if (c == ':') {
+                if (context.bufferIndex == 0) {
+                    if (context.state == PPS_READ_PACKET_TYPE) {
+                        writeError(PI_ERR_MISSING_PACKET_TYPE);
+                    } else {
+                        writeError(PI_ERR_MISSING_FIELD_VALUE);
+                    }
+                    handleReset();
+                } else {
+                    bool handled = false;
+
+                    if (context.state == PPS_READ_PACKET_TYPE) {
+                        handled = processPacketTypeOrWriteError();
+                    } else {
+                        handled = processFieldValueOrWriteError();
+                    }
+
+                    if (handled) {
+                        context.state = PPS_READ_FIELD;
+                        context.bufferIndex = 0;
+                    } else {
+                        handleReset();
+                    }
+                }
+            } else if (c == ';') {
+                if (context.bufferIndex > 0) {
+                    if (context.state == PPS_READ_PACKET_TYPE) {
+                        if (processPacketTypeOrWriteError()) {
+                            handleEndOfPacket();
+                        }
+                    } else {
+                        if (processFieldValueOrWriteError()) {
+                            handleEndOfPacket();
+                        }
+                    }
+                } else {
+                    if (context.state == PPS_READ_PACKET_TYPE) {
+                        writeError(PI_ERR_MISSING_PACKET_TYPE);
+                    } else {
+                        writeError(PI_ERR_MISSING_FIELD_VALUE);
+                    }
+                }
+                handleReset();
+            } else if (c == '*') {
+                handleReset();
+            } else {
+                if (context.bufferIndex < sizeof(context.buffer) - 1) {
+                    context.buffer[context.bufferIndex++] = c;
+                    context.buffer[context.bufferIndex] = '\0';
+                } else {
+                    writeError(PI_ERR_BUFFER_FULL);
+                    handleReset();
+                }
+            }
+            break;
+    }
+}
+
+#pragma endregion
+
+static void transmitLog(void);
+static void processInputBuffer(void);
+
+void ProgrammingInterface_init(void)
+{
+
+}
+
+void ProgrammingInterface_runTasks(void)
+{
+    transmitLog();
+    processInputBuffer();
+}
+
+void ProgrammingInterface_logEvent(const PI_LogEvent event)
+{
+    LogEntry entry = {
+        .event = event,
+        .time = Clock_getUtcEpoch()
+    };
+
+    context.logQueue[context.logQueueIn] = entry;
+
+    if (++context.logQueueIn >= LOG_QUEUE_SIZE) {
+        context.logQueueIn = 0;
+    }
+
+    if (context.logQueueEntries == LOG_QUEUE_SIZE) {
+        if (++context.logQueueOut >= LOG_QUEUE_SIZE) {
+            context.logQueueOut = 0;
+        }
+    }
+
+    if (context.logQueueEntries < LOG_QUEUE_SIZE) {
+        ++context.logQueueEntries;
+    }
+}
+
+void ProgrammingInterface_processInputChar(const char c)
+{
+    context.inputBuffer[context.inputBufferIn] = c;
+
+    if (++context.inputBufferIn == INPUT_BUFFER_SIZE) {
+        context.inputBufferIn = 0;
+    }
+
+    if (context.inputBufferCount == INPUT_BUFFER_SIZE) {
+        if (++context.inputBufferOut >= INPUT_BUFFER_SIZE) {
+            context.inputBufferOut = 0;
+        }
+    }
+
+    if (context.inputBufferCount < INPUT_BUFFER_SIZE) {
+        ++context.inputBufferCount;
+    }
+}
+
+static void transmitLog(void)
+{
+    while (context.logQueueEntries > 0) {
+        --context.logQueueEntries;
+
+        LogEntry entry = context.logQueue[context.logQueueOut];
+
+        if (++context.logQueueOut >= LOG_QUEUE_SIZE) {
+            context.logQueueOut = 0;
+        }
+
+//        printf(";L%ld,%u:\r\n", entry.time, entry.event);
+        printf(";L%ld,%s:\r\n", entry.time, EventNames[entry.event]);
+    }
+}
+
+static void processInputBuffer(void)
+{
+    while (context.inputBufferCount > 0) {
+        --context.inputBufferCount;
+
+        handleInputChar(context.inputBuffer[context.inputBufferOut]);
+
+        if (++context.inputBufferOut >= INPUT_BUFFER_SIZE) {
+            context.inputBufferOut = 0;
+        }
+    }
+}
+
+void putch(char txData)
+{
+    while (!TRMT) {
+        continue;
+    }
+
+    TXREG1 = txData;
+}
+
+#pragma region Date/Time commands
+
 static bool handleTimeFieldValue(const char* value)
 {
     if (context.fieldIndex == 0) {
@@ -398,7 +711,8 @@ static bool handleTimeFieldValue(const char* value)
     return false;
 }
 
-static bool handleDateFieldValue(const char* value) {
+static bool handleDateFieldValue(const char* value)
+{
     if (context.fieldIndex == 0) {
         if (
             hexToU16(value, &context.receivedArguments.date.year)
@@ -424,6 +738,10 @@ static bool handleDateFieldValue(const char* value) {
 
     return false;
 }
+
+#pragma endregion
+
+#pragma region Scheduler commands
 
 static bool handleScheduleSetFieldValue(const char* value)
 {
@@ -534,6 +852,10 @@ static bool handleScheduleSegmentFieldValue(const char* value)
     return false;
 }
 
+#pragma endregion
+
+#pragma region Output control commands
+
 static bool handleOutputFieldValue(const char* value)
 {
     if (context.fieldIndex == 0) {
@@ -548,270 +870,10 @@ static bool handleOutputFieldValue(const char* value)
     return false;
 }
 
-typedef enum {
-    HFV_NO_ERROR,
-    HFV_TOO_MANY_FIELDS,
-    HFV_INVALID_FIELD_VALUE
-} HFV_Result;
-
-static HFV_Result handleFieldValue(const char* value)
+static bool executeOutputCommand()
 {
-    if ((context.fieldIndex + 1) >= PACKET_HANDLER_MAX_FIELDS) {
-        return HFV_TOO_MANY_FIELDS;
-    }
-
-    switch (context.selectedProcessor) {
-        case PP_TIME:
-            if (!handleTimeFieldValue(value)) {
-                return HFV_INVALID_FIELD_VALUE;
-            }
-            break;
-        case PP_DATE:
-            if (!handleDateFieldValue(value)) {
-                return HFV_INVALID_FIELD_VALUE;
-            }
-            break;
-        case PP_SCHSET:
-            if (!handleScheduleSetFieldValue(value)) {
-                return HFV_INVALID_FIELD_VALUE;
-            }
-            break;
-        case PP_SCHINT:
-            if (!handleScheduleIntervalFieldValue(value)) {
-                return HFV_INVALID_FIELD_VALUE;
-            }
-            break;
-        case PP_SCHSEG:
-            if (!handleScheduleSegmentFieldValue(value)) {
-                return HFV_INVALID_FIELD_VALUE;
-            }
-            break;
-        case PP_OUTPUT:
-            if (!handleOutputFieldValue(value)) {
-                return HFV_INVALID_FIELD_VALUE;
-            }
-            break;
-        default:
-            return HFV_INVALID_FIELD_VALUE;
-    }
-
-    ++context.fieldIndex;
-
-    return HFV_NO_ERROR;
+    OutputController_setOverrideState(context.receivedArguments.output.on);
+    return true;
 }
 
-static bool processFieldValueOrWriteError()
-{
-    switch (handleFieldValue(context.buffer)) {
-        case HFV_NO_ERROR:
-            return true;
-        case HFV_TOO_MANY_FIELDS:
-            writeError(PI_ERR_FIELD_BUFFER_FULL);
-            break;
-        case HFV_INVALID_FIELD_VALUE:
-            writeError(PI_ERR_INVALID_FIELD_VALUE);
-            break;
-        default:
-            break;
-    }
-
-    return false;
-}
-
-static void handleEndOfPacket()
-{
-    if (context.selectedProcessor < PP_ENUM_FIRST || context.selectedProcessor >= PP_ENUM_MAX) {
-        writeError(PI_ERR_INTERNAL_ERROR);
-        return;
-    }
-
-    if (context.fieldIndex != FieldCounts[context.selectedProcessor - PP_ENUM_FIRST]) {
-        writeError(PI_ERR_FIELD_COUNT_MISMATCH);
-        return;
-    }
-
-    writeOK();
-}
-
-static void handleInputChar(const char c)
-{
-    if (!isAllowedToken(c)) {
-        writeError(PI_ERR_INVALID_INPUT_CHAR);
-        handleReset();
-        return;
-    }
-
-    switch (context.state) {
-        // RESET -(*)-> READ_PACKET_TYPE
-        case PPS_RESET:
-            if (c == '*') {
-                handleReset();
-                context.state = PPS_READ_PACKET_TYPE;
-            }
-            break;
-
-        // READ_PACKET_TYPE -(*)-> RESET
-        // READ_PACKET_TYPE -(:, buf > 0)-> handlePacketType -> READ_FIELD
-        // READ_PACKET_TYPE -(:)-> RESET
-        // READ_PACKET_TYPE -(;, buf > 0)-> handlePacketType -> RESET
-        // READ_PACKET_TYPE -(;)-> RESET
-
-        // READ_FIELD -(*)-> RESET
-        // READ_FIELD -(:, buf > 0)-> handleFieldValue -> READ_FIELD
-        // READ_FIELD -(:)-> RESET
-        // READ_FIELD -(;, buf > 0)-> handleFieldValue -> RESET
-        // READ_FIELD -(;)-> RESET
-        case PPS_READ_PACKET_TYPE:
-        case PPS_READ_FIELD:
-            if (c == ':') {
-                if (context.bufferIndex == 0) {
-                    if (context.state == PPS_READ_PACKET_TYPE) {
-                        writeError(PI_ERR_MISSING_PACKET_TYPE);
-                    } else {
-                        writeError(PI_ERR_MISSING_FIELD_VALUE);
-                    }
-                    handleReset();
-                } else {
-                    bool handled = false;
-
-                    if (context.state == PPS_READ_PACKET_TYPE) {
-                        handled = processPacketTypeOrWriteError();
-                    } else {
-                        handled = processFieldValueOrWriteError();
-                    }
-
-                    if (handled) {
-                        context.state = PPS_READ_FIELD;
-                        context.bufferIndex = 0;
-                    } else {
-                        handleReset();
-                    }
-                }
-            } else if (c == ';') {
-                if (context.bufferIndex > 0) {
-                    if (context.state == PPS_READ_PACKET_TYPE) {
-                        if (processPacketTypeOrWriteError()) {
-                            handleEndOfPacket();
-                        }
-                    } else {
-                        if (processFieldValueOrWriteError()) {
-                            handleEndOfPacket();
-                        }
-                    }
-                } else {
-                    if (context.state == PPS_READ_PACKET_TYPE) {
-                        writeError(PI_ERR_MISSING_PACKET_TYPE);
-                    } else {
-                        writeError(PI_ERR_MISSING_FIELD_VALUE);
-                    }
-                }
-                handleReset();
-            } else if (c == '*') {
-                handleReset();
-            } else {
-                if (context.bufferIndex < sizeof(context.buffer) - 1) {
-                    context.buffer[context.bufferIndex++] = c;
-                    context.buffer[context.bufferIndex] = '\0';
-                } else {
-                    writeError(PI_ERR_BUFFER_FULL);
-                    handleReset();
-                }
-            }
-            break;
-    }
-}
-
-static void transmitLog(void);
-static void processInputBuffer(void);
-
-void ProgrammingInterface_init(void)
-{
-
-}
-
-void ProgrammingInterface_runTasks(void)
-{
-    transmitLog();
-    processInputBuffer();
-}
-
-void ProgrammingInterface_logEvent(const PI_LogEvent event)
-{
-    LogEntry entry = {
-        .event = event,
-        .time = Clock_getUtcEpoch()
-    };
-
-    context.logQueue[context.logQueueIn] = entry;
-
-    if (++context.logQueueIn >= LOG_QUEUE_SIZE) {
-        context.logQueueIn = 0;
-    }
-
-    if (context.logQueueEntries == LOG_QUEUE_SIZE) {
-        if (++context.logQueueOut >= LOG_QUEUE_SIZE) {
-            context.logQueueOut = 0;
-        }
-    }
-
-    if (context.logQueueEntries < LOG_QUEUE_SIZE) {
-        ++context.logQueueEntries;
-    }
-}
-
-void ProgrammingInterface_processInputChar(const char c)
-{
-    context.inputBuffer[context.inputBufferIn] = c;
-
-    if (++context.inputBufferIn == INPUT_BUFFER_SIZE) {
-        context.inputBufferIn = 0;
-    }
-
-    if (context.inputBufferCount == INPUT_BUFFER_SIZE) {
-        if (++context.inputBufferOut >= INPUT_BUFFER_SIZE) {
-            context.inputBufferOut = 0;
-        }
-    }
-
-    if (context.inputBufferCount < INPUT_BUFFER_SIZE) {
-        ++context.inputBufferCount;
-    }
-}
-
-static void transmitLog(void)
-{
-    while (context.logQueueEntries > 0) {
-        --context.logQueueEntries;
-
-        LogEntry entry = context.logQueue[context.logQueueOut];
-
-        if (++context.logQueueOut >= LOG_QUEUE_SIZE) {
-            context.logQueueOut = 0;
-        }
-
-//        printf(";L%ld,%u:\r\n", entry.time, entry.event);
-        printf(";L%ld,%s:\r\n", entry.time, EventNames[entry.event]);
-    }
-}
-
-static void processInputBuffer(void)
-{
-    while (context.inputBufferCount > 0) {
-        --context.inputBufferCount;
-
-        handleInputChar(context.inputBuffer[context.inputBufferOut]);
-
-        if (++context.inputBufferOut >= INPUT_BUFFER_SIZE) {
-            context.inputBufferOut = 0;
-        }
-    }
-}
-
-void putch(char txData)
-{
-    while (!TRMT) {
-        continue;
-    }
-
-    TXREG1 = txData;
-}
+#pragma endregion
