@@ -83,7 +83,11 @@ typedef struct {
  *      DAY[x2]         00-1F
  *  )
  *
- *  SCHSET(             Turn a schedule on or off
+ *  SCHSET(             // Set the scheduler type
+ *      TYPE[x1]        0: interval, 1: segment, 2: off
+ *  )
+ *
+ *  SCHINTEN(           Turn an interval schedule on or off
  *      INDEX[x1],      0-7
  *      STATE[x1]       0: off, 1: on
  *  )
@@ -100,7 +104,7 @@ typedef struct {
  *      OFF_TIME_M[x2]  00-3C
  *  )
  *
- *  SCHSEG(             // Set segment schedule
+ *  SCHSEG(             // Set segment schedule data
  *      DATA_0[x2],     00-FF
  *      DATA_1[x2],     00-FF
  *      DATA_2[x2],     00-FF
@@ -135,8 +139,8 @@ typedef enum {
 
     PP_TIME = PP_ENUM_FIRST,
     PP_DATE,
-    // TODO add command for main schedule type switch
     PP_SCHSET,
+    PP_SCHINTEN,
     PP_SCHINT,
     PP_SCHSEG,
     PP_OUTPUT,
@@ -159,10 +163,14 @@ typedef union {
         uint8_t day;
     } date;
 
-    struct ScheduleOffArgs {
+    struct ScheduleSetArgs {
+        uint8_t type;
+    } scheduleSet;
+
+    struct ScheduleIntervalEnableArgs {
         uint8_t index;
         uint8_t state;
-    } scheduleSet;
+    } scheduleIntervalEnable;
 
     struct ScheduleIntervalArgs {
         uint8_t index;
@@ -188,7 +196,8 @@ typedef union {
 static uint8_t FieldCounts[PP_ENUM_MAX - PP_ENUM_FIRST] = {
     4,      // PP_TIME
     3,      // PP_DATE
-    2,      // PP_SCHSET
+    1,      // PP_SCHSET
+    2,      // PP_SCHINTEN
     9,      // PP_SCHINT
     6,      // PP_SCHSEG
     1,      // PP_OUTPUT
@@ -279,6 +288,8 @@ static HPT_Result handlePacketType(const char* type)
         context.selectedProcessor = PP_DATE;
     } else if (strncmp(type, "SCHSET", 7) == 0) {
         context.selectedProcessor = PP_SCHSET;
+    } else if (strncmp(type, "SCHINTEN", 9) == 0) {
+        context.selectedProcessor = PP_SCHINTEN;
     } else if (strncmp(type, "SCHINT", 7) == 0) {
         context.selectedProcessor = PP_SCHINT;
     } else if (strncmp(type, "SCHSEG", 7) == 0) {
@@ -377,6 +388,7 @@ static bool handleTimeFieldValue(const char* value);
 static bool handleDateFieldValue(const char* value);
 
 static bool handleScheduleSetFieldValue(const char* value);
+static bool handleScheduleIntervalEnableFieldValue(const char* value);
 static bool handleScheduleIntervalFieldValue(const char* value);
 static bool handleScheduleSegmentFieldValue(const char* value);
 
@@ -407,6 +419,11 @@ static HFV_Result handleFieldValue(const char* value)
             break;
         case PP_SCHSET:
             if (!handleScheduleSetFieldValue(value)) {
+                return HFV_INVALID_FIELD_VALUE;
+            }
+            break;
+        case PP_SCHINTEN:
+            if (!handleScheduleIntervalEnableFieldValue(value)) {
                 return HFV_INVALID_FIELD_VALUE;
             }
             break;
@@ -456,13 +473,14 @@ static bool processFieldValueOrWriteError()
 
 #pragma region End-of-packet handling
 
-static bool executeTimeCommand();
-static bool executeDateCommand();
-static bool executeScheduleSetCommand();
-static bool executeScheduleIntervalCommand();
-static bool executeScheduleSegmentCommand();
-static bool executeOutputCommand();
-static bool executeSaveCommand();
+static bool executeTimeCommand(void);
+static bool executeDateCommand(void);
+static bool executeScheduleSetCommand(void);
+static bool executeScheduleIntervalEnableCommand(void);
+static bool executeScheduleIntervalCommand(void);
+static bool executeScheduleSegmentCommand(void);
+static bool executeOutputCommand(void);
+static bool executeSaveCommand(void);
 
 static void handleEndOfPacket()
 {
@@ -493,6 +511,13 @@ static void handleEndOfPacket()
 
         case PP_SCHSET:
             if (!executeScheduleSetCommand()) {
+                writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
+                return;
+            }
+            break;
+
+        case PP_SCHINTEN:
+            if (!executeScheduleIntervalEnableCommand()) {
                 writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
                 return;
             }
@@ -820,15 +845,29 @@ static bool handleScheduleSetFieldValue(const char* value)
 {
     if (context.fieldIndex == 0) {
         if (
-            hexToU8(value, &context.receivedArguments.scheduleSet.index)
-            && context.receivedArguments.scheduleSet.index <= 7
+            hexToU4(value, &context.receivedArguments.scheduleSet.type)
+            && context.receivedArguments.scheduleSet.type <= 2
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool handleScheduleIntervalEnableFieldValue(const char* value)
+{
+    if (context.fieldIndex == 0) {
+        if (
+            hexToU8(value, &context.receivedArguments.scheduleIntervalEnable.index)
+            && context.receivedArguments.scheduleIntervalEnable.index <= 7
         ) {
             return true;
         }
     } else if (context.fieldIndex == 1) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleSet.state)
-            && context.receivedArguments.scheduleSet.state <= 1
+            hexToU4(value, &context.receivedArguments.scheduleIntervalEnable.state)
+            && context.receivedArguments.scheduleIntervalEnable.state <= 1
         ) {
             return true;
         }
@@ -920,8 +959,15 @@ static bool handleScheduleSegmentFieldValue(const char* value)
 
 static bool executeScheduleSetCommand()
 {
-    Settings_data.scheduler.intervals[context.receivedArguments.scheduleSet.index].active
-        = context.receivedArguments.scheduleSet.state;
+    Settings_data.scheduler.type = context.receivedArguments.scheduleSet.type;
+
+    return true;
+}
+
+static bool executeScheduleIntervalEnableCommand()
+{
+    Settings_data.scheduler.intervals[context.receivedArguments.scheduleIntervalEnable.index].active
+        = context.receivedArguments.scheduleIntervalEnable.state;
 
     return true;
 }
