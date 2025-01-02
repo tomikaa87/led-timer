@@ -43,7 +43,7 @@ static struct Clock_Context {
     uint8_t initialUpdate : 1;
     YearsFrom1970 year;
     uint16_t dayOfYear;
-} context = {
+} Clock_context = {
     .hour = 0,
     .minute = 0,
     .day = 1,
@@ -56,21 +56,21 @@ static struct Clock_Context {
 
 inline Clock_Time Clock_getMinutesSinceMidnight()
 {
-    return (Clock_Time)context.hour * 60 + context.minute;
+    return (Clock_Time)Clock_context.hour * 60 + Clock_context.minute;
 }
 
 void Clock_setTime(const uint8_t hour, const uint8_t minute, const uint8_t seconds)
 {
-    context.hour = hour;
-    context.minute = minute;
+    Clock_context.hour = hour;
+    Clock_context.minute = minute;
 
     struct tm time = {};
-    time.tm_hour = context.hour;
-    time.tm_min = context.minute;
+    time.tm_hour = Clock_context.hour;
+    time.tm_min = Clock_context.minute;
     time.tm_sec = seconds;
-    time.tm_mday = context.day;
-    time.tm_mon = context.month - 1;
-    time.tm_year = (int)context.year + 70;
+    time.tm_mday = Clock_context.day;
+    time.tm_mon = Clock_context.month - 1;
+    time.tm_year = (int)Clock_context.year + 70;
 
     TMR1ON = 0;
     Clock_interruptContext.utcEpoch = mktime(&time)
@@ -112,18 +112,18 @@ void Clock_runTasks()
 
         struct tm* time = gmtime(&localTime);
 
-        bool updateSunriseSunset = context.dayOfYear != time->tm_yday || context.initialUpdate;
+        bool updateSunriseSunset = Clock_context.dayOfYear != time->tm_yday || Clock_context.initialUpdate;
 
-        context.initialUpdate = false;
+        Clock_context.initialUpdate = false;
 
-        context.hour = (uint8_t)time->tm_hour;
-        context.minute = (uint8_t)time->tm_min;
-        context.day = (uint8_t)time->tm_mday;
-        context.weekday = (uint8_t)time->tm_wday;
-        context.month = (uint8_t)time->tm_mon + 1;
-        context.year = (uint8_t)(time->tm_year - 70);
-        context.leapYear = Date_isLeapYear(context.year);
-        context.dayOfYear = (uint16_t)time->tm_yday;
+        Clock_context.hour = (uint8_t)time->tm_hour;
+        Clock_context.minute = (uint8_t)time->tm_min;
+        Clock_context.day = (uint8_t)time->tm_mday;
+        Clock_context.weekday = (uint8_t)time->tm_wday;
+        Clock_context.month = (uint8_t)time->tm_mon + 1;
+        Clock_context.year = (uint8_t)(time->tm_year - 70);
+        Clock_context.leapYear = Date_isLeapYear(Clock_context.year);
+        Clock_context.dayOfYear = (uint16_t)time->tm_yday;
 
         if (updateSunriseSunset) {
             SunriseSunset_update();
@@ -140,16 +140,16 @@ void Clock_setDate(
         return;
     }
 
-    context.year = year;
-    context.month = month;
-    context.day = day;
+    Clock_context.year = year;
+    Clock_context.month = month;
+    Clock_context.day = day;
 
     struct tm time = {};
-    time.tm_hour = context.hour;
-    time.tm_min = context.minute;
-    time.tm_mday = context.day;
-    time.tm_mon = context.month - 1;
-    time.tm_year = (int)context.year + 70;
+    time.tm_hour = Clock_context.hour;
+    time.tm_min = Clock_context.minute;
+    time.tm_mday = Clock_context.day;
+    time.tm_mon = Clock_context.month - 1;
+    time.tm_year = (int)Clock_context.year + 70;
 
     // FIXME fill tm_sec as well
 
@@ -165,42 +165,42 @@ void Clock_setDate(
 
 inline YearsFrom1970 Clock_getYear()
 {
-    return context.year;
+    return Clock_context.year;
 }
 
 inline uint8_t Clock_getMonth()
 {
-    return context.month;
+    return Clock_context.month;
 }
 
 inline uint8_t Clock_getDay()
 {
-    return context.day;
+    return Clock_context.day;
 }
 
 inline uint8_t Clock_getWeekday()
 {
-    return context.weekday;
+    return Clock_context.weekday;
 }
 
 inline bool Clock_isLeapYear()
 {
-    return context.leapYear;
+    return Clock_context.leapYear;
 }
 
 uint16_t Clock_getDayOfYear()
 {
-    return context.dayOfYear;
+    return Clock_context.dayOfYear;
 }
 
 inline uint8_t Clock_getHour()
 {
-    return context.hour;
+    return Clock_context.hour;
 }
 
 inline uint8_t Clock_getMinute()
 {
-    return context.minute;
+    return Clock_context.minute;
 }
 
 inline time_t Clock_getUtcEpoch()

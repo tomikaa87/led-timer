@@ -89,7 +89,7 @@ static struct SystemContext
         bool initialMeasurementDone;
         bool measurementRunning;
     } monitoring;
-} context = {
+} System_context = {
     .sleep = {
         .enabled = true,
         .lastWakeUpTime = 0,
@@ -128,7 +128,7 @@ void updateBatteryLevel()
                 : vbat
             );
 
-    context.monitoring.batteryLevel = (uint8_t)(
+    System_context.monitoring.batteryLevel = (uint8_t)(
         (uint32_t)(vbat - Config_System_VBatMinMilliVolts) * 10u
         / (Config_System_VBatMaxMilliVolts - Config_System_VBatMinMilliVolts)
     );
@@ -139,7 +139,7 @@ void updateBatteryLevel()
         System_getVDDMilliVolts(),
         System_interruptContext.adc.result,
         System_getVBatMilliVolts(),
-        context.monitoring.batteryLevel
+        System_context.monitoring.batteryLevel
     );
 #endif
 }
@@ -296,7 +296,7 @@ void System_init()
 
         updateBatteryLevel();
 
-        context.monitoring.initialMeasurementDone = 1;
+        System_context.monitoring.initialMeasurementDone = 1;
     }
 
     // Turn off the indicator LED
@@ -313,7 +313,7 @@ System_TaskResult System_task()
     // To keep the screen on for a while after a power input change,
     // but avoid overwriting the existing reason (if any)
     if (
-        context.sleep.wakeUpReason == System_WakeUpReason_None
+        System_context.sleep.wakeUpReason == System_WakeUpReason_None
         && result.powerInputChanged
     ) {
         System_onWakeUp(System_WakeUpReason_PowerInputChanged);
@@ -356,13 +356,13 @@ System_TaskResult System_task()
 //        }
 //    }
 
-    if (!context.sleep.enabled) {
+    if (!System_context.sleep.enabled) {
 //        Clock_Ticks elapsedSinceWakeUp
 //            = Clock_getElapsedTicks(context.sleep.lastWakeUpTime);
 
-        switch (context.sleep.wakeUpReason) {
+        switch (System_context.sleep.wakeUpReason) {
             default:
-                context.sleep.enabled = System_isRunningFromBackupBattery();
+                System_context.sleep.enabled = System_isRunningFromBackupBattery();
                 break;
 
 //            case System_WakeUpReason_None:
@@ -396,14 +396,14 @@ System_TaskResult System_task()
 
 void System_onWakeUp(const System_WakeUpReason reason)
 {
-    context.sleep.enabled = false;
-    context.sleep.lastWakeUpTime = Clock_getTicks();
-    context.sleep.wakeUpReason = reason;
+    System_context.sleep.enabled = false;
+    System_context.sleep.lastWakeUpTime = Clock_getTicks();
+    System_context.sleep.wakeUpReason = reason;
 }
 
 inline System_WakeUpReason System_getLastWakeUpReason()
 {
-    return context.sleep.wakeUpReason;
+    return System_context.sleep.wakeUpReason;
 }
 
 System_SleepResult System_sleep()
@@ -421,7 +421,7 @@ System_SleepResult System_sleep()
     // Disable the FVR to conserve power
 //    FVRCONbits.FVREN = 0;
 
-    context.sleep.wakeUpReason = System_WakeUpReason_None;
+    System_context.sleep.wakeUpReason = System_WakeUpReason_None;
 
 #if DEBUG_ENABLE
     _DebugState.sleeping = true;
@@ -441,7 +441,7 @@ System_SleepResult System_sleep()
 //    FVRCONbits.FVREN = 1;
 
     // Clear the flag so the next task() call can update it properly
-    context.sleep.enabled = false;
+    System_context.sleep.enabled = false;
 
 #if DEBUG_ENABLE
     _DebugState.sleeping = false;
@@ -485,7 +485,7 @@ uint16_t System_getVBatMilliVolts()
 
 inline uint8_t System_getBatteryLevel()
 {
-    return context.monitoring.batteryLevel;
+    return System_context.monitoring.batteryLevel;
 }
 
 static void setupAdcAndFvr()
@@ -536,8 +536,8 @@ static void onWakeUp()
 
     if (System_isRunningFromBackupBattery()) {
         if (
-            !context.monitoring.initialMeasurementDone
-            || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+            !System_context.monitoring.initialMeasurementDone
+            || Clock_getElapsedTicks(System_context.monitoring.lastUpdateTime)
                 >= Config_System_MonitoringUpdateIntervalTicks
         ) {
 //            printf("Measuring Vbat\r\n");
@@ -548,8 +548,8 @@ static void onWakeUp()
             while (!System_interruptContext.adc.updated);
             updateBatteryLevel();
 
-            context.monitoring.lastUpdateTime = Clock_getTicks();
-            context.monitoring.initialMeasurementDone = 1;
+            System_context.monitoring.lastUpdateTime = Clock_getTicks();
+            System_context.monitoring.initialMeasurementDone = 1;
         }
     } else{
         printf("Enabling PWM\r\n");
@@ -564,8 +564,8 @@ void System_prepareForSleepMode(void)
 #endif
 
     if (
-        !context.monitoring.initialMeasurementDone
-        || Clock_getElapsedTicks(context.monitoring.lastUpdateTime)
+        !System_context.monitoring.initialMeasurementDone
+        || Clock_getElapsedTicks(System_context.monitoring.lastUpdateTime)
             >= Config_System_MonitoringUpdateIntervalTicks
     ) {
 #if DEBUG_ENABLE_PRINT
@@ -619,8 +619,8 @@ void System_runTasksAfterWakeUp(void)
         updateBatteryLevel();
 
         System_interruptContext.adc.updated = false;
-        context.monitoring.lastUpdateTime = Clock_getTicks();
-        context.monitoring.initialMeasurementDone = 1;
+        System_context.monitoring.lastUpdateTime = Clock_getTicks();
+        System_context.monitoring.initialMeasurementDone = 1;
     }
 
     if (!System_isRunningFromBackupBattery()) {

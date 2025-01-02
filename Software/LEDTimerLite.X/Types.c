@@ -55,6 +55,7 @@ void Types_setScheduleSegmentBit(
     }
 }
 
+#if !SUNRISE_SUNSET_USE_LUT
 double Types_bcdToDouble(const uint32_t bcd, const bool negative)
 {
     double result = 0;
@@ -73,3 +74,4 @@ double Types_bcdToDouble(const uint32_t bcd, const bool negative)
 
     return result;
 }
+#endif

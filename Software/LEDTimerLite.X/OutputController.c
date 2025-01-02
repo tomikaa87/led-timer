@@ -41,7 +41,7 @@ static struct OutputControllerContext
     uint8_t forceOutputStateUpdate : 1;
     uint8_t switchedOnBySchedule : 1;
     uint8_t prevStateFromSchedule : 1;
-} context = {
+} OutputController_context = {
     .outputOverride = 0,
     .prevOutputState = 0,
     .forceOutputStateUpdate = 0,
@@ -221,7 +221,7 @@ void OutputController_toggle()
     puts("OC:toggle");
 #endif
 
-    context.outputOverride = !context.outputOverride;
+    OutputController_context.outputOverride = !OutputController_context.outputOverride;
     OutputController_updateState();
 }
 
@@ -231,30 +231,30 @@ void OutputController_setOverrideState(const bool on)
     puts("OC:set");
 #endif
 
-    context.outputOverride = on;
+    OutputController_context.outputOverride = on;
     OutputController_updateState();
 }
 
 OutputController_TaskResult OutputController_runTasks()
 {
-    context.switchedOnBySchedule = isSwitchedOnBySchedule();
+    OutputController_context.switchedOnBySchedule = isSwitchedOnBySchedule();
 
-    context.outputOverride = calculateOverrideState(
-        context.switchedOnBySchedule,
-        context.prevStateFromSchedule,
-        context.outputOverride
+    OutputController_context.outputOverride = calculateOverrideState(
+        OutputController_context.switchedOnBySchedule,
+        OutputController_context.prevStateFromSchedule,
+        OutputController_context.outputOverride
     );
 
     bool outputState = calculateOutputState(
-        context.switchedOnBySchedule,
+        OutputController_context.switchedOnBySchedule,
         System_isRunningFromBackupBattery(),
-        context.outputOverride
+        OutputController_context.outputOverride
     );
 
     bool updateOutput = calculateOutputUpdateState(
         outputState,
-        context.prevOutputState,
-        context.forceOutputStateUpdate
+        OutputController_context.prevOutputState,
+        OutputController_context.forceOutputStateUpdate
     );
 
 #if DEBUG_ENABLE
@@ -266,9 +266,9 @@ OutputController_TaskResult OutputController_runTasks()
     UI_updateDebugDisplay();
 #endif
 
-    context.prevOutputState = outputState;
-    context.prevStateFromSchedule = context.switchedOnBySchedule;
-    context.forceOutputStateUpdate = 0;
+    OutputController_context.prevOutputState = outputState;
+    OutputController_context.prevStateFromSchedule = OutputController_context.switchedOnBySchedule;
+    OutputController_context.forceOutputStateUpdate = 0;
 
     if (updateOutput) {
 #if DEBUG_ENABLE_PRINT
@@ -300,13 +300,13 @@ OutputController_TaskResult OutputController_runTasks()
 inline bool OutputController_outputEnableTargetState()
 {
     return
-        (!context.switchedOnBySchedule && context.outputOverride)
-        || (context.switchedOnBySchedule && !context.outputOverride);
+        (!OutputController_context.switchedOnBySchedule && OutputController_context.outputOverride)
+        || (OutputController_context.switchedOnBySchedule && !OutputController_context.outputOverride);
 }
 
 inline bool OutputController_isOutputEnabled()
 {
-    return context.prevOutputState;
+    return OutputController_context.prevOutputState;
 }
 
 void OutputController_updateState()
@@ -315,7 +315,7 @@ void OutputController_updateState()
     printf("OC:forceUpdate");
 #endif
 
-    context.forceOutputStateUpdate = 1;
+    OutputController_context.forceOutputStateUpdate = 1;
 }
 
 typedef struct {

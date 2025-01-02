@@ -48,4 +48,6 @@ void Types_setScheduleSegmentBit(
     bool value
 );
 
+#if !SUNRISE_SUNSET_USE_LUT
 double Types_bcdToDouble(uint32_t bcd, bool negative);
+#endif

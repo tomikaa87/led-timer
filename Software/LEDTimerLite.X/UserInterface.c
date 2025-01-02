@@ -27,15 +27,13 @@
 
 #include <xc.h>
 
-static struct {
+static struct UserInteraceContext {
     uint8_t ledLeaveOnAfterBlinking : 1;
     uint8_t ledBlinkCount : 3;
     uint8_t ledFastBlink : 1;
     uint8_t : 3;
     Clock_Ticks ledTicks;
-
-
-} context = {
+} UserInterface_context = {
     .ledLeaveOnAfterBlinking = 0,
     .ledBlinkCount = 0,
     .ledFastBlink = 0,
@@ -46,13 +44,13 @@ static struct {
 
 static void LED_turnOn(void)
 {
-    context.ledBlinkCount = 0;
+    UserInterface_context.ledBlinkCount = 0;
     INDICATOR_LED_OUTPUT = 1;
 }
 
 static void LED_turnOff(void)
 {
-    context.ledBlinkCount = 0;
+    UserInterface_context.ledBlinkCount = 0;
     INDICATOR_LED_OUTPUT = 0;
 }
 
@@ -63,25 +61,25 @@ static void LED_blink(const uint8_t count, const bool fast)
         return;
     }
 
-    context.ledBlinkCount = count;
-    context.ledFastBlink = fast;
-    context.ledTicks = Clock_getFastTicks();
+    UserInterface_context.ledBlinkCount = count;
+    UserInterface_context.ledFastBlink = fast;
+    UserInterface_context.ledTicks = Clock_getFastTicks();
     INDICATOR_LED_OUTPUT = 1;
 }
 
 static void LED_task()
 {
-    if (context.ledBlinkCount > 0) {
-        uint8_t interval = context.ledFastBlink ? 10 : 30;
-        if (Clock_getFastTicks() - context.ledTicks >= interval) {
+    if (UserInterface_context.ledBlinkCount > 0) {
+        uint8_t interval = UserInterface_context.ledFastBlink ? 10 : 30;
+        if (Clock_getFastTicks() - UserInterface_context.ledTicks >= interval) {
             if (!INDICATOR_LED_OUTPUT) {
                 // Decrement only after a full on-off cycle
-                --context.ledBlinkCount;
+                --UserInterface_context.ledBlinkCount;
             }
-            if (context.ledBlinkCount > 0 || context.ledLeaveOnAfterBlinking) {
+            if (UserInterface_context.ledBlinkCount > 0 || UserInterface_context.ledLeaveOnAfterBlinking) {
                 INDICATOR_LED_OUTPUT ^= 1;
             }
-            context.ledTicks = Clock_getFastTicks();
+            UserInterface_context.ledTicks = Clock_getFastTicks();
         }
     }
 }
@@ -105,7 +103,7 @@ void UserInterface_runLightweightTasks(void)
 
 bool UserInterface_hasPendingLightweightTasks(void)
 {
-    return context.ledBlinkCount > 0;
+    return UserInterface_context.ledBlinkCount > 0;
 }
 
 void UserInterface_buttonPressEvent(void)

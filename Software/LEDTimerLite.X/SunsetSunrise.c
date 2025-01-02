@@ -28,7 +28,7 @@
 static struct SunriseSunsetContext {
     Clock_Time sunrise;
     Clock_Time sunset;
-} context;
+} SunriseSunset_context;
 
 #if !SUNRISE_SUNSET_USE_LUT
 #include <math.h>
@@ -139,12 +139,12 @@ Clock_Time SunriseSunset_calculate(
 
 Clock_Time SunriseSunset_getSunrise(void)
 {
-    return context.sunrise;
+    return SunriseSunset_context.sunrise;
 }
 
 Clock_Time SunriseSunset_getSunset(void)
 {
-    return context.sunset;
+    return SunriseSunset_context.sunset;
 }
 
 void SunriseSunset_update()
@@ -177,7 +177,7 @@ void SunriseSunset_update()
     }
 #endif
 
-    context.sunrise = SunriseSunset_calculate(
+    SunriseSunset_context.sunrise = SunriseSunset_calculate(
 #if !SUNRISE_SUNSET_USE_LUT
         &data,
 #endif
@@ -185,7 +185,7 @@ void SunriseSunset_update()
         dayOfYear
     );
 
-    context.sunset = SunriseSunset_calculate(
+    SunriseSunset_context.sunset = SunriseSunset_calculate(
 #if !SUNRISE_SUNSET_USE_LUT
         &data,
 #endif

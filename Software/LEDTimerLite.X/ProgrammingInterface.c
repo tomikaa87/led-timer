@@ -204,7 +204,7 @@ static uint8_t FieldCounts[PP_ENUM_MAX - PP_ENUM_FIRST] = {
     0,      // PP_SAVE
 };
 
-static struct Context {
+static struct ProgrammingInterfaceContext {
     volatile LogEntry logQueue[LOG_QUEUE_SIZE];
 
     volatile uint8_t logQueueIn;
@@ -223,7 +223,7 @@ static struct Context {
     PacketProcessor selectedProcessor;
     uint8_t fieldIndex;
     ReceivedArguments receivedArguments;
-} context = {
+} ProgrammingInterface_context = {
     .logQueueIn = 0,
     .logQueueOut = 0,
     .logQueueEntries = 0,
@@ -253,7 +253,7 @@ bool isAllowedToken(const char c) {
         return true;
     }
 
-    switch (context.state) {
+    switch (ProgrammingInterface_context.state) {
         case PPS_READ_PACKET_TYPE:
         case PPS_READ_FIELD:
             if (c == ':' || c == ';' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')) {
@@ -270,9 +270,9 @@ bool isAllowedToken(const char c) {
 
 static void handleReset()
 {
-    context.bufferIndex = 0;
-    context.state = PPS_RESET;
-    context.selectedProcessor = PP_NONE;
+    ProgrammingInterface_context.bufferIndex = 0;
+    ProgrammingInterface_context.state = PPS_RESET;
+    ProgrammingInterface_context.selectedProcessor = PP_NONE;
 }
 
 typedef enum {
@@ -283,33 +283,33 @@ typedef enum {
 static HPT_Result handlePacketType(const char* type)
 {
     if (strncmp(type, "TIME", 5) == 0) {
-        context.selectedProcessor = PP_TIME;
+        ProgrammingInterface_context.selectedProcessor = PP_TIME;
     } else if (strncmp(type, "DATE", 5) == 0) {
-        context.selectedProcessor = PP_DATE;
+        ProgrammingInterface_context.selectedProcessor = PP_DATE;
     } else if (strncmp(type, "SCHSET", 7) == 0) {
-        context.selectedProcessor = PP_SCHSET;
+        ProgrammingInterface_context.selectedProcessor = PP_SCHSET;
     } else if (strncmp(type, "SCHINTEN", 9) == 0) {
-        context.selectedProcessor = PP_SCHINTEN;
+        ProgrammingInterface_context.selectedProcessor = PP_SCHINTEN;
     } else if (strncmp(type, "SCHINT", 7) == 0) {
-        context.selectedProcessor = PP_SCHINT;
+        ProgrammingInterface_context.selectedProcessor = PP_SCHINT;
     } else if (strncmp(type, "SCHSEG", 7) == 0) {
-        context.selectedProcessor = PP_SCHSEG;
+        ProgrammingInterface_context.selectedProcessor = PP_SCHSEG;
     } else if (strncmp(type, "OUTPUT", 7) == 0) {
-        context.selectedProcessor = PP_OUTPUT;
+        ProgrammingInterface_context.selectedProcessor = PP_OUTPUT;
     } else if (strncmp(type, "SAVE", 5) == 0) {
-        context.selectedProcessor = PP_SAVE;
+        ProgrammingInterface_context.selectedProcessor = PP_SAVE;
     } else {
         return HPT_UNKNOWN_TYPE;
     }
 
-    context.fieldIndex = 0;
+    ProgrammingInterface_context.fieldIndex = 0;
 
     return HPT_NO_ERROR;
 }
 
 static bool processPacketTypeOrWriteError()
 {
-    switch (handlePacketType(context.buffer)) {
+    switch (handlePacketType(ProgrammingInterface_context.buffer)) {
         case HPT_NO_ERROR:
             return true;
         case HPT_UNKNOWN_TYPE:
@@ -402,11 +402,11 @@ typedef enum {
 
 static HFV_Result handleFieldValue(const char* value)
 {
-    if ((context.fieldIndex + 1) >= PACKET_HANDLER_MAX_FIELDS) {
+    if ((ProgrammingInterface_context.fieldIndex + 1) >= PACKET_HANDLER_MAX_FIELDS) {
         return HFV_TOO_MANY_FIELDS;
     }
 
-    switch (context.selectedProcessor) {
+    switch (ProgrammingInterface_context.selectedProcessor) {
         case PP_TIME:
             if (!handleTimeFieldValue(value)) {
                 return HFV_INVALID_FIELD_VALUE;
@@ -446,14 +446,14 @@ static HFV_Result handleFieldValue(const char* value)
             return HFV_INVALID_FIELD_VALUE;
     }
 
-    ++context.fieldIndex;
+    ++ProgrammingInterface_context.fieldIndex;
 
     return HFV_NO_ERROR;
 }
 
 static bool processFieldValueOrWriteError()
 {
-    switch (handleFieldValue(context.buffer)) {
+    switch (handleFieldValue(ProgrammingInterface_context.buffer)) {
         case HFV_NO_ERROR:
             return true;
         case HFV_TOO_MANY_FIELDS:
@@ -484,17 +484,17 @@ static bool executeSaveCommand(void);
 
 static void handleEndOfPacket()
 {
-    if (context.selectedProcessor < PP_ENUM_FIRST || context.selectedProcessor >= PP_ENUM_MAX) {
+    if (ProgrammingInterface_context.selectedProcessor < PP_ENUM_FIRST || ProgrammingInterface_context.selectedProcessor >= PP_ENUM_MAX) {
         writeError(PI_ERR_INTERNAL_ERROR);
         return;
     }
 
-    if (context.fieldIndex != FieldCounts[context.selectedProcessor - PP_ENUM_FIRST]) {
+    if (ProgrammingInterface_context.fieldIndex != FieldCounts[ProgrammingInterface_context.selectedProcessor - PP_ENUM_FIRST]) {
         writeError(PI_ERR_FIELD_COUNT_MISMATCH);
         return;
     }
 
-    switch (context.selectedProcessor) {
+    switch (ProgrammingInterface_context.selectedProcessor) {
         case PP_TIME:
             if (!executeTimeCommand()) {
                 writeError(PI_ERR_COMMAND_EXECUTION_FAILED);
@@ -571,12 +571,12 @@ static void handleInputChar(const char c)
         return;
     }
 
-    switch (context.state) {
+    switch (ProgrammingInterface_context.state) {
         // RESET -(*)-> READ_PACKET_TYPE
         case PPS_RESET:
             if (c == '*') {
                 handleReset();
-                context.state = PPS_READ_PACKET_TYPE;
+                ProgrammingInterface_context.state = PPS_READ_PACKET_TYPE;
             }
             break;
 
@@ -594,8 +594,8 @@ static void handleInputChar(const char c)
         case PPS_READ_PACKET_TYPE:
         case PPS_READ_FIELD:
             if (c == ':') {
-                if (context.bufferIndex == 0) {
-                    if (context.state == PPS_READ_PACKET_TYPE) {
+                if (ProgrammingInterface_context.bufferIndex == 0) {
+                    if (ProgrammingInterface_context.state == PPS_READ_PACKET_TYPE) {
                         writeError(PI_ERR_MISSING_PACKET_TYPE);
                     } else {
                         writeError(PI_ERR_MISSING_FIELD_VALUE);
@@ -604,22 +604,22 @@ static void handleInputChar(const char c)
                 } else {
                     bool handled = false;
 
-                    if (context.state == PPS_READ_PACKET_TYPE) {
+                    if (ProgrammingInterface_context.state == PPS_READ_PACKET_TYPE) {
                         handled = processPacketTypeOrWriteError();
                     } else {
                         handled = processFieldValueOrWriteError();
                     }
 
                     if (handled) {
-                        context.state = PPS_READ_FIELD;
-                        context.bufferIndex = 0;
+                        ProgrammingInterface_context.state = PPS_READ_FIELD;
+                        ProgrammingInterface_context.bufferIndex = 0;
                     } else {
                         handleReset();
                     }
                 }
             } else if (c == ';') {
-                if (context.bufferIndex > 0) {
-                    if (context.state == PPS_READ_PACKET_TYPE) {
+                if (ProgrammingInterface_context.bufferIndex > 0) {
+                    if (ProgrammingInterface_context.state == PPS_READ_PACKET_TYPE) {
                         if (processPacketTypeOrWriteError()) {
                             handleEndOfPacket();
                         }
@@ -629,7 +629,7 @@ static void handleInputChar(const char c)
                         }
                     }
                 } else {
-                    if (context.state == PPS_READ_PACKET_TYPE) {
+                    if (ProgrammingInterface_context.state == PPS_READ_PACKET_TYPE) {
                         writeError(PI_ERR_MISSING_PACKET_TYPE);
                     } else {
                         writeError(PI_ERR_MISSING_FIELD_VALUE);
@@ -639,9 +639,9 @@ static void handleInputChar(const char c)
             } else if (c == '*') {
                 handleReset();
             } else {
-                if (context.bufferIndex < sizeof(context.buffer) - 1) {
-                    context.buffer[context.bufferIndex++] = c;
-                    context.buffer[context.bufferIndex] = '\0';
+                if (ProgrammingInterface_context.bufferIndex < sizeof(ProgrammingInterface_context.buffer) - 1) {
+                    ProgrammingInterface_context.buffer[ProgrammingInterface_context.bufferIndex++] = c;
+                    ProgrammingInterface_context.buffer[ProgrammingInterface_context.bufferIndex] = '\0';
                 } else {
                     writeError(PI_ERR_BUFFER_FULL);
                     handleReset();
@@ -674,51 +674,51 @@ void ProgrammingInterface_logEvent(const PI_LogEvent event)
         .time = Clock_getUtcEpoch()
     };
 
-    context.logQueue[context.logQueueIn] = entry;
+    ProgrammingInterface_context.logQueue[ProgrammingInterface_context.logQueueIn] = entry;
 
-    if (++context.logQueueIn >= LOG_QUEUE_SIZE) {
-        context.logQueueIn = 0;
+    if (++ProgrammingInterface_context.logQueueIn >= LOG_QUEUE_SIZE) {
+        ProgrammingInterface_context.logQueueIn = 0;
     }
 
-    if (context.logQueueEntries == LOG_QUEUE_SIZE) {
-        if (++context.logQueueOut >= LOG_QUEUE_SIZE) {
-            context.logQueueOut = 0;
+    if (ProgrammingInterface_context.logQueueEntries == LOG_QUEUE_SIZE) {
+        if (++ProgrammingInterface_context.logQueueOut >= LOG_QUEUE_SIZE) {
+            ProgrammingInterface_context.logQueueOut = 0;
         }
     }
 
-    if (context.logQueueEntries < LOG_QUEUE_SIZE) {
-        ++context.logQueueEntries;
+    if (ProgrammingInterface_context.logQueueEntries < LOG_QUEUE_SIZE) {
+        ++ProgrammingInterface_context.logQueueEntries;
     }
 }
 
 void ProgrammingInterface_processInputChar(const char c)
 {
-    context.inputBuffer[context.inputBufferIn] = c;
+    ProgrammingInterface_context.inputBuffer[ProgrammingInterface_context.inputBufferIn] = c;
 
-    if (++context.inputBufferIn == INPUT_BUFFER_SIZE) {
-        context.inputBufferIn = 0;
+    if (++ProgrammingInterface_context.inputBufferIn == INPUT_BUFFER_SIZE) {
+        ProgrammingInterface_context.inputBufferIn = 0;
     }
 
-    if (context.inputBufferCount == INPUT_BUFFER_SIZE) {
-        if (++context.inputBufferOut >= INPUT_BUFFER_SIZE) {
-            context.inputBufferOut = 0;
+    if (ProgrammingInterface_context.inputBufferCount == INPUT_BUFFER_SIZE) {
+        if (++ProgrammingInterface_context.inputBufferOut >= INPUT_BUFFER_SIZE) {
+            ProgrammingInterface_context.inputBufferOut = 0;
         }
     }
 
-    if (context.inputBufferCount < INPUT_BUFFER_SIZE) {
-        ++context.inputBufferCount;
+    if (ProgrammingInterface_context.inputBufferCount < INPUT_BUFFER_SIZE) {
+        ++ProgrammingInterface_context.inputBufferCount;
     }
 }
 
 static void transmitLog(void)
 {
-    while (context.logQueueEntries > 0) {
-        --context.logQueueEntries;
+    while (ProgrammingInterface_context.logQueueEntries > 0) {
+        --ProgrammingInterface_context.logQueueEntries;
 
-        LogEntry entry = context.logQueue[context.logQueueOut];
+        LogEntry entry = ProgrammingInterface_context.logQueue[ProgrammingInterface_context.logQueueOut];
 
-        if (++context.logQueueOut >= LOG_QUEUE_SIZE) {
-            context.logQueueOut = 0;
+        if (++ProgrammingInterface_context.logQueueOut >= LOG_QUEUE_SIZE) {
+            ProgrammingInterface_context.logQueueOut = 0;
         }
 
 //        printf(";L%ld,%u:\r\n", entry.time, entry.event);
@@ -728,13 +728,13 @@ static void transmitLog(void)
 
 static void processInputBuffer(void)
 {
-    while (context.inputBufferCount > 0) {
-        --context.inputBufferCount;
+    while (ProgrammingInterface_context.inputBufferCount > 0) {
+        --ProgrammingInterface_context.inputBufferCount;
 
-        handleInputChar(context.inputBuffer[context.inputBufferOut]);
+        handleInputChar(ProgrammingInterface_context.inputBuffer[ProgrammingInterface_context.inputBufferOut]);
 
-        if (++context.inputBufferOut >= INPUT_BUFFER_SIZE) {
-            context.inputBufferOut = 0;
+        if (++ProgrammingInterface_context.inputBufferOut >= INPUT_BUFFER_SIZE) {
+            ProgrammingInterface_context.inputBufferOut = 0;
         }
     }
 }
@@ -752,31 +752,31 @@ void putch(char txData)
 
 static bool handleTimeFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
+    if (ProgrammingInterface_context.fieldIndex == 0) {
         if (
-            hexToU8(value, &context.receivedArguments.time.hour)
-            && context.receivedArguments.time.hour <= 23
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.time.hour)
+            && ProgrammingInterface_context.receivedArguments.time.hour <= 23
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 1) {
+    } else if (ProgrammingInterface_context.fieldIndex == 1) {
         if (
-            hexToU8(value, &context.receivedArguments.time.minute)
-            && context.receivedArguments.time.minute <= 59
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.time.minute)
+            && ProgrammingInterface_context.receivedArguments.time.minute <= 59
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 2) {
+    } else if (ProgrammingInterface_context.fieldIndex == 2) {
         if (
-            hexToU8(value, &context.receivedArguments.time.second)
-            && context.receivedArguments.time.second <= 59
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.time.second)
+            && ProgrammingInterface_context.receivedArguments.time.second <= 59
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 3) {
+    } else if (ProgrammingInterface_context.fieldIndex == 3) {
         if (
-            hexToU8(value, &context.receivedArguments.time.timeZone)
-            && context.receivedArguments.time.timeZone <= 0x6F
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.time.timeZone)
+            && ProgrammingInterface_context.receivedArguments.time.timeZone <= 0x6F
         ) {
             return true;
         }
@@ -787,24 +787,24 @@ static bool handleTimeFieldValue(const char* value)
 
 static bool handleDateFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
+    if (ProgrammingInterface_context.fieldIndex == 0) {
         if (
-            hexToU16(value, &context.receivedArguments.date.year)
-            && context.receivedArguments.date.year >= 2024
+            hexToU16(value, &ProgrammingInterface_context.receivedArguments.date.year)
+            && ProgrammingInterface_context.receivedArguments.date.year >= 2024
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 1) {
+    } else if (ProgrammingInterface_context.fieldIndex == 1) {
         if (
-            hexToU4(value, &context.receivedArguments.date.month)
-            && context.receivedArguments.date.month < 0x0C
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.date.month)
+            && ProgrammingInterface_context.receivedArguments.date.month < 0x0C
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 2) {
+    } else if (ProgrammingInterface_context.fieldIndex == 2) {
         if (
-            hexToU8(value, &context.receivedArguments.date.day)
-            && context.receivedArguments.date.day < 0x1F
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.date.day)
+            && ProgrammingInterface_context.receivedArguments.date.day < 0x1F
         ) {
             return true;
         }
@@ -816,9 +816,9 @@ static bool handleDateFieldValue(const char* value)
 static bool executeTimeCommand()
 {
     Clock_setTime(
-        context.receivedArguments.time.hour,
-        context.receivedArguments.time.minute,
-        context.receivedArguments.time.second
+        ProgrammingInterface_context.receivedArguments.time.hour,
+        ProgrammingInterface_context.receivedArguments.time.minute,
+        ProgrammingInterface_context.receivedArguments.time.second
     );
 
     // TODO timezone
@@ -829,9 +829,9 @@ static bool executeTimeCommand()
 static bool executeDateCommand()
 {
     Clock_setDate(
-        (uint8_t)(context.receivedArguments.date.year - 1970),
-        context.receivedArguments.date.month + 1,
-        context.receivedArguments.date.day + 1
+        (uint8_t)(ProgrammingInterface_context.receivedArguments.date.year - 1970),
+        ProgrammingInterface_context.receivedArguments.date.month + 1,
+        ProgrammingInterface_context.receivedArguments.date.day + 1
     );
 
     return true;
@@ -843,10 +843,10 @@ static bool executeDateCommand()
 
 static bool handleScheduleSetFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
+    if (ProgrammingInterface_context.fieldIndex == 0) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleSet.type)
-            && context.receivedArguments.scheduleSet.type <= 2
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleSet.type)
+            && ProgrammingInterface_context.receivedArguments.scheduleSet.type <= 2
         ) {
             return true;
         }
@@ -857,17 +857,17 @@ static bool handleScheduleSetFieldValue(const char* value)
 
 static bool handleScheduleIntervalEnableFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
+    if (ProgrammingInterface_context.fieldIndex == 0) {
         if (
-            hexToU8(value, &context.receivedArguments.scheduleIntervalEnable.index)
-            && context.receivedArguments.scheduleIntervalEnable.index <= 7
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.scheduleIntervalEnable.index)
+            && ProgrammingInterface_context.receivedArguments.scheduleIntervalEnable.index <= 7
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 1) {
+    } else if (ProgrammingInterface_context.fieldIndex == 1) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleIntervalEnable.state)
-            && context.receivedArguments.scheduleIntervalEnable.state <= 1
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleIntervalEnable.state)
+            && ProgrammingInterface_context.receivedArguments.scheduleIntervalEnable.state <= 1
         ) {
             return true;
         }
@@ -878,66 +878,66 @@ static bool handleScheduleIntervalEnableFieldValue(const char* value)
 
 static bool handleScheduleIntervalFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
+    if (ProgrammingInterface_context.fieldIndex == 0) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.index)
-            && context.receivedArguments.scheduleInterval.index <= 7
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.index)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.index <= 7
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 1) {
+    } else if (ProgrammingInterface_context.fieldIndex == 1) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.onType)
-            && context.receivedArguments.scheduleInterval.onType <= 0x2
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.onType)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.onType <= 0x2
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 2) {
+    } else if (ProgrammingInterface_context.fieldIndex == 2) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.onSunOffset)
-            && context.receivedArguments.scheduleInterval.onSunOffset <= 0x8
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.onSunOffset)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.onSunOffset <= 0x8
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 3) {
+    } else if (ProgrammingInterface_context.fieldIndex == 3) {
         if (
-            hexToU8(value, &context.receivedArguments.scheduleInterval.onTimeH)
-            && context.receivedArguments.scheduleInterval.onTimeH <= 0x17
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.onTimeH)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.onTimeH <= 0x17
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 4) {
+    } else if (ProgrammingInterface_context.fieldIndex == 4) {
         if (
-            hexToU8(value, &context.receivedArguments.scheduleInterval.onTimeM)
-            && context.receivedArguments.scheduleInterval.onTimeM <= 0x3C
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.onTimeM)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.onTimeM <= 0x3C
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 5) {
+    } else if (ProgrammingInterface_context.fieldIndex == 5) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.offType)
-            && context.receivedArguments.scheduleInterval.offType <= 0x2
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.offType)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.offType <= 0x2
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 6) {
+    } else if (ProgrammingInterface_context.fieldIndex == 6) {
         if (
-            hexToU4(value, &context.receivedArguments.scheduleInterval.offSunOffset)
-            && context.receivedArguments.scheduleInterval.offSunOffset <= 0x8
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.offSunOffset)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.offSunOffset <= 0x8
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 7) {
+    } else if (ProgrammingInterface_context.fieldIndex == 7) {
         if (
-            hexToU8(value, &context.receivedArguments.scheduleInterval.offTimeH)
-            && context.receivedArguments.scheduleInterval.offTimeH <= 0x17
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.offTimeH)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.offTimeH <= 0x17
         ) {
             return true;
         }
-    } else if (context.fieldIndex == 8) {
+    } else if (ProgrammingInterface_context.fieldIndex == 8) {
         if (
-            hexToU8(value, &context.receivedArguments.scheduleInterval.offTimeM)
-            && context.receivedArguments.scheduleInterval.offTimeM <= 0x3C
+            hexToU8(value, &ProgrammingInterface_context.receivedArguments.scheduleInterval.offTimeM)
+            && ProgrammingInterface_context.receivedArguments.scheduleInterval.offTimeM <= 0x3C
         ) {
             return true;
         }
@@ -948,8 +948,8 @@ static bool handleScheduleIntervalFieldValue(const char* value)
 
 static bool handleScheduleSegmentFieldValue(const char* value)
 {
-    if (context.fieldIndex >= 0 && context.fieldIndex <= 6) {
-        if (hexToU8(value, &context.receivedArguments.scheduleSegment.data[context.fieldIndex - 1])) {
+    if (ProgrammingInterface_context.fieldIndex >= 0 && ProgrammingInterface_context.fieldIndex <= 6) {
+        if (hexToU8(value, &ProgrammingInterface_context.receivedArguments.scheduleSegment.data[ProgrammingInterface_context.fieldIndex - 1])) {
             return true;
         }
     }
@@ -959,15 +959,15 @@ static bool handleScheduleSegmentFieldValue(const char* value)
 
 static bool executeScheduleSetCommand()
 {
-    Settings_data.scheduler.type = context.receivedArguments.scheduleSet.type;
+    Settings_data.scheduler.type = ProgrammingInterface_context.receivedArguments.scheduleSet.type;
 
     return true;
 }
 
 static bool executeScheduleIntervalEnableCommand()
 {
-    Settings_data.scheduler.intervals[context.receivedArguments.scheduleIntervalEnable.index].active
-        = context.receivedArguments.scheduleIntervalEnable.state;
+    Settings_data.scheduler.intervals[ProgrammingInterface_context.receivedArguments.scheduleIntervalEnable.index].active
+        = ProgrammingInterface_context.receivedArguments.scheduleIntervalEnable.state;
 
     return true;
 }
@@ -975,17 +975,17 @@ static bool executeScheduleIntervalEnableCommand()
 static bool executeScheduleIntervalCommand()
 {
     struct IntervalScheduler* sch =
-        &Settings_data.scheduler.intervals[context.receivedArguments.scheduleInterval.index];
+        &Settings_data.scheduler.intervals[ProgrammingInterface_context.receivedArguments.scheduleInterval.index];
 
-    sch->onSwitch.type = context.receivedArguments.scheduleInterval.onType;
-    sch->onSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.onSunOffset - 4) * 15;
-    sch->onSwitch.timeHour = context.receivedArguments.scheduleInterval.onTimeH;
-    sch->onSwitch.timeMinute = context.receivedArguments.scheduleInterval.onTimeM;
+    sch->onSwitch.type = ProgrammingInterface_context.receivedArguments.scheduleInterval.onType;
+    sch->onSwitch.sunOffset = ((int8_t)ProgrammingInterface_context.receivedArguments.scheduleInterval.onSunOffset - 4) * 15;
+    sch->onSwitch.timeHour = ProgrammingInterface_context.receivedArguments.scheduleInterval.onTimeH;
+    sch->onSwitch.timeMinute = ProgrammingInterface_context.receivedArguments.scheduleInterval.onTimeM;
 
-    sch->offSwitch.type = context.receivedArguments.scheduleInterval.offType;
-    sch->offSwitch.sunOffset = ((int8_t)context.receivedArguments.scheduleInterval.offSunOffset - 4) * 15;
-    sch->offSwitch.timeHour = context.receivedArguments.scheduleInterval.offTimeH;
-    sch->offSwitch.timeMinute = context.receivedArguments.scheduleInterval.offTimeM;
+    sch->offSwitch.type = ProgrammingInterface_context.receivedArguments.scheduleInterval.offType;
+    sch->offSwitch.sunOffset = ((int8_t)ProgrammingInterface_context.receivedArguments.scheduleInterval.offSunOffset - 4) * 15;
+    sch->offSwitch.timeHour = ProgrammingInterface_context.receivedArguments.scheduleInterval.offTimeH;
+    sch->offSwitch.timeMinute = ProgrammingInterface_context.receivedArguments.scheduleInterval.offTimeM;
 
     return true;
 }
@@ -994,7 +994,7 @@ static bool executeScheduleSegmentCommand()
 {
     memcpy(
         Settings_data.scheduler.segmentData,
-        context.receivedArguments.scheduleSegment.data,
+        ProgrammingInterface_context.receivedArguments.scheduleSegment.data,
         sizeof(ScheduleSegmentData)
     );
 
@@ -1007,10 +1007,10 @@ static bool executeScheduleSegmentCommand()
 
 static bool handleOutputFieldValue(const char* value)
 {
-    if (context.fieldIndex == 0) {
+    if (ProgrammingInterface_context.fieldIndex == 0) {
         if (
-            hexToU4(value, &context.receivedArguments.output.on)
-            && context.receivedArguments.output.on <= 1
+            hexToU4(value, &ProgrammingInterface_context.receivedArguments.output.on)
+            && ProgrammingInterface_context.receivedArguments.output.on <= 1
         ) {
             return true;
         }
@@ -1021,7 +1021,7 @@ static bool handleOutputFieldValue(const char* value)
 
 static bool executeOutputCommand()
 {
-    OutputController_setOverrideState(context.receivedArguments.output.on);
+    OutputController_setOverrideState(ProgrammingInterface_context.receivedArguments.output.on);
     return true;
 }
 

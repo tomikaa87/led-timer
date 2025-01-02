@@ -35,7 +35,7 @@ static struct MainContext
     volatile uint8_t adcConversionFinished : 1;
     volatile uint8_t buttonPressed : 1;
     volatile uint8_t ldoSenseChanged : 1;
-} context = {
+} Main_context = {
     .adcConversionFinished = 0,
     .buttonPressed = 0,
     .ldoSenseChanged = 0
@@ -59,7 +59,7 @@ void __interrupt() isr(void)
     if (ADIE && ADIF) {
         ADIF = 0;
         System_handleADCInterrupt(((uint16_t)ADRESH) << 8 | ADRESL);
-        context.adcConversionFinished = 1;
+        Main_context.adcConversionFinished = 1;
     }
 
     // UART RC (Programming Interface)
@@ -73,7 +73,7 @@ void __interrupt() isr(void)
         // RC3 IOC - SW
         if (IOCCF3) {
             IOCCF3 = 0;
-            context.buttonPressed = 1;
+            Main_context.buttonPressed = 1;
 //            System_handleExternalWakeUp();
             ProgrammingInterface_logEvent(PI_LOG_ButtonPress);
         }
@@ -81,7 +81,7 @@ void __interrupt() isr(void)
         // RA2 IOC - LDO_SENSE
         if (IOCAF2) {
             IOCAF2 = 0;
-            context.ldoSenseChanged = 1;
+            Main_context.ldoSenseChanged = 1;
             ProgrammingInterface_logEvent(
                 RA2 == 1 ? PI_LOG_LDOPowerDown : PI_LOG_LDOPowerUp
             );
@@ -153,14 +153,14 @@ void main(void)
         }
 
         // Handle button press
-        if (context.buttonPressed) {
-            context.buttonPressed = 0;
+        if (Main_context.buttonPressed) {
+            Main_context.buttonPressed = 0;
             UserInterface_buttonPressEvent();
         }
 
         // Handle LDO sense changes
-        if (context.ldoSenseChanged) {
-            context.ldoSenseChanged = 0;
+        if (Main_context.ldoSenseChanged) {
+            Main_context.ldoSenseChanged = 0;
             UserInterface_handleExternalEvent(UI_ExternalEvent_PowerInputChanged);
         }
 
