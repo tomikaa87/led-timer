@@ -26,40 +26,6 @@
 #include <stdlib.h>
 #include <xc.h>
 
-static void TMR1_StartTimer(void)
-{
-    // Start the Timer by writing to TMRxON bit
-    T1CONbits.TMR1ON = 1;
-}
-
-static void TMR1_StopTimer(void)
-{
-    // Stop the Timer by writing to TMRxON bit
-    T1CONbits.TMR1ON = 0;
-}
-
-static void TMR1_WriteTimer(uint16_t timerVal)
-{
-    if (T1CONbits.T1SYNC == 1)
-    {
-        // Stop the Timer by writing to TMRxON bit
-        T1CONbits.TMR1ON = 0;
-
-        // Write to the Timer1 register
-        TMR1H = (uint8_t)(timerVal >> 8);
-        TMR1L = (uint8_t)timerVal;
-
-        // Start the Timer after writing to the register
-        T1CONbits.TMR1ON =1;
-    }
-    else
-    {
-        // Write to the Timer1 register
-        TMR1H = (uint8_t)(timerVal >> 8);
-        TMR1L = (uint8_t)timerVal;
-    }
-}
-
 Clock_InterruptContext Clock_interruptContext = {
     .ticks = 0,
     .fastTicks = 0,
@@ -106,11 +72,12 @@ void Clock_setTime(const uint8_t hour, const uint8_t minute, const uint8_t secon
     time.tm_mon = context.month - 1;
     time.tm_year = (int)context.year + 70;
 
-    TMR1_StopTimer();
+    TMR1ON = 0;
     Clock_interruptContext.utcEpoch = mktime(&time)
         - (time_t)Settings_data.time.timeZoneOffsetHalfHours * 30 * 60;
-    TMR1_WriteTimer(0);
-    TMR1_StartTimer();
+    TMR1H = 0;
+    TMR1L = 0;
+    TMR1ON = 1;
 
     Clock_interruptContext.updateCalendar = true;
 }
@@ -184,10 +151,12 @@ void Clock_setDate(
     time.tm_mon = context.month - 1;
     time.tm_year = (int)context.year + 70;
 
-    TMR1_StopTimer();
+    // FIXME fill tm_sec as well
+
+    TMR1ON = 0;
     Clock_interruptContext.utcEpoch = mktime(&time) -
         (time_t)Settings_data.time.timeZoneOffsetHalfHours * 30 * 60;
-    TMR1_StartTimer();
+    TMR1ON = 1;
 
     Clock_interruptContext.updateCalendar = true;
 

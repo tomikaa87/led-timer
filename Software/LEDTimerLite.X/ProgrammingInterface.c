@@ -829,7 +829,7 @@ static bool executeTimeCommand()
 static bool executeDateCommand()
 {
     Clock_setDate(
-        context.receivedArguments.date.year - 1970,
+        (uint8_t)(context.receivedArguments.date.year - 1970),
         context.receivedArguments.date.month + 1,
         context.receivedArguments.date.day + 1
     );
