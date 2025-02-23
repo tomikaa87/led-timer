@@ -1,4 +1,4 @@
-#if SUNRISE_SUNSET_USE_LUT
+#if SUNRISE_SUNSET_USE_LUT && !DEBUG_DONT_COMPILE_LUT
 
 /*
  * LUT size reduction plan
