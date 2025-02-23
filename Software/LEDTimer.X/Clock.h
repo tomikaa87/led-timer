@@ -50,7 +50,6 @@ typedef volatile struct
     ++Clock_interruptContext.fastTicks; \
 }
 
-//inline uint8_t Clock_getSeconds(void);
 inline Clock_Time Clock_getMinutesSinceMidnight(void);
 void Clock_setMinutesSinceMidnight(Clock_Time value);
 inline Clock_Ticks Clock_getTicks(void);

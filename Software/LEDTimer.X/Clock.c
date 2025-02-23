@@ -30,7 +30,7 @@
 Clock_InterruptContext Clock_interruptContext = {
     .ticks = 0,
     .fastTicks = 0,
-    .epoch = 0
+    .epoch = 1672531200 // Set to 2023-01-01 00:00:00 UTC because we calculate with YearsFrom2023
 };
 
 static struct Clock_Context {
@@ -54,10 +54,7 @@ static struct Clock_Context {
     .dayOfYear = 0
 };
 
-//inline uint8_t Clock_getSeconds()
-//{
-//    return Clock_interruptContext.epoch;
-//}
+static void _updateEpochFromContext(void);
 
 inline Clock_Time Clock_getMinutesSinceMidnight()
 {
@@ -69,15 +66,7 @@ void Clock_setMinutesSinceMidnight(const Clock_Time value)
     context.hour = (uint8_t)(value / 60);
     context.minute = (uint8_t)(value - context.hour * 60);
 
-    struct tm time = {};
-    time.tm_hour = context.hour;
-    time.tm_min = context.minute;
-    time.tm_mday = context.day;
-    time.tm_mon = context.month;
-    time.tm_year = (int)context.year + 2023 - 1900;
-
-    Clock_interruptContext.epoch = mktime(&time);
-    Clock_interruptContext.updateCalendar = true;
+    _updateEpochFromContext();
 
     TMR1_WriteTimer(0);
 }
@@ -107,7 +96,7 @@ void Clock_task()
     if (Clock_interruptContext.updateCalendar) {
         Clock_interruptContext.updateCalendar = false;
 
-        struct tm* time = gmtime((const time_t*)Clock_interruptContext.epoch);
+        struct tm* time = gmtime((const time_t*)&Clock_interruptContext.epoch);
 
         bool updateSunriseSunset = context.dayOfYear != time->tm_yday || context.initialUpdate;
 
@@ -142,15 +131,7 @@ void Clock_setDate(
     context.month = month;
     context.day = day;
 
-    struct tm time = {};
-    time.tm_hour = context.hour;
-    time.tm_min = context.minute;
-    time.tm_mday = context.day;
-    time.tm_mon = context.month;
-    time.tm_year = (int)context.year + 2023 - 1900;
-
-    Clock_interruptContext.epoch = mktime(&time);
-    Clock_interruptContext.updateCalendar = true;
+    _updateEpochFromContext();
 
     SunriseSunset_update();
 }
@@ -183,4 +164,17 @@ inline bool Clock_isLeapYear()
 uint16_t Clock_getDayOfYear()
 {
     return context.dayOfYear;
+}
+
+static void _updateEpochFromContext(void)
+{
+    struct tm time = {};
+    time.tm_hour = context.hour;
+    time.tm_min = context.minute;
+    time.tm_mday = context.day;
+    time.tm_mon = context.month - 1;
+    time.tm_year = (int)context.year + 2023 - 1900;
+
+    Clock_interruptContext.epoch = mktime(&time);
+    Clock_interruptContext.updateCalendar = true;
 }
