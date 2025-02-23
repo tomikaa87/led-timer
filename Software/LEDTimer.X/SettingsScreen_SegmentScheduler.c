@@ -18,6 +18,8 @@
     Created on 2023-01-31
 */
 
+#if !NIGHTLIGHT_TIMER
+
 #include "Clock.h"
 #include "Graphics.h"
 #include "Keypad.h"
@@ -107,3 +109,5 @@ bool SettingsScreen_SegmentScheduler_handleKeyPress(const uint8_t keyCode, const
 
     return true;
 }
+
+#endif

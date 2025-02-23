@@ -18,6 +18,8 @@
     Created on 2023-04-06
 */
 
+#if !NIGHTLIGHT_TIMER
+
 #include "Graphics.h"
 #include "Keypad.h"
 #include "SettingsScreen_DST.h"
@@ -228,3 +230,5 @@ bool SettingsScreen_DST_handleKeyPress(const uint8_t keyCode, const bool hold)
 
     return true;
 }
+
+#endif

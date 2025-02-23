@@ -113,6 +113,7 @@ static inline bool isSwitchedOnBySchedule()
         }
 
         case Settings_SchedulerType_Segment: {
+#if !NIGHTLIGHT_TIMER
             uint8_t segmentIndex = Types_calculateScheduleSegmentIndex(
                 Clock_getMinutesSinceMidnight()
             );
@@ -121,6 +122,9 @@ static inline bool isSwitchedOnBySchedule()
                 Settings_data.scheduler.segmentData,
                 segmentIndex
             );
+#else
+            break;
+#endif
         }
 
         default:

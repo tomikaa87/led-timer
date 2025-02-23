@@ -121,6 +121,7 @@ bool Date_isDst(
     const uint8_t hour
 )
 {
+#if !NIGHTLIGHT_TIMER
     if (month < data.startMonth || month > data.endMonth) {
         return false;
     }
@@ -174,6 +175,9 @@ bool Date_isDst(
             return true;
         }
     }
+#else
+
+#endif
 
     return false;
 }

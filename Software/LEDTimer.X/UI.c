@@ -217,9 +217,11 @@ static void updateScreen(const bool redraw)
             SettingsScreen_Scheduler_update(redraw);
             break;
 
+#if !NIGHTLIGHT_TIMER
         case UI_Screen_Settings_SegmentScheduler:
             SettingsScreen_SegmentScheduler_update(redraw);
             break;
+#endif
 
         case UI_Screen_Settings_LEDBrightness:
             SettingsScreen_LEDBrightness_update(redraw);
@@ -241,9 +243,11 @@ static void updateScreen(const bool redraw)
             SettingsScreen_TimeZone_update(redraw);
             break;
 
+#if !NIGHTLIGHT_TIMER
         case UI_Screen_Settings_DST:
             SettingsScreen_DST_update(redraw);
             break;
+#endif
 
         case UI_Screen_Settings_Location:
 #if !SUNRISE_SUNSET_USE_LUT
@@ -440,8 +444,10 @@ void UI_keyEvent(uint8_t keyCode)
                             switchToScreen(UI_Screen_Settings_Scheduler);
                             break;
                         case 1:
+#if !NIGHTLIGHT_TIMER
                             SettingsScreen_SegmentScheduler_init(&context.modifiedSettings.scheduler);
                             switchToScreen(UI_Screen_Settings_SegmentScheduler);
+#endif
                             break;
                         case 2:
                             SettingsScreen_LEDBrightness_init(&context.modifiedSettings.output);
@@ -464,8 +470,10 @@ void UI_keyEvent(uint8_t keyCode)
                             switchToScreen(UI_Screen_Settings_TimeZone);
                             break;
                         case 7:
+#if !NIGHTLIGHT_TIMER
                             SettingsScreen_DST_init(&context.modifiedSettings.dst);
                             switchToScreen(UI_Screen_Settings_DST);
+#endif
                             break;
 #if !SUNRISE_SUNSET_USE_LUT
                         case 8:
@@ -488,9 +496,11 @@ void UI_keyEvent(uint8_t keyCode)
             break;
 
         case UI_Screen_Settings_SegmentScheduler:
+#if !NIGHTLIGHT_TIMER
             if (!SettingsScreen_SegmentScheduler_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
+#endif
             break;
 
         case UI_Screen_Settings_LEDBrightness:
@@ -523,11 +533,13 @@ void UI_keyEvent(uint8_t keyCode)
             }
             break;
 
+#if !NIGHTLIGHT_TIMER
         case UI_Screen_Settings_DST:
             if (!SettingsScreen_DST_handleKeyPress(keyCode, hold)) {
                 switchToScreen(UI_Screen_Settings);
             }
             break;
+#endif
 
 #if !SUNRISE_SUNSET_USE_LUT
         case UI_Screen_Settings_Location:

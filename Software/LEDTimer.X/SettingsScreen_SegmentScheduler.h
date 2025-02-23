@@ -20,8 +20,12 @@
 
 #pragma once
 
+#if !NIGHTLIGHT_TIMER
+
 #include "Settings.h"
 
 void SettingsScreen_SegmentScheduler_init(struct Scheduler* settings);
 void SettingsScreen_SegmentScheduler_update(bool redraw);
 bool SettingsScreen_SegmentScheduler_handleKeyPress(uint8_t keyCode, bool hold);
+
+#endif

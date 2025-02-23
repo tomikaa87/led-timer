@@ -370,9 +370,19 @@ static void adjustSelectedItem()
 
     switch (context.selection) {
         case 0: {
+#if !NIGHTLIGHT_TIMER
             if (++(context.settings->type) > Settings_SchedulerType_Off) {
                 context.settings->type = Settings_SchedulerType_Interval;
             }
+#else
+            ++(context.settings->type);
+            if (context.settings->type == Settings_SchedulerType_Segment) {
+                ++(context.settings->type);
+            }
+            if (context.settings->type > Settings_SchedulerType_Off) {
+                context.settings->type = Settings_SchedulerType_Interval;
+            }
+#endif
             context.schedulerTypeChanged = true;
             break;
         }
