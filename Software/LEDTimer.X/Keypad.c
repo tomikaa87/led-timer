@@ -29,6 +29,16 @@
 
 #include <stdbool.h>
 
+#if DEBUG_ALTERNATIVE_KEY_INPUTS
+#define SW1_INPUT (PORTCbits.RC4)
+#define SW2_INPUT (PORTCbits.RC2)
+#define SW3_INPUT (IO_SW3_GetValue())
+#else
+#define SW1_INPUT (IO_SW1_GetValue())
+#define SW2_INPUT (IO_SW2_GetValue())
+#define SW3_INPUT (IO_SW3_GetValue())
+#endif
+
 static struct KeypadContext
 {
     enum {
@@ -55,10 +65,22 @@ static uint8_t scanKeys()
     uint8_t scanCode = 0;
 
     for (uint8_t i = Config_Keypad_ScanSampleCount; i > 0; --i) {
-        scanCode |=
-            (IO_SW1_GetValue() ? 0 : (1 << 0))
-            | (IO_SW2_GetValue() ? 0 : (1 << 1))
-            | (IO_SW3_GetValue() ? 0 : (1 << 2));
+//        scanCode |=
+//            (SW1_INPUT ? 0 : (1 << 0))
+//            | (SW2_INPUT ? 0 : (1 << 1))
+//            | (SW3_INPUT ? 0 : (1 << 2));
+
+        if (SW1_INPUT == 0) {
+            scanCode |= 1;
+        }
+
+        if (SW2_INPUT == 0) {
+            scanCode |= 1 << 1;
+        }
+
+        if (SW3_INPUT == 0) {
+            scanCode |= 1 << 2;
+        }
 
         __delay_us(Config_Keypad_ScanSamplingDelayUs);
     }
@@ -68,6 +90,25 @@ static uint8_t scanKeys()
 
 void Keypad_init()
 {
+#if DEBUG_ALTERNATIVE_KEY_INPUTS
+    TRISCbits.TRISC2 = 1;
+    TRISCbits.TRISC4 = 1;
+
+    WPUCbits.WPUC2 = 1;
+    WPUCbits.WPUC4 = 1;
+
+    ANSELCbits.ANSC2 = 0;
+    ANSELCbits.ANSC4 = 0;
+
+    IOCANbits.IOCAN0 = 0;
+    IOCANbits.IOCAN1 = 0;
+
+    IOCAPbits.IOCAP0 = 0;
+    IOCAPbits.IOCAP1 = 0;
+
+    IOCCNbits.IOCCN2 = 1;
+    IOCCNbits.IOCCN4 = 1;
+#endif
 }
 
 uint8_t Keypad_task()

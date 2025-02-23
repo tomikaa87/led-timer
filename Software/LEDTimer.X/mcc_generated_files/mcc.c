@@ -61,7 +61,9 @@ void SYSTEM_Initialize(void)
     PWM5_Initialize();
     TMR2_Initialize();
     TMR1_Initialize();
+#if !DEBUG_ALTERNATIVE_KEY_INPUTS
     EUSART_Initialize();
+#endif
 }
 
 void OSCILLATOR_Initialize(void)

@@ -70,6 +70,7 @@ static struct MainContext
 void __interrupt() isr(void)
 {
     if (IOCIE && IOCIF) {
+#if !DEBUG_ALTERNATIVE_KEY_INPUTS
         // RA0 IOC - SW1
         if (IOCAF0) {
             IOCAF0 = 0;
@@ -81,6 +82,19 @@ void __interrupt() isr(void)
             IOCAF1 = 0;
             System_handleExternalWakeUp();
         }
+#else
+        // RC4 IOC - SW1
+        if (IOCCF4) {
+            IOCCF4 = 0;
+            System_handleExternalWakeUp();
+        }
+
+        // RC2 IOC - SW2
+        if (IOCCF2) {
+            IOCCF2 = 0;
+            System_handleExternalWakeUp();
+        }
+#endif
 
         // RC5 IOC - SW3
         if (IOCCF5) {
