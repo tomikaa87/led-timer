@@ -42,7 +42,8 @@ static struct OutputControllerContext
     uint8_t switchedOnBySchedule : 1;
     uint8_t prevStateFromSchedule : 1;
     uint8_t rampingUp : 1;
-    uint8_t : 2;
+    uint8_t active : 1;
+    uint8_t : 1;
 
     uint8_t rampingCurrentBrightness;
     Clock_Ticks rampingUpStepTime;
@@ -56,6 +57,7 @@ static struct OutputControllerContext
     .switchedOnBySchedule = 0,
     .prevStateFromSchedule = 0,
     .rampingUp = 0,
+    .active = 1,
     .rampingCurrentBrightness = 0,
     .rampingUpStepTime = 0,
     .rampingStepTimer = 0,
@@ -242,6 +244,10 @@ void OutputController_toggle()
 
 OutputController_TaskResult OutputController_task()
 {
+    if (!context.active) {
+        return OutputController_TaskResult_StateUnchanged;
+    }
+
     context.switchedOnBySchedule = isSwitchedOnBySchedule();
 
     context.outputOverride = calculateOverrideState(
@@ -331,6 +337,16 @@ void OutputController_updateState()
 #endif
 
     context.forceOutputStateUpdate = 1;
+}
+
+void OutputController_activate()
+{
+    context.active = 1;
+}
+
+void OutputController_deactivate()
+{
+    context.active = 0;
 }
 
 typedef struct {

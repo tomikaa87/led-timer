@@ -82,3 +82,15 @@ bool OutputController_getNextTransition(
  * @return Clock_Time Calculated switch time in minutes from midnight
  */
 Clock_Time OutputController_calculateSwitchTime(struct IntervalSwitch* sw);
+
+/**
+ * Activates the automatic output control logic, which takes control
+ * of the PWM output.
+ */
+void OutputController_activate(void);
+
+/**
+ * Deactivates the automatic output control logic. PWM output will not be
+ * controlled and can be manipulated by other components.
+ */
+void OutputController_deactivate(void);

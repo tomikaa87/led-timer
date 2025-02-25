@@ -20,7 +20,10 @@
 
 #include "Graphics.h"
 #include "Keypad.h"
+#include "OutputController.h"
 #include "SettingsScreen_LEDBrightness.h"
+
+#include "mcc_generated_files/pwm5.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -46,6 +49,9 @@ void SettingsScreen_LEDBrightness_update(const bool redraw)
     char s[4];
     sprintf(s, "%3u", context.settings->brightness);
     Text_draw7Seg(s, 2, 64 - Text_calculateWidth7Seg(s) / 2, false);
+
+    OutputController_deactivate();
+    PWM5_LoadDutyValue(context.settings->brightness);
 }
 
 bool SettingsScreen_LEDBrightness_handleKeyPress(const uint8_t keyCode, const bool hold)
@@ -56,6 +62,10 @@ bool SettingsScreen_LEDBrightness_handleKeyPress(const uint8_t keyCode, const bo
             if (hold) {
                 break;
             }
+
+            // Restore the original state
+            OutputController_activate();
+            OutputController_updateState();
 
             return false;
         }
