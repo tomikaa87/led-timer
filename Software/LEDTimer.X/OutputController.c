@@ -41,13 +41,30 @@ static struct OutputControllerContext
     uint8_t forceOutputStateUpdate : 1;
     uint8_t switchedOnBySchedule : 1;
     uint8_t prevStateFromSchedule : 1;
+    uint8_t rampingUp : 1;
+    uint8_t : 2;
+
+    uint8_t rampingCurrentBrightness;
+    Clock_Ticks rampingUpStepTime;
+    Clock_Ticks rampingStepTimer;
+
+    Clock_Ticks rampingUpTaskTimer;
 } context = {
     .outputOverride = 0,
     .prevOutputState = 0,
     .forceOutputStateUpdate = 0,
     .switchedOnBySchedule = 0,
-    .prevStateFromSchedule = 0
+    .prevStateFromSchedule = 0,
+    .rampingUp = 0,
+    .rampingCurrentBrightness = 0,
+    .rampingUpStepTime = 0,
+    .rampingStepTimer = 0,
+    .rampingUpTaskTimer = 0
 };
+
+static void startRampingUp(void);
+static void stopRampingUp(void);
+static void rampingUpTask(void);
 
 Clock_Time calculateSunEventTime(const Clock_Time eventTime, const int8_t offset) {
     int16_t t = (int16_t)(eventTime) + (int16_t)(offset);
@@ -262,13 +279,23 @@ OutputController_TaskResult OutputController_task()
 #if DEBUG_ENABLE_PRINT
         puts(outputState ? "OC:outputOn" : "OC:outputOff");
 #endif
-        PWM5_LoadDutyValue(
-            outputState
-                ? Settings_data.output.brightness
-                : 0
-        );
+        PWM5_LoadDutyValue(0);
+
+        if (outputState) {
+            startRampingUp();
+        } else {
+            stopRampingUp();
+        }
 
         return OutputController_TaskResult_OutputStateChanged;
+    }
+
+    if (context.rampingUp) {
+        if (Clock_getTicks() != context.rampingUpTaskTimer) {
+            context.rampingUpTaskTimer = Clock_getTicks();
+
+            rampingUpTask();
+        }
     }
 
     return OutputController_TaskResult_StateUnchanged;
@@ -447,4 +474,38 @@ bool OutputController_getNextTransition(
     *on = !currentlyOn;
 
     return foundIndex >= 0;
+}
+
+static void startRampingUp(void)
+{
+    context.rampingUpStepTime = 2;
+    context.rampingStepTimer = context.rampingUpStepTime;
+    context.rampingCurrentBrightness = 0;
+    context.rampingUp = 1;
+}
+
+static void stopRampingUp(void)
+{
+    context.rampingUp = false;
+}
+
+static void rampingUpTask(void)
+{
+    // Run the timer
+    if (context.rampingStepTimer > 0) {
+        --context.rampingStepTimer;
+        return;
+    }
+
+    // Finish when the target brightness is reached
+    if (context.rampingCurrentBrightness >= Settings_data.output.brightness) {
+        stopRampingUp();
+        return;
+    }
+
+    ++context.rampingCurrentBrightness;
+
+    context.rampingStepTimer = context.rampingUpStepTime;
+
+    PWM5_LoadDutyValue(context.rampingCurrentBrightness);
 }

@@ -137,7 +137,7 @@ inline static void showStartupScreen()
 {
     SSD1306_clear();
 
-    static const char Title[] = "LED TIMER";
+    static const char Title[] = "NIGHTLIGHT TIMER";
     static const char GitHub[] = "GITHUB.COM/TOMIKAA87";
 
     uint8_t iconPos = 64 - (CalculateTextWidth(Title) + 5 + 5) / 2;
