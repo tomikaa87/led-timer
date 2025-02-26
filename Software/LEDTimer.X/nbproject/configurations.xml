@@ -105,9 +105,9 @@
       <itemPath>SettingsScreen_TimeZone.c</itemPath>
       <itemPath>SunriseSunsetLUT.c</itemPath>
       <itemPath>Utils.c</itemPath>
+      <itemPath>SettingsScreen_DST.c</itemPath>
+      <itemPath>SettingsScreen_DST.h</itemPath>
     </logicalFolder>
-    <itemPath>SettingsScreen_DST.c</itemPath>
-    <itemPath>SettingsScreen_DST.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
@@ -126,7 +126,7 @@
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.25.389"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -510,6 +510,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3fff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/home/tomikaa/github/led-timer/Software/LEDTimer.X/debug/SunriseSunset_LUT/"/>
         <property key="programmerToGoImageName" value=""/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
@@ -550,11 +552,11 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.41</languageToolchainVersion>
+        <languageToolchainVersion>2.49</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.25.389"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -938,6 +940,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3fff"/>
         <property key="poweroptions.powerenable" value="true"/>
+        <property key="programmerToGoFilePath"
+                  value="/home/tomikaa/github/led-timer/Software/LEDTimer.X/debug/SunriseSunset_Calc/"/>
         <property key="programmerToGoImageName" value=""/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
@@ -982,7 +986,7 @@
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.25.389"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1027,7 +1031,7 @@
         <property key="garbage-collect-functions" value="true"/>
         <property key="identifier-length" value="255"/>
         <property key="local-generation" value="false"/>
-        <property key="operation-mode" value="pro"/>
+        <property key="operation-mode" value="free"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
         <property key="optimization-assembler" value="true"/>
         <property key="optimization-assembler-files" value="true"/>
@@ -1270,7 +1274,7 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3fff"/>
-        <property key="poweroptions.powerenable" value="false"/>
+        <property key="poweroptions.powerenable" value="true"/>
         <property key="programmerToGoFilePath"
                   value="/home/tomikaa/github/led-timer/Software/LEDTimer.X/debug/default/LEDTimer_ptg"/>
         <property key="programmerToGoImageName" value=""/>
@@ -1343,9 +1347,15 @@
         <property key="communication.interface" value=""/>
         <property key="communication.interface.jtag" value="2wire"/>
         <property key="communication.speed" value="${communication.speed.default}"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.simultaneous.debug" value="false"/>
         <property key="debugoptions.useswbreakpoints" value="true"/>
+        <property key="event.recorder.debugger.behavior" value="Running"/>
+        <property key="event.recorder.enabled" value="false"/>
+        <property key="event.recorder.scvd.files" value=""/>
         <property key="freeze.timers" value="false"/>
+        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>
@@ -1359,9 +1369,9 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3fff"/>
-        <property key="poweroptions.powerenable" value="false"/>
+        <property key="poweroptions.powerenable" value="true"/>
         <property key="programmerToGoFilePath"
-                  value="/home/tomikaa/github/led-timer/Software/LEDTimer.X/debug/default/LEDTimer_ptg"/>
+                  value="/home/tomikaa/github/led-timer/Software/LEDTimer.X/debug/Debug_SunriseSunset_LUT/"/>
         <property key="programmerToGoImageName" value=""/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
