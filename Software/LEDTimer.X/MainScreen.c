@@ -28,8 +28,6 @@
 #include "Keypad.h"
 #include "OutputController.h"
 
-#include <stdio.h>
-
 #pragma warning push
 #pragma warning disable 763
 
@@ -135,9 +133,17 @@ static void drawClock()
 
     char s[6];
 //    snprintf(s, sizeof(s), "%02u:%02u", hours, minutes);
-    sprintf(s, "%02u:%02u", hours, minutes);
+//    sprintf(s, "%02u:%02u", hours, minutes);
 
-    Text_draw7Seg(s, 3, 15, false);
+    uint8_t x = 15;
+
+    uint16ToString(hours, s, '0');
+    x = Text_draw7Seg(s + 3, 3, x, false) + 1;
+
+    x = Text_draw7Seg(":", 3, x, false) + 1;
+
+    uint16ToString(minutes, s, '0');
+    x = Text_draw7Seg(s + 3, 3, x, false);
 }
 
 static void drawScheduleWidget(const bool redraw)
@@ -184,9 +190,13 @@ static void drawScheduleWidget(const bool redraw)
 
                 uint8_t x = Text_draw(on ? "ON:  " : "OFF: ", 0, StartPos, 0, false);
 
-                char buf[25] = { 0 };
-                sprintf(buf, "%2u:%02u", hours, minutes);
-                x = Text_draw(buf, 0, x, 0, false);
+                char buf[7] = { 0 };
+//                sprintf(buf, "%2u:%02u", hours, minutes);
+                uint16ToString(hours, buf, ' ');
+                x = Text_draw(buf + 3, 0, x, 0, false);
+                x = Text_draw(":", 0, x, 0, false);
+                uint16ToString(minutes, buf, '0');
+                x = Text_draw(buf + 3, 0, x, 0, false);
 
                 // Sun-based switch time indicator
                 if (
@@ -216,7 +226,7 @@ static void drawScheduleWidget(const bool redraw)
 
                     FormatSunOffset(buf, sw->sunOffset);
                     x += Graphics_ArrowDownIconWidth + 5;
-                    x = Text_draw(buf, 0, x, 0, false);
+                    x = Text_draw(buf + 3, 0, x, 0, false);
                 }
             } else {
                 Text_draw("---: --:--", 0, StartPos, 0, false);

@@ -25,7 +25,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -54,19 +53,32 @@ void SettingsScreen_TimeZone_update(const bool redraw)
 
     char s[7];
     uint8_t x = 64u - TotalWidth / 2u;
-    uint8_t xPrev = x;
+    uint8_t left = x;
 
     // Time zone
-    sprintf(
-        s,
-        "%c%02u:%02u",
-        context.settings->timeZoneOffsetHalfHours >= 0 ? '+' : '-',
-        abs(context.settings->timeZoneOffsetHalfHours / 2),
-        abs(context.settings->timeZoneOffsetHalfHours % 2) * 30
+    x = Text_draw7Seg(
+        context.settings->timeZoneOffsetHalfHours >= 0 ? "+" : "-",
+        2, x, false
     );
-    xPrev = x;
-    x = Text_draw7Seg(s, 2, x, false);
-    SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, LinePattern);
+
+    uint16ToString((uint16_t)abs(context.settings->timeZoneOffsetHalfHours / 2), s, '0');
+    x = Text_draw7Seg(s + 3, 2, x, false) + 1;
+
+    x = Text_draw7Seg(":", 2, x, false) + 1;
+
+    uint16ToString((uint16_t)(abs(context.settings->timeZoneOffsetHalfHours % 2)) * 30, s, '0');
+    x = Text_draw7Seg(s + 3, 2, x, false);
+
+//    sprintf(
+//        s,
+//        "%c%02u:%02u",
+//        context.settings->timeZoneOffsetHalfHours >= 0 ? '+' : '-',
+//        abs(context.settings->timeZoneOffsetHalfHours / 2),
+//        abs(context.settings->timeZoneOffsetHalfHours % 2) * 30
+//    );
+//    xPrev = x;
+//    x = Text_draw7Seg(s, 2, x, false);
+    SSD1306_fillAreaPattern(left, 5, x - left, 1, LinePattern);
 }
 
 bool SettingsScreen_TimeZone_handleKeyPress(const uint8_t keyCode, const bool hold)

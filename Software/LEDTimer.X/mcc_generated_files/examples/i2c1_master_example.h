@@ -48,7 +48,6 @@
 #define I2C1_MASTER_EXAMPLE_H
 
 #include <stdint.h>
-#include <stdio.h>
 #include "../i2c1_master.h"
 
 uint8_t  I2C1_Read1ByteRegister(i2c1_address_t address, uint8_t reg);

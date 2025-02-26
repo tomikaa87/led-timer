@@ -25,7 +25,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 static struct SettingScreen_Time_Context {
@@ -61,8 +60,9 @@ void SettingsScreen_Time_update(const bool redraw)
     uint8_t xPrev = x;
 
     // Hour
-    sprintf(s, "%02u", context.hours);
-    x = Text_draw7Seg(s, 2, x, false);
+//    sprintf(s, "%02u", context.hours);
+    uint16ToString(context.hours, s, '0');
+    x = Text_draw7Seg(s + 3, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
     x += CharSpacing;
 
@@ -71,9 +71,10 @@ void SettingsScreen_Time_update(const bool redraw)
     x += CharSpacing;
 
     // Minute
-    sprintf(s, "%02u", context.minutes);
+//    sprintf(s, "%02u", context.minutes);
+    uint16ToString(context.minutes, s, '0');
     xPrev = x;
-    x = Text_draw7Seg(s, 2, x, false);
+    x = Text_draw7Seg(s + 3, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 1 ? LinePattern : 0);
 }
 

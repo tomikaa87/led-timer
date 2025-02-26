@@ -57,7 +57,6 @@
 // FIXME for testing
 #include "SunsetSunrise.h"
 
-#include <stdio.h>
 #include <stdbool.h>
 
 static struct MainContext

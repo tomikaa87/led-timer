@@ -68,8 +68,13 @@ bool Date_isDst(
     uint8_t hour
 );
 
+uint8_t uint8ToString(uint8_t number, char* buffer, const char padding);
+uint8_t uint16ToString(uint16_t number, char* buffer, const char padding);
+
+//#define FormatSunOffset(_buf, _offset)\
+//    sprintf((_buf), "%c%02u",\
+//        (_offset) >= 0 ? '+' : '-',\
+//        abs((_offset))\
+//    );
 #define FormatSunOffset(_buf, _offset)\
-    sprintf((_buf), "%c%02u",\
-        (_offset) >= 0 ? '+' : '-',\
-        abs((_offset))\
-    );
+    uint16ToString((uint16_t)(abs(_offset)), (_buf), (_offset) >= 0 ? '+' : '-')

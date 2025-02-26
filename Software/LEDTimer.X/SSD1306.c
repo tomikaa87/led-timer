@@ -33,7 +33,6 @@ enum
 #define SSD1309 0
 
 #include <xc.h>
-#include <stdio.h>
 
 #define SSD1306_SCREEN_BUFFER_SIZE (SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8)
 

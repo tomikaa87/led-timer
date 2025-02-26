@@ -32,7 +32,6 @@
 #endif
 
 #include <stdbool.h>
-#include <stdio.h>
 
 static struct OutputControllerContext
 {

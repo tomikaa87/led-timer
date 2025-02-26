@@ -24,7 +24,6 @@
 
 #include "mcc_generated_files/memory.h"
 
-#include <stdio.h>
 #include <string.h>
 
 SettingsData Settings_data;

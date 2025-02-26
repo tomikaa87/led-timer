@@ -27,7 +27,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 static struct SettingScreen_LEDBrightness_Context {
@@ -46,9 +45,10 @@ void SettingsScreen_LEDBrightness_update(const bool redraw)
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_SetIcon, Graphics_ClearIcon);
     }
 
-    char s[4];
-    sprintf(s, "%3u", context.settings->brightness);
-    Text_draw7Seg(s, 2, 64 - Text_calculateWidth7Seg(s) / 2, false);
+    char s[6];
+//    sprintf(s, "%3lu", context.settings->brightness);
+    uint16ToString(context.settings->brightness, s, ' ');
+    Text_draw7Seg(s + 2, 2, 64 - Text_calculateWidth7Seg(s) / 2, false);
 
     OutputController_deactivate();
     PWM5_LoadDutyValue(context.settings->brightness);

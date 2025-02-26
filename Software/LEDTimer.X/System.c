@@ -25,7 +25,6 @@
 #include "mcc_generated_files/adc.h"
 #include "mcc_generated_files/pin_manager.h"
 
-#include <stdio.h>
 #include <xc.h>
 
 // Debug

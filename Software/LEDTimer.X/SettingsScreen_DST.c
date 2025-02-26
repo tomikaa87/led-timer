@@ -26,8 +26,6 @@
 #include "SSD1306.h"
 #include "Text.h"
 
-#include <stdio.h>
-
 static struct SettingsScreen_DST_Context {
     Date_DstData* settings;
     uint8_t selectionIndex;

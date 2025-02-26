@@ -51,9 +51,9 @@
   Section: Included Files
 */
 
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef enum {
     I2C1_NOERR, // The message was sent.

@@ -24,7 +24,6 @@
 #include "SettingsScreen_Scheduler.h"
 
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 static struct SettingScreen_Scheduler_Context {
@@ -123,9 +122,10 @@ void SettingsScreen_Scheduler_update(const bool redraw)
 
         if (context.schedulerTypeChanged || context.intervalIndexChanged || context.selectionChanged) {
             // Interval scheduler program index
-            char s[2];
-            sprintf(s, "%u", context.intervalIndex + 1);
-            Text_draw(s, 2, PositionAfter("SCHEDULE:"), 0, InvertForSelectionIndex(1));
+            char s[6];
+//            sprintf(s, "%u", context.intervalIndex + 1);
+            uint16ToString(context.intervalIndex + 1, s, '0');
+            Text_draw(s + 4, 2, PositionAfter("SCHEDULE:"), 0, InvertForSelectionIndex(1));
         }
 
         if (context.schedulerTypeChanged || context.activeStateChanged || context.selectionChanged) {
@@ -256,15 +256,17 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                 }
 
                 case Settings_IntervalSwitchType_Time: {
-                    char s[3];
+                    char s[6];
 
                     // Time hour value label
-                    sprintf(s, "%2u", context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
-                    Text_draw(s, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(4));
+//                    sprintf(s, "%2u", context.settings->intervals[context.intervalIndex].onSwitch.timeHour);
+                    uint16ToString(context.settings->intervals[context.intervalIndex].onSwitch.timeHour, s, ' ');
+                    Text_draw(s + 3, 4, PositionAfter("TIME:"), 0, InvertForSelectionIndex(4));
 
                     // Time minute value label
-                    sprintf(s, "%02u", context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
-                    Text_draw(s, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(5));
+//                    sprintf(s, "%02u", context.settings->intervals[context.intervalIndex].onSwitch.timeMinute);
+                    uint16ToString(context.settings->intervals[context.intervalIndex].onSwitch.timeMinute, s, '0');
+                    Text_draw(s + 3, 4, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(5));
                     break;
                 }
             }
@@ -275,7 +277,7 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     // Offset value label
                     char s[4];
                     FormatSunOffset(s, context.settings->intervals[context.intervalIndex].offSwitch.sunOffset);
-                    Text_draw(s, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(7));
+                    Text_draw(s + 3, 6, PositionAfter("OFFSET:"), 0, InvertForSelectionIndex(7));
                     break;
                 }
 
@@ -283,12 +285,14 @@ void SettingsScreen_Scheduler_update(const bool redraw)
                     char s[3];
 
                     // Time hour value label
-                    sprintf(s, "%2u", context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
-                    Text_draw(s, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(7));
+//                    sprintf(s, "%2u", context.settings->intervals[context.intervalIndex].offSwitch.timeHour);
+                    uint16ToString(context.settings->intervals[context.intervalIndex].offSwitch.timeHour, s, ' ');
+                    Text_draw(s + 3, 6, PositionAfter("TIME:"), 0, InvertForSelectionIndex(7));
 
                     // Time minute value label
-                    sprintf(s, "%02u", context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
-                    Text_draw(s, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(8));
+//                    sprintf(s, "%02u", context.settings->intervals[context.intervalIndex].offSwitch.timeMinute);
+                    uint16ToString(context.settings->intervals[context.intervalIndex].offSwitch.timeMinute, s, '0');
+                    Text_draw(s + 3, 6, CalculateTextWidth("TIME: xx:"), 0, InvertForSelectionIndex(8));
                     break;
                 }
             }

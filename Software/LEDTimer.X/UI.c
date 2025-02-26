@@ -38,9 +38,8 @@
 #include "SettingsScreen_Time.h"
 #include "SettingsScreen_TimeZone.h"
 
-#include "stdbool.h"
-#include "stdio.h"
-#include "string.h"
+#include <stdbool.h>
+#include <string.h>
 
 /*
  *  Screen width = 21 chars (128 / (5 + 1))

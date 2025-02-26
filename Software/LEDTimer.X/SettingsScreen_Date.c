@@ -26,7 +26,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 static struct SettingScreen_Date_Context {
@@ -62,27 +61,30 @@ void SettingsScreen_Date_update(const bool redraw)
     #define ExtraSpacing (CharSpacing * 4)
     #define LinePattern 0b00000110
 
-    char s[5];
+    char s[6];
     uint8_t x = 64 - TotalWidth / 2;
     uint8_t xPrev = x;
 
     // Year
-    sprintf(s, "%04u", (uint16_t)context.year + 2023);
-    x = Text_draw7Seg(s, 2, x, false);
+//    sprintf(s, "%04u", (uint16_t)context.year + 2023);
+    uint16ToString((uint16_t)(context.year + 2023), s, '0');
+    x = Text_draw7Seg(s + 1, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 0 ? LinePattern : 0);
     x += ExtraSpacing;
 
     // Month
-    sprintf(s, "%02u", context.month);
+//    sprintf(s, "%02u", context.month);
+    uint16ToString(context.month, s, '0');
     xPrev = x;
-    x = Text_draw7Seg(s, 2, x, false);
+    x = Text_draw7Seg(s + 3, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 1 ? LinePattern : 0);
     x += ExtraSpacing - 1 /* to fit the last 2 numbers on the screen */;
 
     // Day
-    sprintf(s, "%02u", context.day);
+//    sprintf(s, "%02u", context.day);
+    uint16ToString(context.day, s, '0');
     xPrev = x;
-    x = Text_draw7Seg(s, 2, x, false);
+    x = Text_draw7Seg(s + 3, 2, x, false);
     SSD1306_fillAreaPattern(xPrev, 5, x - xPrev, 1, context.selectionIndex == 2 ? LinePattern : 0);
 }
 

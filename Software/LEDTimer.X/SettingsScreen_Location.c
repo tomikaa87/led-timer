@@ -29,7 +29,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 
 static struct SettingScreen_Location_Context {
     struct Location* settings;

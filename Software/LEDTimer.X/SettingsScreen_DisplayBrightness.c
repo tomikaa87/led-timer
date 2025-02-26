@@ -24,7 +24,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 static struct SettingScreen_DisplayBrightness_Context {
@@ -43,9 +42,10 @@ void SettingsScreen_DisplayBrightness_update(const bool redraw)
         Graphics_DrawKeypadHelpBar(Graphics_ExitIcon, Graphics_SetIcon, Graphics_ClearIcon);
     }
 
-    char s[2];
-    sprintf(s, "%u", context.settings->brightness);
-    Text_draw7Seg(s, 2, 64 - Text_calculateWidth7Seg(s) / 2, false);
+    char s[6];
+//    sprintf(s, "%u", context.settings->brightness);
+    uint16ToString(context.settings->brightness, s, '0');
+    Text_draw7Seg(s + 4, 2, 64 - Text_calculateWidth7Seg(s) / 2, false);
 }
 
 bool SettingsScreen_DisplayBrightness_handleKeyPress(const uint8_t keyCode, const bool hold)

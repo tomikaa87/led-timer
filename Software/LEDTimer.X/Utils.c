@@ -181,3 +181,43 @@ bool Date_isDst(
 
     return false;
 }
+
+uint8_t uint8ToString(uint8_t number, char* buffer, const char padding)
+{
+    buffer[3] = 0;
+    buffer[2] = '0';
+
+    uint8_t length = 0;
+
+    for (uint8_t i = 3; i > 0; --i) {
+        if (number > 0) {
+            buffer[i - 1] = (char)(number % 10 + '0');
+            number /= 10;
+            ++length;
+        } else if (i < 3) {
+            buffer[i - 1] = padding;
+        }
+    }
+
+    return length;
+}
+
+uint8_t uint16ToString(uint16_t number, char* buffer, const char padding)
+{
+    buffer[5] = 0;
+    buffer[4] = '0';
+
+    uint8_t length = 0;
+
+    for (uint8_t i = 5; i > 0; --i) {
+        if (number > 0) {
+            buffer[i - 1] = (char)(number % 10 + '0');
+            number /= 10;
+            ++length;
+        } else if (i < 5) {
+            buffer[i - 1] = padding;
+        }
+    }
+
+    return length;
+}
