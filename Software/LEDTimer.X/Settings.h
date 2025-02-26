@@ -72,7 +72,7 @@ typedef struct
 
     struct Output
     {
-        uint8_t brightness;
+        uint16_t brightness;
     } output;
 
     struct Display

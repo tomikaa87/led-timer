@@ -128,7 +128,7 @@ void SettingsData_initWithDefaults(SettingsData* const data)
 {
     memset(data, 0, sizeof(SettingsData));
 
-    data->output.brightness = 255;
+    data->output.brightness = 511;
 
     data->display.brightness = 2;
 

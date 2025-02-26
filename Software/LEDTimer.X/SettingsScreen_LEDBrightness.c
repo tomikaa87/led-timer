@@ -72,14 +72,18 @@ bool SettingsScreen_LEDBrightness_handleKeyPress(const uint8_t keyCode, const bo
 
         // Set
         case Keypad_Key2: {
-            ++context.settings->brightness;
+            if (++context.settings->brightness >= 512) {
+                context.settings->brightness = 0;
+            }
             SettingsScreen_LEDBrightness_update(false);
             break;
         }
 
         // Adjust
         case Keypad_Key3: {
-            --context.settings->brightness;
+            if (--context.settings->brightness >= 512) {
+                context.settings->brightness = 511;
+            }
             SettingsScreen_LEDBrightness_update(false);
             break;
         }
