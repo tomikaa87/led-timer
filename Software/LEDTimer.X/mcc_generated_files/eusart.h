@@ -22,25 +22,25 @@
 */
 
 /*
-    (c) 2018 Microchip Technology Inc. and its subsidiaries. 
-    
-    Subject to your compliance with these terms, you may use Microchip software and any 
-    derivatives exclusively with Microchip products. It is your responsibility to comply with third party 
-    license terms applicable to your use of third party software (including open source software) that 
+    (c) 2018 Microchip Technology Inc. and its subsidiaries.
+
+    Subject to your compliance with these terms, you may use Microchip software and any
+    derivatives exclusively with Microchip products. It is your responsibility to comply with third party
+    license terms applicable to your use of third party software (including open source software) that
     may accompany Microchip software.
-    
-    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
-    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
-    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS
     FOR A PARTICULAR PURPOSE.
-    
-    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
-    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
-    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO 
-    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
-    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
-    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS
     SOFTWARE.
 */
 
@@ -105,7 +105,7 @@ typedef union {
     None
 
   @Comment
-    
+
 */
 void EUSART_Initialize(void);
 
@@ -114,13 +114,13 @@ void EUSART_Initialize(void);
     Checks if the EUSART transmitter is ready to transmit data
 
   @Description
-    This routine checks if EUSART transmitter is ready 
+    This routine checks if EUSART transmitter is ready
     to accept and transmit data byte
 
   @Preconditions
     EUSART_Initialize() function should have been called
     before calling this function.
-    EUSART transmitter should be enabled before calling 
+    EUSART transmitter should be enabled before calling
     this function
 
   @Param
@@ -130,16 +130,16 @@ void EUSART_Initialize(void);
     Status of EUSART transmitter
     TRUE: EUSART transmitter is ready
     FALSE: EUSART transmitter is not ready
-    
+
   @Example
     <code>
     void main(void)
     {
         volatile uint8_t rxData;
-        
+
         // Initialize the device
         SYSTEM_Initialize();
-        
+
         while(1)
         {
             // Logic to echo received data
@@ -162,13 +162,13 @@ bool EUSART_is_tx_ready(void);
     Checks if the EUSART receiver ready for reading
 
   @Description
-    This routine checks if EUSART receiver has received data 
+    This routine checks if EUSART receiver has received data
     and ready to be read
 
   @Preconditions
     EUSART_Initialize() function should be called
     before calling this function
-    EUSART receiver should be enabled before calling this 
+    EUSART receiver should be enabled before calling this
     function
 
   @Param
@@ -178,16 +178,16 @@ bool EUSART_is_tx_ready(void);
     Status of EUSART receiver
     TRUE: EUSART receiver is ready for reading
     FALSE: EUSART receiver is not ready for reading
-    
+
   @Example
     <code>
     void main(void)
     {
         volatile uint8_t rxData;
-        
+
         // Initialize the device
         SYSTEM_Initialize();
-        
+
         while(1)
         {
             // Logic to echo received data
@@ -225,16 +225,16 @@ bool EUSART_is_rx_ready(void);
     Status of EUSART receiver
     TRUE: Data completely shifted out if the USART shift register
     FALSE: Data is not completely shifted out of the shift register
-    
+
   @Example
     <code>
     void main(void)
     {
         volatile uint8_t rxData;
-        
+
         // Initialize the device
         SYSTEM_Initialize();
-        
+
         while(1)
         {
             if(EUSART_is_tx_ready())
@@ -276,13 +276,13 @@ bool EUSART_is_tx_done(void);
     {
         volatile uint8_t rxData;
         volatile eusart_status_t rxStatus;
-        
+
         // Initialize the device
         SYSTEM_Initialize();
-        
+
         // Enable the Global Interrupts
         INTERRUPT_GlobalInterruptEnable();
-        
+
         while(1)
         {
             // Logic to echo received data
