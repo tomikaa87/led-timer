@@ -25,7 +25,7 @@
 /**
  * General
  */
-#define Config_FirmwareVersion                              "2.2.0"
+#define Config_FirmwareVersion                              "2.3.0"
 
 /**
  * Settings
