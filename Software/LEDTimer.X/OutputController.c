@@ -44,7 +44,7 @@ static struct OutputControllerContext
     uint8_t active : 1;
     uint8_t : 1;
 
-    uint8_t rampingCurrentBrightness;
+    uint16_t rampingCurrentBrightness;
     Clock_Ticks rampingUpStepTime;
     Clock_Ticks rampingStepTimer;
 
@@ -493,7 +493,7 @@ bool OutputController_getNextTransition(
 
 static void startRampingUp(void)
 {
-    context.rampingUpStepTime = 2;
+    context.rampingUpStepTime = 4;
     context.rampingStepTimer = context.rampingUpStepTime;
     context.rampingCurrentBrightness = 0;
     context.rampingUp = 1;
