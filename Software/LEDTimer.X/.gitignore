@@ -10,3 +10,7 @@ nbproject/private
 **/disassembly
 .ca/
 **/.vscode/
+**/out/
+**/cmake/
+**/_build/
+**/queuelogs/
