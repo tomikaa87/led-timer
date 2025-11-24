@@ -126,7 +126,7 @@
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.28.431"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -566,11 +566,11 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.41</languageToolchainVersion>
-        <platform>2</platform>
+        <languageToolchainVersion>2.49</languageToolchainVersion>
+        <platform>4</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.18.352"/>
+        <pack name="PIC16F1xxxx_DFP" vendor="Microchip" version="1.28.431"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
