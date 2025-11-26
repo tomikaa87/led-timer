@@ -24,6 +24,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const char* Date_DayShortNames[7];
 extern const char* Date_MonthShortNames[12];
 
@@ -51,7 +55,7 @@ bool Date_isLeapYear(YearsFrom1970 year);
 
 uint8_t Date_lastDayOfMonth(uint8_t month, bool leapYear);
 
-bool Date_dayOfMonth(
+int8_t Date_dayOfMonth(
     uint8_t targetDayOfWeek,
     uint8_t currentDayOfWeek,
     int8_t ordinal,
@@ -73,3 +77,7 @@ bool Date_isDst(
         (_offset) >= 0 ? '+' : '-',\
         abs((_offset))\
     );
+
+#ifdef __cplusplus
+}
+#endif

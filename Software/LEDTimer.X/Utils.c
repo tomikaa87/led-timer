@@ -82,7 +82,7 @@ uint8_t Date_lastDayOfMonth(const uint8_t month, const bool leapYear)
 #endif
 }
 
-bool Date_dayOfMonth(
+int8_t Date_dayOfMonth(
     const uint8_t targetDayOfWeek,
     const uint8_t currentDayOfWeek,
     const int8_t ordinal,
