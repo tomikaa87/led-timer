@@ -30,6 +30,11 @@
  */
 void OutputController_toggle(void);
 
+/**
+ * Suspends automatically executed tasks.
+ */
+void OutputController_suspend(bool suspended);
+
 typedef enum {
     OutputController_TaskResult_StateUnchanged,
     OutputController_TaskResult_OutputStateChanged

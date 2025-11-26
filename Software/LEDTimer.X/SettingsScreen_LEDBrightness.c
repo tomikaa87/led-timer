@@ -21,6 +21,9 @@
 #include "Graphics.h"
 #include "Keypad.h"
 #include "SettingsScreen_LEDBrightness.h"
+#include "OutputController.h"
+
+#include "mcc_generated_files/pwm5.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -34,6 +37,13 @@ static struct SettingScreen_LEDBrightness_Context {
 void SettingsScreen_LEDBrightness_init(struct Output* settings)
 {
     context.settings = settings;
+    OutputController_suspend(true);
+    PWM5_LoadDutyValue(context.settings->brightness);
+}
+
+void SettingsScreen_LEDBrightness_close()
+{
+    OutputController_suspend(false);
 }
 
 void SettingsScreen_LEDBrightness_update(const bool redraw)
@@ -64,6 +74,7 @@ bool SettingsScreen_LEDBrightness_handleKeyPress(const uint8_t keyCode, const bo
         case Keypad_Key2: {
             ++context.settings->brightness;
             SettingsScreen_LEDBrightness_update(false);
+            PWM5_LoadDutyValue(context.settings->brightness);
             break;
         }
 
@@ -71,6 +82,7 @@ bool SettingsScreen_LEDBrightness_handleKeyPress(const uint8_t keyCode, const bo
         case Keypad_Key3: {
             --context.settings->brightness;
             SettingsScreen_LEDBrightness_update(false);
+            PWM5_LoadDutyValue(context.settings->brightness);
             break;
         }
     }

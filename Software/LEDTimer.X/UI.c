@@ -21,6 +21,7 @@
 #include "Clock.h"
 #include "Config.h"
 #include "Keypad.h"
+#include "OutputController.h"
 #include "SSD1306.h"
 #include "SunsetSunrise.h"
 #include "System.h"
@@ -290,8 +291,23 @@ static void updateDisplayContrast()
     );
 }
 
+static void closeScreen(const UI_Screen screen)
+{
+    switch (screen) {
+        case UI_Screen_Settings_LEDBrightness:
+            SettingsScreen_LEDBrightness_close();
+            break;
+    }
+}
+
 static void switchToScreen(const UI_Screen screen)
 {
+    if (context.screen == screen) {
+        return;
+    }
+
+    closeScreen(context.screen);
+
     context.screen = screen;
     SSD1306_clear();
     updateScreen(true);
@@ -423,6 +439,7 @@ void UI_keyEvent(uint8_t keyCode)
                     // Save settings
                     memcpy(&Settings_data, &context.modifiedSettings, sizeof(SettingsData));
                     updateDisplayContrast();
+                    OutputController_updateState();
                     Settings_save();
                     SunriseSunset_update();
 

@@ -41,12 +41,14 @@ static struct OutputControllerContext
     uint8_t forceOutputStateUpdate : 1;
     uint8_t switchedOnBySchedule : 1;
     uint8_t prevStateFromSchedule : 1;
+    uint8_t suspended : 1;
 } context = {
     .outputOverride = 0,
     .prevOutputState = 0,
     .forceOutputStateUpdate = 0,
     .switchedOnBySchedule = 0,
-    .prevStateFromSchedule = 0
+    .prevStateFromSchedule = 0,
+    .suspended = 0
 };
 
 Clock_Time calculateSunEventTime(const Clock_Time eventTime, const int8_t offset) {
@@ -219,8 +221,17 @@ void OutputController_toggle()
     OutputController_updateState();
 }
 
+void OutputController_suspend(const bool suspended)
+{
+    context.suspended = !!suspended;
+}
+
 OutputController_TaskResult OutputController_task()
 {
+    if (context.suspended) {
+        return OutputController_TaskResult_StateUnchanged;
+    }
+
     context.switchedOnBySchedule = isSwitchedOnBySchedule();
 
     context.outputOverride = calculateOverrideState(

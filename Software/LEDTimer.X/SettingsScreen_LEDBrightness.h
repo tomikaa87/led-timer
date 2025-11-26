@@ -23,5 +23,6 @@
 #include "Settings.h"
 
 void SettingsScreen_LEDBrightness_init(struct Output* settings);
+void SettingsScreen_LEDBrightness_close();
 void SettingsScreen_LEDBrightness_update(bool redraw);
 bool SettingsScreen_LEDBrightness_handleKeyPress(uint8_t keyCode, bool hold);
